@@ -1,111 +1,188 @@
-はじめに
-========
+Introduction
+============
 
-スマートフォンを安心して利用出来る社会へ
-----------------------------------------
-
-本ガイドはAndroidアプリケーション開発者向けのセキュア設計、セキュアコーディングのノウハウをまとめたTips集です。できるだけ多くのAndroidアプリケーション開発者に活用していただきたく思い、ここに公開いたします。
-
-昨今、スマートフォン市場は急拡大しており、さらにその勢いは増すばかりです。スマートフォン市場の急拡大は多種多彩なアプリケーション群によってもたらされています。従来の携帯電話ではセキュリティ制約によって利用できなかったさまざまな携帯電話の重要な機能がスマートフォンアプリケーションには開放され、従来の携帯電話では実現できなかった多種多彩なアプリケーション群がスマートフォンの魅力を引き立てています。
-
-スマートフォンのアプリケーション開発者にはそれ相応の責任が生じています。従来の携帯電話ではあらかじめ課せられたセキュリティ制約によって、セキュリティについてあまり意識せずに開発したアプリケーションであっても比較的安全性が保たれていました。スマートフォンでは前述のとおり、携帯電話の重要な機能がアプリケーション開発者に開放されているため、アプリケーション開発者がセキュリティを意識して設計、コーディングをしなければ、スマートフォン利用者の個人情報が漏洩したり、料金の発生する携帯電話機能をマルウェアに悪用されたりといった被害が生じます。
-
-AndroidスマートフォンはiPhoneに比べると、アプリケーション開発者のセキュリティへの配慮がより多く求められます。iPhoneに比べAndroidスマートフォンはアプリケーション開発者に開放された携帯電話機能が多く、App
-Storeに比べGoogle Play（旧Android
-Market）は無審査でアプリケーション公開ができるなど、アプリケーションのセキュリティがほぼ全面的にアプリケーション開発者に任されているためです。
-
-スマートフォン市場の急拡大にともない、様々な分野のソフトウェア技術者が一気にスマートフォンアプリケーション開発市場に流れ込んできており、スマートフォン特有のセキュリティを考慮したセキュア設計、セキュアコーディングのノウハウ集約、共有が急務となっています。
-
-このような状況を踏まえ、一般社団法人日本スマートフォンセキュリティ協会はセキュアコーディングWGを立ち上げ、Androidアプリケーションのセキュア設計、セキュアコーディングのノウハウを集めて、公開することにいたしました。それがこのガイド文書です。多くのAndroidアプリケーション開発者にセキュア設計、セキュアコーディングのノウハウを知っていただき、アプリケーション開発に活かしていただくことで、市場にリリースされる多くのAndroidアプリケーションのセキュリティを高めることを狙っています。その結果、安心、安全なスマートフォン社会づくりに貢献したいと考えています。
-
-常にベータ版でタイムリーなフィードバックを
-------------------------------------------
-
-私たちJSSECセキュアコーディングWGはこのガイド文書の内容について、できるだけ間違いがないように心がけておりますが、その正しさを保証するものではありません。私たちはタイムリーにノウハウを公開し共有していくことが第一と考え、最新かつその時点で正しいと思われることをできるだけ記載・公開し、間違いがあればフィードバックを頂いて常に正しい情報に更新し、タイムリーに提供するよう心がける、いわゆる常にベータ版というアプローチをとっています。このアプローチはこのガイド文書をご利用いただく多くのAndroidアプリケーション開発者のみなさまにとって有意義であると私たちは信じています。
-
-このガイド文書とサンプルコードの最新版はいつでも下記URLから入手できます。
-
--   [http://www.jssec.org/dl/android_securecoding.pdf](http://www.jssec.org/dl/android_securecoding.pdf)
-    ガイド文書
-
--   [http://www.jssec.org/dl/android_securecoding.zip](http://www.jssec.org/dl/android_securecoding.zip)
-    サンプルコード一式
-
-本文書の利用許諾
-----------------
-
-このガイド文書のご利用に際しては次の2つの注意事項に同意いただく必要がございます。
-
-1.  このガイド文書には間違いが含まれている可能性があります。ご自身の責任のもとでご利用ください。
-
-2.  このガイド文書に含まれる間違いを見つけた場合には、下記連絡先までメールにてご連絡ください。ただしお返事することや修正をお約束するものではありませんのでご了承ください。
-
-一般社団法人 日本スマートフォンセキュリティ協会
-
-セキュアコーディングWG問い合わせ
-
-メール宛先：
-[jssec-securecoding-qa@googlegroups.com](mailto:jssec-securecoding-qa@googlegroups.com)
-
-件名：【コメント応募】Androidアプリのセキュア設計・セキュアコーディングガイド
-2018年2月1日版
-
-内容：氏名(任意)/所属(任意)/連絡先E-mail(任意)/ご意見(必須)/その他ご希望(任意)
-
-2017年2月1日版からの訂正記事について
+Building a Secure Smartphone Society
 ------------------------------------
 
-本節では、前版の記事について事実関係と照らし合わせることで判明した訂正事項を一覧にして掲載しています。各訂正記事は、執筆者による継続的な調査結果だけでなく読者の方々の貴重なご指摘を広く取り入れたものです。特に、いただいたご指摘は、本改訂版をより実践に即したガイドとして高い完成度を得るための最も重要な糧となっています。
+This guidebook is a collection of tips concerning the know-how of
+secure designs and secure coding for Android application developers.
+Our intent is to have as many Android application developers as
+possible take advantage of this, and for that reason we are making it
+public.
 
-前版を元にアプリケーション開発を進めていた読者は、以下の訂正記事一覧に特に目を通していただきますようお願いいたします。なお、ここで掲げる項目には、誤植の修正、記事の追加、構成の変更、単なる表現上の改善は含みません。
+In recent years, the smartphone market has witnessed a rapid
+expansion, and its momentum seems unstoppable. Its accelerated growth
+is brought on due to the diverse range of applications. An unspecified
+large number of key functions of mobile phones that were once not
+accessible due to security restrictions on conventional mobile phones
+have been made open to smartphone applications. Subsequently, the
+availability of varied applications that were once closed to
+conventional mobile phones is what makes smartphones more attractive.
 
-本ガイドに対するコメントは、今後もお気軽にお寄せくださいますようよろしくお願いいたします。
+With great power that comes from smartphone applications comes great
+responsibility from their developers. The default security
+restrictions on conventional mobile phones had made it possible to
+maintain a relative level of security even for applications that were
+developed without security awareness. As it has been aforementioned
+with regard to smartphones, since the key advantage of a smartphone is
+that they are open to application developers, if the developers design
+or code their applications without the knowledge of security issues
+then this could lead to risks of users\' personal information leakage
+or exploitation by malware causing financial damage such as from
+illicit calls to premium-rate numbers.
 
-**訂正記事一覧**
+Due to Android being a very open model allowing access to many
+functions on the smartphone, it is believed that Android application
+developers need to take more care about security issues than iOS
+application developers. In addition, responsibility for application
+security is almost solely left to the application developers. For
+example, applications can be released to the public without any
+screening from a marketplace such as Google Play (former Android
+Market), though this is not possible for iOS applications.
+
+In conjunction with the rapid growth of the smartphone market, there
+has been a sudden influx of software engineers from different areas in
+the smartphone application development market. As a result, there is
+an urgent call for the sharing knowledge of secure design and
+consolidation of secure coding know-how for specific security issues
+related to mobile applications.
+
+Due to these circumstances, Japan\'s Smartphone Security Association
+(JSSEC) has launched the Secure Coding Group, and by collecting the
+know-how of secure design as well as secure coding of Android
+applications, it has decided to make all of the information public
+with this guidebook. It is our intention to raise the security level
+of many of the Android applications that are released in the market by
+having many Android application developers become acquainted with the
+know-how of secure design and coding. As a result, we believe we will
+be contributing to the creation of a more reliable and safe smartphone
+society.
+
+Timely Feedback on a Regular Basis Through the Beta Version
+-----------------------------------------------------------
+
+We, the JSSEC Secure Coding Group, will do our best to keep the
+content contained in the Guidebook as accurate as possible, but we
+cannot make any guarantees. We believe it is our priority to publicize
+and share the know-how in a timely fashion. Equally, we will upload
+and publicize what we consider to be the latest and most accurate
+correct information at that particular juncture, and will update it
+with more accurate information once we receive any feedback or
+corrections. In other words, we are taking the beta version approach
+on a regular basis. We think this approach would be meaningful for
+many of the Android application developers who are planning on using
+the Guidebook.
+
+The latest version of the Guidebook and sample codes can be obtained
+from the URL below.
+
+-   [http://www.jssec.org/dl/android_securecoding_en.pdf](http://www.jssec.org/dl/android_securecoding_en.pdf)
+    Guidebook (English)
+
+-   [http://www.jssec.org/dl/android_securecoding_en.zip](http://www.jssec.org/dl/android_securecoding_en.zip)
+    Sample Codes (English)
+
+The latest Japanese version can be obtained from the URL below.
+
+-   [http://www.jssec.org/dl/android_securecoding.pdf](http://www.jssec.org/dl/android_securecoding.pdf)
+    Guidebook (Japanese)
+
+-   [http://www.jssec.org/dl/android_securecoding.zip](http://www.jssec.org/dl/android_securecoding.zip)
+    Sample Codes (Japanese)
+
+Usage Agreement of the Guidebook
+--------------------------------
+
+We need your consent for the following two precautionary statements
+when using the Guidebook.
+
+1.  The information contained in the Guidebook may be inaccurate. Please
+    use the information written here by your own discretion.
+
+2.  In case of finding any mistakes contained in the Guidebook, please
+    send us an e-mail to the address listed below. However, we cannot
+    guarantee a reply or any revisions thereof.
+
+Japan Smartphone Security Association
+
+Secure Coding Group Inquiry
+
+E-mail:
+[jssec-securecoding-qa@googlegroups.com](mailto:jssec-securecoding-qa@googlegroups.com)
+
+Subject: [Comment] Android Secure Coding Guidebook 20180201EN
+
+Content: Name (optional), Affiliation (optional), E-mail (optional),
+Comment (required) and Other matters (optional)
+
+Correction articles of February 1, 2018 edition
+-----------------------------------------------
+
+This section provides a list of corrections and modifications for the
+previous edition from the viewpoint of security, as a result of
+further studies.
+
+In correcting articles, we adopted the outcomes of our studies and the
+valuable opinions of those who read the former editions of this
+guidebook.
+
+Especially, taking in readers\' opinions is considered as a key factor
+in making the document highly practical.
+
+We recommend, for those who use a previous edition of the document as
+a reference, taking a look at the list below. Note that the list does
+not include the following kinds of changes and error corrections:
+fixes of typos, new articles added in this edition, organizational
+changes, and improvements in expression.
+
+Any comments, opinions or suggestions on this guidebook are greatly
+appreciated.
+
+**List of revisions**
 
 <table border="yes" bordercolor="gray">
 <thead bgcolor="lightgray">
 <tr>
-<th width="30%">2017年2月1日版の修正個所</th>
-<th width="30%">本改訂版の訂正記事</th>
-<th width="40%">訂正の要旨</th>
+<th width="30%">Section revised in 2/1/2018 version</th>
+<th width="30%">Section revised in this version</th>
+<th width="40%">Revision</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>(該当なし)</td>
-<td>4.1.3.7 Autofillフレームワークについて</td>
-<td>Autofillフレームワークについての解説を記載しました。</td>
+<td>(not applicable)</td>
+<td>4.1.3.7 The Autofill framework</td>
+<td>Added a description of the Autofill framework.</td>
 </tr>
 <tr>
-<td>4.2 Broadcastを受信する・送信する</td>
-<td>4.2 Broadcastを受信する・送信する</td>
-<td>Android 8.0(API Level 26)以降の暗黙的Broadcst Intentの受信に対する制限について追記しました。</td>
+<td>4.2 Receiving/Sending Broadcasts</td>
+<td>4.2 Receiving/Sending Broadcasts</td>
+<td>Added a discussion of restrictions on the receipt of implicit Broadcast Intents in Android 8.0(API Level 26) and later.</td>
 </tr>
 <tr>
-<td>5.2.3.6 Android 6.0以降のPermissionモデルの仕様変更について</td>
-<td>5.2.3.6 Android 6.0以降のPermissionモデルの仕様変更について</td>
-<td>Android 8.0(API Level 26)以降のPermission付与に関する挙動の変更について追記しました。</td>
+<td>5.2.3.6 Modifications to the Permission model specifications in Android versions 6.0 and later</td>
+<td>5.2.3.6 Modifications to the Permission model specifications in Android versions 6.0 and later</td>
+<td>Added a discussion of modifications to behavior regarding the granting of Permissions in Android 8.0 (API Level 26) and later.</td>
 </tr>
 <tr>
-<td>5.3.2.4 KEY_INTENTには、ログイン画面Activityのクラス名を指定した明示的Intentを与える （必須）</td>
-<td>5.3.2.4 KEY_INTENTには、ログイン画面Activityのクラス名を指定した明示的Intentを与える （必須）</td>
-<td>Android 4.4（API Level 19）前後でのKey Intentの挙動の違いについて追記しました。</td>
+<td>5.3.2.4 Provide KEY_INTENT with Explicit Intent with the Specified Class Name of Login Screen Activity (Required</td>
+<td>5.3.2.4 Provide KEY_INTENT with Explicit Intent with the Specified Class Name of Login Screen Activity (Required</td>
+<td>Added a discussion of changes in the behavior of Key Intents before and after Android 4.4 (API Level 19）.</td>
 </tr>
 <tr>
-<td>5.3.2.6 Account Managerにパスワードを保存しない （推奨）</td>
-<td>5.3.2.6 Account Managerにパスワードを保存しない （推奨）</td>
-<td>Android 7.0(API Level 24)以降のパスワード保存場所に関する記述を追記しました。</td>
+<td>5.3.2.6 Password Should Not Be Saved in Account Manager (Recommended</td>
+<td>5.3.2.6 Password Should Not Be Saved in Account Manager (Recommended</td>
+<td>Added a description of password storage locations for Android 7.0 (API Level 24) and later.</td>
 </tr>
 <tr>
-<td>5.3.3.1 Account Managerの利用とPermission</td>
-<td>5.3.3.1 Account Managerの利用とPermission</td>
-<td>Android 6.0(API Level 23)以降およびAndorid 8.0(API Level 26)以降のAccountManagerに関するPermissionとメソッドの対応を追記しました。</td>
+<td>5.3.3.1 Usage of Account Manager and Permission</td>
+<td>5.3.3.1 Usage of Account Manager and Permission</td>
+<td>Added a discussion of support for Permissions and methods related to AccountManager in Android 6.0 (API Level 23) and later and Android 8.0 (API Level 26) and later.</td>
 </tr>
 <tr>
-<td>（該当なし）</td>
-<td>5.3.3.3 Android 8.0（API Level 26）以降で署名の一致しないAuthenticatorのアカウントを読めるケース</td>
-<td>Android 8.0（API Level 26）以降で署名の一致しないAuthenticatorのアカウント情報を取得できるケースとその対策に関する記述を追記しました。</td>
+<td>(not applicable)</td>
+<td>5.3.3.3 Cases in which Authenticator accounts with non-matching signatures may be read in Android 8.0 (API Level 26) or later</td>
+<td>For Android 8.0 (API Level 26) and later, added a discussion of cases in which it is possible to obtain account information for Authenticators with non-matching signatures, and how to handle such cases.</td>
 </tr>
 <tr>
 <td>5.4 HTTPSで通信する</td>

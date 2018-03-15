@@ -14,18 +14,18 @@ import android.widget.Toast;
 
 public class InhouseSenderActivity extends Activity {
 
-    // 自社のSignature Permission
+    // In-house Signature Permission
     private static final String MY_PERMISSION = "org.jssec.android.broadcast.inhousesender.MY_PERMISSION";
 
-    // 自社の証明書のハッシュ値
+    // In-house certificate hash value
     private static String sMyCertHash = null;
     private static String myCertHash(Context context) {
         if (sMyCertHash == null) {
             if (Utils.isDebuggable(context)) {
-                // debug.keystoreの"androiddebugkey"の証明書ハッシュ値
+                // Certificate hash value of "androiddebugkey" in the debug.keystore.
                 sMyCertHash = "0EFB7236 328348A9 89718BAD DF57F544 D5CCB4AE B9DB34BC 1E29DD26 F77C8255";
             } else {
-                // keystoreの"my company key"の証明書ハッシュ値
+                // Certificate hash value of "my company key" in the keystore.
                 sMyCertHash = "D397D343 A5CBC10F 4EDDEB7C A10062DE 5690984F 1FB9E88B D7B3A7C2 42E142CA";
             }
         }
@@ -37,33 +37,35 @@ public class InhouseSenderActivity extends Activity {
 
     public void onSendNormalClick(View view) {
 
-        // ★ポイント12★ 独自定義Signature Permissionが自社アプリにより定義されていることを確認する
+        // *** POINT 12 *** Verify that the in-house signature permission is defined by an in-house application.
         if (!SigPerm.test(this, MY_PERMISSION, myCertHash(this))) {
-            Toast.makeText(this, "独自定義Signature Permissionが自社アプリにより定義されていない。", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "The in-house signature permission is not declared by in-house application.",
+                    Toast.LENGTH_LONG).show();
             return;
         }
 
-        // ★ポイント13★ Receiverは自社アプリ限定であるから、センシティブな情報を送信してもよい
+        // *** POINT 13 *** Sensitive information can be returned since the requesting application is in-house.
         Intent intent = new Intent(MY_BROADCAST_INHOUSE);
-        intent.putExtra("PARAM", "センシティブな情報 from Sender");
+        intent.putExtra("PARAM", "Sensitive Info from Sender");
 
-        // ★ポイント14★ Receiverに独自定義Signature Permissionを要求する
+        // *** POINT 14 *** Require the in-house signature permission to limit receivers.
         sendBroadcast(intent, "org.jssec.android.broadcast.inhousesender.MY_PERMISSION");
     }
 
     public void onSendOrderedClick(View view) {
 
-        // ★ポイント12★ 独自定義Signature Permissionが自社アプリにより定義されていることを確認する
+        // *** POINT 12 *** Verify that the in-house signature permission is defined by an in-house application.
         if (!SigPerm.test(this, MY_PERMISSION, myCertHash(this))) {
-            Toast.makeText(this, "独自定義Signature Permissionが自社アプリにより定義されていない。", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "The in-house signature permission is not declared by in-house application.",
+                    Toast.LENGTH_LONG).show();
             return;
         }
 
-        // ★ポイント13★ Receiverは自社アプリ限定であるから、センシティブな情報を送信してもよい
+        // *** POINT 13 *** Sensitive information can be returned since the requesting application is in-house.
         Intent intent = new Intent(MY_BROADCAST_INHOUSE);
-        intent.putExtra("PARAM", "センシティブな情報 from Sender");
+        intent.putExtra("PARAM", "Sensitive Info from Sender");
 
-        // ★ポイント14★ Receiverに独自定義Signature Permissionを要求する
+        // *** POINT 14 *** Require the in-house signature permission to limit receivers.
         sendOrderedBroadcast(intent, "org.jssec.android.broadcast.inhousesender.MY_PERMISSION",
                 mResultReceiver, null, 0, null, null);
     }
@@ -72,10 +74,11 @@ public class InhouseSenderActivity extends Activity {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            // ★ポイント15★ 結果を受け取る場合、結果データの安全性を確認する
-            // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+            // *** POINT 15 *** Handle the received result data carefully and securely,
+            // even though the data came from an in-house application.
+            // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
             String data = getResultData();
-            InhouseSenderActivity.this.logLine(String.format("結果「%s」を受信した。", data));
+            InhouseSenderActivity.this.logLine(String.format("Received result: \"%s\"", data));
         }
     };
 

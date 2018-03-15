@@ -29,37 +29,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void readContacts() {
-        // ★ポイント3★ Permissionがアプリに付与されているか確認する
+        // *** POINT 3 *** Check whether or not Permissions have been granted to the app
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-            // Permissionが付与されていない
-            // ★ポイント4★ Permissionを要求する(ユーザーに許可を求めるダイアログを表示する)
+            // Permission was not granted
+            // *** POINT 4 *** Request Permissions (open a dialog to request permission from users)
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_CODE_READ_CONTACTS);
         } else {
-            // Permissionがすでに付与されている
+            // Permission was previously granted
             showContactList();
         }
     }
 
-    // ユーザー選択の結果を受けるコールバックメソッド
+    // A callback method that receives the result of the user's selection
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
             case REQUEST_CODE_READ_CONTACTS:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Permissionの利用が許可されているので、連絡先情報を利用する処理を実行できる
+                    // Permissions were granted; we may execute operations that use contact information
                     showContactList();
                 } else {
-                    // Permissionの利用が許可されていないため、連絡先情報を利用する処理は実行できない
-                    // ★ポイント5★ Permissionの利用が許可されていない場合の処理を実装する
-                    Toast.makeText(this, String.format("連絡先の利用が許可されていません"), Toast.LENGTH_LONG).show();
+                    // Because the Permission was denied, we may not execute operations that use contact information
+                    // *** POINT 5 *** Implement appropriate behavior for cases in which the use of a Permission is refused
+                    Toast.makeText(this, String.format("Use of contact is not allowed."), Toast.LENGTH_LONG).show();
                 }
                 return;
         }
     }
 
-    // 連絡先一覧を表示
+    // Show contact list
     private void showContactList() {
-        // ContactListActivityを起動
+        // Launch ContactListActivity
         Intent intent = new Intent();
         intent.setClass(getApplicationContext(), ContactListActivity.class);
         startActivity(intent);

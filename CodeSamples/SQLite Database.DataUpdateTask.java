@@ -25,8 +25,8 @@ public class DataUpdateTask extends  AsyncTask<String, Void, Void>  {
         String  idno = params[0];
         String  name = params[1];
         String  info = params[2];
-        android.util.Log.d("test", "debug " + idno + " " + name + " " + info);
-        //★ポイント3★ アプリケーション要件に従って入力値をチェックする
+
+        //*** POINT 3 *** Validate the input value according the application requirements.
         if (!DataValidator.validateData(idno, name, info)) {
             return null;
         }
@@ -37,10 +37,8 @@ public class DataUpdateTask extends  AsyncTask<String, Void, Void>  {
         updateValues.put("name", name);
         updateValues.put("info", info);
 
-        android.util.Log.d("test", "debug " + idno + " " + name + " " + info);
-
         try {
-            //★ポイント2★ プレースホルダを使用する
+            //*** POINT 2 *** Use place holder.
             mSampleDb. update (CommonData.TABLE_NAME, updateValues, "idno = ?", whereArgs);
         } catch (SQLException e) {
             Log.e(DataUpdateTask.class.toString(), mActivity.getString(R.string.UPDATING_ERROR_MESSAGE));
@@ -50,7 +48,7 @@ public class DataUpdateTask extends  AsyncTask<String, Void, Void>  {
 
     @Override
     protected void onPostExecute(Void v) {
-        //DBデータの表示
+        //Display database data
         mActivity.showDbData();
     }
 

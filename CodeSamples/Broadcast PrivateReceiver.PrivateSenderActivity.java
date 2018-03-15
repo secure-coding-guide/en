@@ -11,20 +11,20 @@ import android.widget.TextView;
 public class PrivateSenderActivity extends Activity {
 
     public void onSendNormalClick(View view) {
-        // ★ポイント4★ 同一アプリ内Receiverはクラス指定の明示的IntentでBroadcast送信する
+        // *** POINT 4 *** Use the explicit Intent with class specified to call a receiver within the same application.
         Intent intent = new Intent(this, PrivateReceiver.class);
 
-        // ★ポイント5★ 送信先は同一アプリ内Receiverであるため、センシティブな情報を送信してよい
-        intent.putExtra("PARAM", "センシティブな情報 from Sender");
+        // *** POINT 5 *** Sensitive information can be sent since the destination Receiver is within the same application.
+        intent.putExtra("PARAM", "Sensitive Info from Sender");
         sendBroadcast(intent);
     }
     
     public void onSendOrderedClick(View view) {
-        // ★ポイント4★ 同一アプリ内Receiverはクラス指定の明示的IntentでBroadcast送信する
+        // *** POINT 4 *** Use the explicit Intent with class specified to call a receiver within the same application.
         Intent intent = new Intent(this, PrivateReceiver.class);
 
-        // ★ポイント5★ 送信先は同一アプリ内Receiverであるため、センシティブな情報を送信してよい
-        intent.putExtra("PARAM", "センシティブな情報 from Sender");
+        // *** POINT 5 *** Sensitive information can be sent since the destination Receiver is within the same application.
+        intent.putExtra("PARAM", "Sensitive Info from Sender");
         sendOrderedBroadcast(intent, null, mResultReceiver, null, 0, null, null);
     }
     
@@ -32,11 +32,12 @@ public class PrivateSenderActivity extends Activity {
         @Override
         public void onReceive(Context context, Intent intent) {
             
-            // ★ポイント6★ 同一アプリ内Receiverからの結果情報であっても、受信データの安全性を確認する
-            // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+            // *** POINT 6 *** Handle the received result data carefully and securely,
+            // even though the data came from the Receiver within the same application.
+            // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
             String data = getResultData();
             PrivateSenderActivity.this.logLine(
-                    String.format("結果「%s」を受信した。", data));
+                    String.format("Received result: \"%s\"", data));
         }
     };
     

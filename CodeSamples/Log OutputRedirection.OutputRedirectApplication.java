@@ -8,7 +8,7 @@ import android.app.Application;
 
 public class OutputRedirectApplication extends Application {
 
-    // どこにも出力しないPrintStream
+    // PrintStream which is not output anywhere
     private final PrintStream emptyStream = new PrintStream(new OutputStream() {
         public void write(int oneByte) throws IOException {
             // do nothing
@@ -17,21 +17,21 @@ public class OutputRedirectApplication extends Application {
 
     @Override
     public void onCreate() {
-        // リリースビルド時にSystem.out/errをどこにも出力しないPrintStreamにリダイレクトする
+        // Redirect System.out/err to PrintStream which doesn't output anywhere, when release build.
 
-        // System.out/errの本来のストリームを退避する
+        // Save original stream of System.out/err
         PrintStream savedOut = System.out;
         PrintStream savedErr = System.err;
 
-        // 一旦、System.out/errをどこにも出力しないPrintStreamにリダイレクトする
+        // Once, redirect System.out/err to PrintStream which doesn't output anywhere
         System.setOut(emptyStream);
         System.setErr(emptyStream);
 
-        // デバッグ時のみ本来のストリームに戻す(リリースビルドでは下記1行がProGuardにより削除される)
+        // Restore the original stream only when debugging. (In release build, the following 1 line is deleted byProGuard.)
         resetStreams(savedOut, savedErr);
     }
 
-    // リリース時はProGuardにより下記メソッドがまるごと削除される
+    // All of the following methods are deleted byProGuard when release.
     private void resetStreams(PrintStream savedOut, PrintStream savedErr) {
         System.setOut(savedOut);
         System.setErr(savedErr);

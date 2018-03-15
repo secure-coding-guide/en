@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.jssec.android.file.inhouseprovider" >
 
-    <!-- 独自定義Signature Permissionを定義する -->
+    <!-- Define in-house defined signature permission -->
     <permission
         android:name="org.jssec.android.file.inhouseprovider.MY_PERMISSION"
         android:protectionLevel="signature" />
@@ -12,11 +12,11 @@
         android:label="@string/app_name"
         android:allowBackup="false" >
 
-        <!-- 独自定義Signature Permissionを要求宣言する -->
+        <!-- Set in-house defined signature permission in permission attribute -->
         <provider
             android:name="org.jssec.android.file.inhouseprovider.InhouseProvider"
             android:authorities="org.jssec.android.file.inhouseprovider"
-            android:permission="org.jssec.android.file.inhouseprovider.MY_PERMISSION"
-            android:exported="true" />
+            android:permission="org.jssec.android.file.inhouseprovider.MY_PERMISSION" 
+            android:exported="true"/>
     </application>
 </manifest>

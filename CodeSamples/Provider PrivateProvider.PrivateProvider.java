@@ -14,7 +14,7 @@ public class PrivateProvider extends ContentProvider {
     public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.org.jssec.contenttype";
     public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.org.jssec.contenttype";
 
-    // Content Providerが提供するインターフェースを公開
+    // Expose the interface that the Content Provider provides.
     public interface Download {
         public static final String PATH = "downloads";
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/" + PATH);
@@ -38,12 +38,13 @@ public class PrivateProvider extends ContentProvider {
         sUriMatcher.addURI(AUTHORITY, Address.PATH + "/#", ADDRESSES_ID_CODE);
     }
 
-    // DBを使用せずに固定値を返す例にしているため、queryメソッドで返すCursorを事前に定義
-    private static MatrixCursor sAddressCursor = new MatrixCursor(new String[] { "_id", "pref" });
+    // Since this is a sample program,
+    // query method returns the following fixed result always without using database.
+    private static MatrixCursor sAddressCursor = new MatrixCursor(new String[] { "_id", "city" });
     static {
-        sAddressCursor.addRow(new String[] { "1", "北海道" });
-        sAddressCursor.addRow(new String[] { "2", "青森" });
-        sAddressCursor.addRow(new String[] { "3", "岩手" });
+        sAddressCursor.addRow(new String[] { "1", "New York" });
+        sAddressCursor.addRow(new String[] { "2", "Longon" });
+        sAddressCursor.addRow(new String[] { "3", "Paris" });
     }
     private static MatrixCursor sDownloadCursor = new MatrixCursor(new String[] { "_id", "path" });
     static {
@@ -58,12 +59,14 @@ public class PrivateProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
-
-        // ★ポイント2★ 同一アプリ内からのリクエストであっても、パラメータの安全性を確認する
-        // ここではuriが想定の範囲内であることを、UriMatcher#match()とswitch caseで確認している。
-        // 「3.2 入力データの安全性を確認する」を参照。
-        // ★ポイント3★ 利用元アプリは同一アプリであるから、センシティブな情報を返送してよい
-        // ただしgetTypeの結果がセンシティブな意味を持つことはあまりない。
+        // *** POINT 2 *** Handle the received request data carefully and securely,
+        // even though the data comes from the same application.
+        // Here, whether uri is within expectations or not, is verified by UriMatcher#match() and switch case. 
+        // Checking for other parameters are omitted here, due to sample.
+        // Please refer to "3.2 Handle Input Data Carefully and Securely."
+        
+        // *** POINT 3 *** Sensitive information can be sent since it is sending and receiving all within the same application.
+        // However, the result of getType rarely has the sensitive meaning.
         switch (sUriMatcher.match(uri)) {
         case DOWNLOADS_CODE:
         case ADDRESSES_CODE:
@@ -74,7 +77,7 @@ public class PrivateProvider extends ContentProvider {
             return CONTENT_ITEM_TYPE;
 
         default:
-            throw new IllegalArgumentException("Invalid URI：" + uri);
+            throw new IllegalArgumentException("Invalid URI:" + uri);
         }
     }
 
@@ -82,11 +85,14 @@ public class PrivateProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) {
 
-        // ★ポイント2★ 同一アプリ内からのリクエストであっても、パラメータの安全性を確認する
-        // ここではuriが想定の範囲内であることを、UriMatcher#match()とswitch caseで確認している。
-        // その他のパラメータの確認はサンプルにつき省略。「3.2 入力データの安全性を確認する」を参照。
-        // ★ポイント3★ 利用元アプリは同一アプリであるから、センシティブな情報を返送してよい
-        // queryの結果がセンシティブな意味を持つかどうかはアプリ次第。
+        // *** POINT 2 *** Handle the received request data carefully and securely,
+        // even though the data comes from the same application.
+        // Here, whether uri is within expectations or not, is verified by UriMatcher#match() and switch case. 
+        // Checking for other parameters are omitted here, due to sample.
+        // Please refer to "3.2 Handle Input Data Carefully and Securely."
+        
+        // *** POINT 3 *** Sensitive information can be sent since it is sending and receiving all within the same application.
+        // It depends on application whether the query result has sensitive meaning or not.
         switch (sUriMatcher.match(uri)) {
         case DOWNLOADS_CODE:
         case DOWNLOADS_ID_CODE:
@@ -97,18 +103,21 @@ public class PrivateProvider extends ContentProvider {
             return sAddressCursor;
 
         default:
-            throw new IllegalArgumentException("Invalid URI：" + uri);
+            throw new IllegalArgumentException("Invalid URI:" + uri);
         }
     }
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
 
-        // ★ポイント2★ 同一アプリ内からのリクエストであっても、パラメータの安全性を確認する
-        // ここではuriが想定の範囲内であることを、UriMatcher#match()とswitch caseで確認している。
-        // その他のパラメータの確認はサンプルにつき省略。「3.2 入力データの安全性を確認する」を参照。
-        // ★ポイント3★ 利用元アプリは同一アプリであるから、センシティブな情報を返送してよい
-        // Insert結果、発番されるIDがセンシティブな意味を持つかどうかはアプリ次第。
+        // *** POINT 2 *** Handle the received request data carefully and securely,
+        // even though the data comes from the same application.
+        // Here, whether uri is within expectations or not, is verified by UriMatcher#match() and switch case. 
+        // Checking for other parameters are omitted here, due to sample.
+        // Please refer to "3.2 Handle Input Data Carefully and Securely."
+        
+        // *** POINT 3 *** Sensitive information can be sent since it is sending and receiving all within the same application.
+        // It depends on application whether the issued ID has sensitive meaning or not.
         switch (sUriMatcher.match(uri)) {
         case DOWNLOADS_CODE:
             return ContentUris.withAppendedId(Download.CONTENT_URI, 3);
@@ -117,7 +126,7 @@ public class PrivateProvider extends ContentProvider {
             return ContentUris.withAppendedId(Address.CONTENT_URI, 4);
 
         default:
-            throw new IllegalArgumentException("Invalid URI：" + uri);
+            throw new IllegalArgumentException("Invalid URI:" + uri);
         }
     }
 
@@ -125,14 +134,17 @@ public class PrivateProvider extends ContentProvider {
     public int update(Uri uri, ContentValues values, String selection,
             String[] selectionArgs) {
 
-        // ★ポイント2★ 同一アプリ内からのリクエストであっても、パラメータの安全性を確認する
-        // ここではuriが想定の範囲内であることを、UriMatcher#match()とswitch caseで確認している。
-        // その他のパラメータの確認はサンプルにつき省略。「3.2 入力データの安全性を確認する」を参照。
-        // ★ポイント3★ 利用元アプリは同一アプリであるから、センシティブな情報を返送してよい
-        // Updateされたレコード数がセンシティブな意味を持つかどうかはアプリ次第。
+        // *** POINT 2 *** Handle the received request data carefully and securely,
+        // even though the data comes from the same application.
+        // Here, whether uri is within expectations or not, is verified by UriMatcher#match() and switch case. 
+        // Checking for other parameters are omitted here, due to sample.
+        // Please refer to "3.2 Handle Input Data Carefully and Securely."
+        
+        // *** POINT 3 *** Sensitive information can be sent since it is sending and receiving all within the same application.
+        // It depends on application whether the number of updated records has sensitive meaning or not.
         switch (sUriMatcher.match(uri)) {
         case DOWNLOADS_CODE:
-            return 5;   // updateされたレコード数を返す
+            return 5;   // Return number of updated records
 
         case DOWNLOADS_ID_CODE:
             return 1;
@@ -144,21 +156,24 @@ public class PrivateProvider extends ContentProvider {
             return 1;
 
         default:
-            throw new IllegalArgumentException("Invalid URI：" + uri);
+            throw new IllegalArgumentException("Invalid URI:" + uri);
         }
     }
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
 
-        // ★ポイント2★ 同一アプリ内からのリクエストであっても、パラメータの安全性を確認する
-        // ここではuriが想定の範囲内であることを、UriMatcher#match()とswitch caseで確認している。
-        // その他のパラメータの確認はサンプルにつき省略。「3.2 入力データの安全性を確認する」を参照。
-        // ★ポイント3★ 利用元アプリは同一アプリであるから、センシティブな情報を返送してよい
-        // Deleteされたレコード数がセンシティブな意味を持つかどうかはアプリ次第。
+        // *** POINT 2 *** Handle the received request data carefully and securely,
+        // even though the data comes from the same application.
+        // Here, whether uri is within expectations or not, is verified by UriMatcher#match() and switch case. 
+        // Checking for other parameters are omitted here, due to sample.
+        // Please refer to "3.2 Handle Input Data Carefully and Securely."
+        
+        // *** POINT 3 *** Sensitive information can be sent since it is sending and receiving all within the same application.
+        // It depends on application whether the number of deleted records has sensitive meaning or not.
         switch (sUriMatcher.match(uri)) {
         case DOWNLOADS_CODE:
-            return 10;  // deleteされたレコード数を返す
+            return 10;  // Return number of deleted records
 
         case DOWNLOADS_ID_CODE:
             return 1;
@@ -170,7 +185,7 @@ public class PrivateProvider extends ContentProvider {
             return 1;
 
         default:
-            throw new IllegalArgumentException("Invalid URI：" + uri);
+            throw new IllegalArgumentException("Invalid URI:" + uri);
         }
     }
 }

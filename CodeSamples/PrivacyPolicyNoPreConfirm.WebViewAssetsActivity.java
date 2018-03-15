@@ -8,7 +8,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 public class WebViewAssetsActivity extends Activity {
-    // ★ポイント7★ アプリ・プライバシーポリシー概要版をassetsフォルダ内に配置しておく
+    // *** POINT 7 *** Place a summary version of the application privacy policy in the assets folder
     private final String ABST_PP_URL = "file:///android_asset/PrivacyPolicy/app-policy-abst-privacypolicy-1.0.html";
     
     @Override

@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.jssec.android.service.inhouseservice.messengeruser" >
 
-    <!-- ★ポイント8★ 独自定義Signature Permissionを利用宣言する -->
+    <!-- *** POINT 8 *** Declare to use the in-house signature permission.  -->
     <uses-permission
         android:name="org.jssec.android.service.inhouseservice.messenger.MY_PERMISSION" />
 

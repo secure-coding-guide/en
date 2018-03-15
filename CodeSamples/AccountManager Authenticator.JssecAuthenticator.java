@@ -32,13 +32,13 @@ public class JssecAuthenticator extends AbstractAccountAuthenticator {
         Account[] accounts = am.getAccountsByType(JSSEC_ACCOUNT_TYPE);
         Bundle bundle = new Bundle();
         if (accounts.length > 0) {
-            // 本サンプルコードではアカウントが既に存在する場合はエラーとする
+            // In this sample code, when an account already exists, consider it as an error.
             bundle.putString(AccountManager.KEY_ERROR_CODE, String.valueOf(-1));
             bundle.putString(AccountManager.KEY_ERROR_MESSAGE,
                     mContext.getString(R.string.error_account_exists));
         } else {
-            // ★ポイント2★ ログイン画面ActivityはAuthenticatorアプリで実装する
-            // ★ポイント4★ KEY_INTENTには、ログイン画面Activityのクラス名を指定した明示的Intentを与える
+            // *** POINT 2 *** The login screen activity must be implemented in an authenticator application.
+            // *** POINT 4 *** The explicit intent which the class name of the login screen activity is specified must be set to KEY_INTENT.
             Intent intent = new Intent(mContext, LoginActivity.class);
             intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
 
@@ -53,13 +53,13 @@ public class JssecAuthenticator extends AbstractAccountAuthenticator {
 
         Bundle bundle = new Bundle();
         if (accountExist(account)) {
-            // ★ポイント4★ KEY_INTENTには、ログイン画面Activityのクラス名を指定した明示的Intentを与える
+            // *** POINT 4 *** KEY_INTENT must be given an explicit intent that is specified the class name of the login screen activity.
             Intent intent = new Intent(mContext, LoginActivity.class);
             intent.putExtra(RE_AUTH_NAME, account.name);
             intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
             bundle.putParcelable(AccountManager.KEY_INTENT, intent);
         } else {
-            // 指定されたアカウントが存在しない場合はエラーとする
+            // When the specified account doesn't exist, consider it as an error.
             bundle.putString(AccountManager.KEY_ERROR_CODE, String.valueOf(-2));
             bundle.putString(AccountManager.KEY_ERROR_MESSAGE,
                     mContext.getString(R.string.error_account_not_exists));

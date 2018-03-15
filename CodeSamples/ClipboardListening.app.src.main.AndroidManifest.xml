@@ -8,14 +8,16 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".ClipboardListeningActivity"
-            android:label="@string/title_activity_clipboard_listening" 
-            android:exported="true">
+            android:label="@string/title_activity_clipboard_listening"
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".ClipboardListeningService" android:exported="false"/>
+        <service 
+            android:name=".ClipboardListeningService"
+            android:exported="false" />
     </application>
 
 </manifest>

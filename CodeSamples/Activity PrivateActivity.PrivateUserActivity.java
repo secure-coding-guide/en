@@ -18,12 +18,12 @@ public class PrivateUserActivity extends Activity {
     
     public void onUseActivityClick(View view) {
         
-        // ★ポイント6★ Activityに送信するIntentには、フラグFLAG_ACTIVITY_NEW_TASKを設定しない
-        // ★ポイント7★ 同一アプリ内Activityはクラス指定の明示的Intentで呼び出す
+        // *** POINT 6 *** Do not set the FLAG_ACTIVITY_NEW_TASK flag for intents to start an activity.
+        // *** POINT 7 *** Use the explicit Intents with the class specified to call an activity in the same application.
         Intent intent = new Intent(this, PrivateActivity.class);
         
-        // ★ポイント8★ 利用先アプリは同一アプリであるから、センシティブな情報をputExtra()を使う場合に限り送信してもよい
-        intent.putExtra("PARAM", "センシティブな情報");
+        // *** POINT 8 *** Sensitive information can be sent only by putExtra() since the destination activity is in the same application. 
+        intent.putExtra("PARAM", "Sensitive Info");
         
         startActivityForResult(intent, REQUEST_CODE);
     }
@@ -38,9 +38,10 @@ public class PrivateUserActivity extends Activity {
         case REQUEST_CODE:
             String result = data.getStringExtra("RESULT");
             
-            // ★ポイント9★ 同一アプリ内Activityからの結果情報であっても、受信データの安全性を確認する
-            // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
-            Toast.makeText(this, String.format("結果「%s」を受け取った。", result), Toast.LENGTH_LONG).show();
+            // *** POINT 9 *** Handle the received data carefully and securely,
+            // even though the data comes from an activity within the same application.
+            // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
+            Toast.makeText(this, String.format("Received result: \"%s\"", result), Toast.LENGTH_LONG).show();
             break;
         }
     }

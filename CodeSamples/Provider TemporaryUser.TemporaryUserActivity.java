@@ -9,15 +9,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class TemporaryUserActivity extends Activity {
 
-    // Provider Activityに関する情報
+    // Information of the Content Provider's Activity to request temporary content provider access.
     private static final String TARGET_PACKAGE =  "org.jssec.android.provider.temporaryprovider";
     private static final String TARGET_ACTIVITY = "org.jssec.android.provider.temporaryprovider.TemporaryPassiveGrantActivity";
 
-    // 利用先のContent Provider情報
+    // Target Content Provider Information
     private static final String AUTHORITY = "org.jssec.android.provider.temporaryprovider";
     private interface Address {
         public static final String PATH = "addresses";
@@ -33,17 +32,16 @@ public class TemporaryUserActivity extends Activity {
         Cursor cursor = null;
         try {
             if (!providerExists(Address.CONTENT_URI)) {
-                logLine("  Content Providerが不在");
+                logLine("  Content Provider doesn't exist.");
                 return;
             }
 
-            // ★ポイント9★ センシティブな情報をリクエストに含めてはならない
-            // リクエスト先のアプリがマルウェアである可能性がある。
-            // マルウェアに取得されても問題のない情報であればリクエストに含めてもよい。
+            // *** POINT 9 *** Do not send sensitive information.
+            // If no problem when the information is taken by malware, it can be included in the request.
             cursor = getContentResolver().query(Address.CONTENT_URI, null, null, null, null);
 
-            // ★ポイント10★ 結果データの安全性を確認する
-            // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+            // *** POINT 10 *** When receiving a result, handle the result data carefully and securely.
+            // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
             if (cursor == null) {
                 logLine("  null cursor");
             } else {
@@ -54,21 +52,22 @@ public class TemporaryUserActivity extends Activity {
                 }
             }
         } catch (SecurityException ex) {
-            logLine("  例外:" + ex.getMessage());
+            logLine("  Exception:" + ex.getMessage());
         }
         finally {
             if (cursor != null) cursor.close();
         }
     }
 
-    // このアプリが一時的なアクセス許可を要求し、Content Provider側アプリが受動的にアクセス許可を与えるケース
+    // In the case that this application requests temporary access to the Content Provider
+    // and the Content Provider passively grants temporary access permission to this application.
     public void onGrantRequestClick(View view) {
         Intent intent = new Intent();
         intent.setClassName(TARGET_PACKAGE, TARGET_ACTIVITY);
         try {
             startActivityForResult(intent, REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
-            logLine("Grantの要求に失敗しました。\nTemporaryProviderがインストールされているか確認してください。");
+            logLine("Content Provider's Activity not found.");
         }
     }
 
@@ -79,7 +78,8 @@ public class TemporaryUserActivity extends Activity {
 
     private TextView mLogView;
 
-    // Content Provider側アプリが能動的にこのアプリにアクセス許可を与えるケース
+    // In the case that the Content Provider application grants temporary access
+    // to this application actively.
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

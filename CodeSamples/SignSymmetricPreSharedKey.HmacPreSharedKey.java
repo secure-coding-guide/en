@@ -10,16 +10,16 @@ import javax.crypto.spec.SecretKeySpec;
 
 public final class HmacPreSharedKey {
 
-    // ★ポイント1★ 明示的に暗号モードとパディングを設定する
-    // ★ポイント2★ 脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
-    // Mac クラスの getInstance に渡すパラメータ （認証モード)
+    // *** POINT 1 *** Explicitly specify the encryption mode and the padding.
+    // *** POINT 2 *** Use strong encryption methods (specifically, technologies that meet the relevant criteria), including algorithms, block cipher modes, and padding modes.
+    // Parameters passed to the getInstance method of the Mac class: Authentication mode
     private static final String TRANSFORMATION = "HmacSHA256";
 
-    // 暗号アルゴリズム
+    // Encryption algorithm
     private static final String KEY_ALGORITHM = "HmacSHA256";
 
-    // ★ポイント3★ 十分安全な長さを持つ鍵を利用する
-    // 鍵長チェック
+    // *** POINT 3 *** Use a key of length sufficient to guarantee the MAC strength.
+    // Check the length of the key
     private static final int MIN_KEY_LENGTH_BYTES = 16;
 
     HmacPreSharedKey() {
@@ -31,11 +31,10 @@ public final class HmacPreSharedKey {
 
     public final byte[] calculate(final byte[] plain, final byte[] keyData) {
         byte[] hmac = null;
-        int count = 0;
 
         try {
-            // ★ポイント1★ 明示的に暗号モードとパディングを設定する
-            // ★ポイント2★ 脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
+            // *** POINT 1 *** Explicitly specify the encryption mode and the padding.
+            // *** POINT 2 *** Use strong encryption methods (specifically, technologies that meet the relevant criteria), including algorithms, block cipher modes, and padding modes.
             Mac mac = Mac.getInstance(TRANSFORMATION);
 
             SecretKey secretKey = generateKey(keyData);
@@ -43,16 +42,6 @@ public final class HmacPreSharedKey {
                 mac.init(secretKey);
 
                 hmac = mac.doFinal(plain);
-
-                StringBuilder sb = new StringBuilder();
-
-                for (int i = 0; i < hmac.length; i++) {
-                    //System.out.println(Integer.toHexString(hmac[i] & 0xff));
-                    sb.append(Integer.toHexString(hmac[i] & 0xff));
-                    count++;
-                }
-
-                count = 0;
             }
         } catch (NoSuchAlgorithmException e) {
         } catch (InvalidKeyException e) {
@@ -76,9 +65,9 @@ public final class HmacPreSharedKey {
         SecretKey secretKey = null;
 
         try {
-            // ★ポイント3★ 十分安全な長さを持つ鍵を利用する
+            // *** POINT 3 *** Use a key of length sufficient to guarantee the MAC strength.
             if (keyData.length >= MIN_KEY_LENGTH_BYTES) {
-                // ★ポイント2★ 脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
+                // *** POINT 2 *** Use strong encryption methods (specifically, technologies that meet the relevant criteria), including algorithms, block cipher modes, and padding modes.
                 secretKey = new SecretKeySpec(keyData, KEY_ALGORITHM);
             }
         } catch (IllegalArgumentException e) {

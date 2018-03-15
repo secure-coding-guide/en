@@ -35,7 +35,7 @@ public class ConfirmFragment extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle args) {
-        // ★ポイント1★ 初回起動時に、アプリが扱う利用者情報の送信について包括同意を得る
+        // *** POINT 1 *** On first launch (or application update), obtain broad consent to transmit user data that will be handled by the application.
         final int title = getArguments().getInt("title");
         final int sentence = getArguments().getInt("sentence");
         final int type = getArguments().getInt("type");
@@ -46,7 +46,7 @@ public class ConfirmFragment extends DialogFragment {
         linkPP.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                // ★ポイント3★ ユーザーがアプリ・プライバシーポリシーを確認できる手段を用意する
+                // *** POINT 3 *** Provide methods by which the user can review the application privacy policy.
                 Intent intent = new Intent();
                 intent.setClass(getActivity(), WebViewAssetsActivity.class);
                 startActivity(intent);
@@ -59,14 +59,14 @@ public class ConfirmFragment extends DialogFragment {
         builder.setMessage(sentence);
         builder.setView(content);
 
-        builder.setPositiveButton(R.string.buttonOK, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.buttonConsent, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 if (mListener != null) {
                     mListener.onPositiveButtonClick(type);
                 }
             }
         });
-        builder.setNegativeButton(R.string.buttonNG, new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.buttonDonotConsent, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 if (mListener != null) {
                     mListener.onNegativeButtonClick(type);

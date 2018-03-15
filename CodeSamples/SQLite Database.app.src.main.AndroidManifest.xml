@@ -15,23 +15,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- ŒŸõ‰æ–Ê -->
+        <!-- Search screen -->
         <activity
             android:name=".SearchActivity"
             android:theme="@android:style/Theme.Dialog"
             android:exported="false" >
         </activity>
         
-        <!-- •ÒW‰æ–Ê -->
+        <!-- Edit screen -->
         <activity
             android:name=".EditActivity"
             android:exported="false" >
         </activity>
-        <!-- íœ‰æ–Ê -->
+        <!-- Delete screen -->
         <activity
             android:name=".DeleteActivity"
             android:theme="@android:style/Theme.Dialog"
-            android:exported="false" >
+            android:exported="false">
         </activity>
         
     </application>

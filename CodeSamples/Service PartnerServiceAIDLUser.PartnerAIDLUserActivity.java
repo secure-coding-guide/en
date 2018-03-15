@@ -2,7 +2,6 @@ package org.jssec.android.service.partnerservice.aidluser;
 
 import org.jssec.android.service.partnerservice.aidl.IPartnerAIDLService;
 import org.jssec.android.service.partnerservice.aidl.IPartnerAIDLServiceCallback;
-import org.jssec.android.service.partnerservice.aidl.R;
 import org.jssec.android.shared.PkgCertWhitelists;
 import org.jssec.android.shared.Utils;
 
@@ -26,31 +25,32 @@ public class PartnerAIDLUserActivity extends Activity {
     
     private final static int MGS_VALUE_CHANGED = 1;
     
-    // ★ポイント6★ 利用先パートナー限定Serviceアプリの証明書がホワイトリストに登録されていることを確認する
+    // *** POINT 6 *** Verify if the certificate of the target application has been registered in the own white list.
     private static PkgCertWhitelists sWhitelists = null;
     private static void buildWhitelists(Context context) {
         boolean isdebug = Utils.isDebuggable(context);
         sWhitelists = new PkgCertWhitelists();
         
-        // パートナー限定Serviceアプリ org.jssec.android.service.partnerservice.aidl の証明書ハッシュ値を登録
+        // Register certificate hash value of partner service application "org.jssec.android.service.partnerservice.aidl"
         sWhitelists.add("org.jssec.android.service.partnerservice.aidl", isdebug ?
-                // debug.keystoreの"androiddebugkey"の証明書ハッシュ値
+                // Certificate hash value of debug.keystore "androiddebugkey"
                 "0EFB7236 328348A9 89718BAD DF57F544 D5CCB4AE B9DB34BC 1E29DD26 F77C8255" :
-                // keystoreの"my company key"の証明書ハッシュ値
+                // Certificate hash value of  keystore "my company key"
                 "D397D343 A5CBC10F 4EDDEB7C A10062DE 5690984F 1FB9E88B D7B3A7C2 42E142CA");
         
-        // 以下同様に他のパートナー限定Serviceアプリを登録...
+        // Register other partner service applications in the same way
     }
     private static boolean checkPartner(Context context, String pkgname) {
         if (sWhitelists == null) buildWhitelists(context);
         return sWhitelists.test(context, pkgname);
     }
 
-    // 利用先のパートナー限定Activityに関する情報
+    // Information about destination (requested) partner activity.
     private static final String TARGET_PACKAGE =  "org.jssec.android.service.partnerservice.aidl";
     private static final String TARGET_CLASS = "org.jssec.android.service.partnerservice.aidl.PartnerAIDLService";
 
     private static class ReceiveHandler extends Handler{
+
         private Context mContext;
 
         public ReceiveHandler(Context context){
@@ -61,21 +61,20 @@ public class PartnerAIDLUserActivity extends Activity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MGS_VALUE_CHANGED: {
-                    String info = (String)msg.obj;
-                    Toast.makeText(mContext, String.format("コールバックで「%s」を受信した。", info), Toast.LENGTH_SHORT).show();
+                      String info = (String)msg.obj;
+                    Toast.makeText(mContext, String.format("Received \"%s\" with callback.", info), Toast.LENGTH_SHORT).show();
                     break;
-                }
+                  }
                 default:
                     super.handleMessage(msg);
                     break;
-            } // switch
-        }
-
+           } // switch
+        }    
     }
 
     private final ReceiveHandler mHandler = new ReceiveHandler(this);
-
-    // AIDLで定義したインターフェース。Serviceからの通知を受け取る。
+    
+    // Interfaces defined in AIDL. Receive notice from service
     private final IPartnerAIDLServiceCallback.Stub mCallback =
         new IPartnerAIDLServiceCallback.Stub() {
             @Override
@@ -85,29 +84,29 @@ public class PartnerAIDLUserActivity extends Activity {
             }
     };
     
-    // AIDLで定義したインターフェース。Serviceへ通知する。
+    // Interfaces defined in AIDL. Inform service.
     private IPartnerAIDLService mService = null;
     
-    // Serviceと接続する時に利用するコネクション。bindServiceで実装する場合は必要になる。
+    // Connection used to connect with service. This is necessary when service is implemented with bindService(). 
     private ServiceConnection mConnection = new ServiceConnection() {
 
-        // Serviceに接続された場合に呼ばれる
+        // This is called when the connection with the service has been established.
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             mService = IPartnerAIDLService.Stub.asInterface(service);
             
             try{
-                // Serviceに接続
+                // connect to service
                 mService.registerCallback(mCallback);
                 
             }catch(RemoteException e){
-                // Serviceが異常終了した場合
+                // service stopped abnormally
             }
             
             Toast.makeText(mContext, "Connected to service", Toast.LENGTH_SHORT).show();
         }
 
-        // Serviceが異常終了して、コネクションが切断された場合に呼ばれる
+        // This is called when the service stopped abnormally and connection is disconnected.
         @Override
         public void onServiceDisconnected(ComponentName className) {
             Toast.makeText(mContext, "Disconnected from service", Toast.LENGTH_SHORT).show();
@@ -123,18 +122,17 @@ public class PartnerAIDLUserActivity extends Activity {
         mContext = this;
     }
 
-    // サービス開始ボタン
+    // --- StartService control ---
+    
     public void onStartServiceClick(View v) {
-        // bindServiceを実行する
+        // Start bindService
         doBindService();
     }
     
-    // 情報取得ボタン
     public void onGetInfoClick(View v) {
         getServiceinfo();
     }
     
-    // サービス停止ボタン
     public void onStopServiceClick(View v) {
         doUnbindService();
     }
@@ -146,22 +144,22 @@ public class PartnerAIDLUserActivity extends Activity {
     }
 
     /**
-     * Serviceに接続する
+     * Connect to service
      */
     private void doBindService() {
         if (!mIsBound){
-            // ★ポイント6★ 利用先パートナー限定Serviceアプリの証明書がホワイトリストに登録されていることを確認する
+            // *** POINT 6 *** Verify if the certificate of the target application has been registered in the own white list.
             if (!checkPartner(this, TARGET_PACKAGE)) {
-                Toast.makeText(this, "利用先 Service アプリはホワイトリストに登録されていない。", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Destination(Requested) sevice application is not registered in white list.", Toast.LENGTH_LONG).show();
                 return;
             }
             
             Intent intent = new Intent();
             
-            // ★ポイント7★ 利用先パートナー限定アプリに開示してよい情報に限り送信してよい
-            intent.putExtra("PARAM", "パートナーアプリに開示してよい情報");
+            // *** POINT 7 *** Return only information that is granted to be disclosed to a partner application.
+            intent.putExtra("PARAM", "Information disclosed to partner application");
             
-            // ★ポイント8★ 明示的Intentによりパートナー限定Serviceを呼び出す
+            // *** POINT 8 *** Use the explicit intent to call a partner service.
             intent.setClassName(TARGET_PACKAGE, TARGET_CLASS);
                  
           bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -170,17 +168,17 @@ public class PartnerAIDLUserActivity extends Activity {
     }
 
     /**
-     * Serviceへの接続を切断する
+     * Disconnect service
      */
     private void doUnbindService() {
         if (mIsBound) {
-            // 登録していたレジスタがある場合は解除
+            // Unregister callbacks which have been registered. 
             if(mService != null){
                 try{
                     mService.unregisterCallback(mCallback);
                 }catch(RemoteException e){
-                    // Serviceが異常終了していた場合
-                    // サンプルにつき処理は割愛
+                    // Service stopped abnormally
+                    // Omitted, since it' s sample.
                 }
             }
             
@@ -188,7 +186,7 @@ public class PartnerAIDLUserActivity extends Activity {
             
           Intent intent = new Intent();
         
-           // ★ポイント8★ 明示的Intentによりパートナー限定Serviceを呼び出す
+        // *** POINT 8 *** Use the explicit intent to call a partner service.
           intent.setClassName(TARGET_PACKAGE, TARGET_CLASS);
  
           stopService(intent);
@@ -198,21 +196,22 @@ public class PartnerAIDLUserActivity extends Activity {
     }
 
     /**
-     * Serviceから情報を取得する
+     * Get information from service
      */
     void getServiceinfo() {
         if (mIsBound && mService != null) {
             String info = null;
             
             try {
-                // ★ポイント7★ 利用先パートナー限定アプリに開示してよい情報に限り送信してよい
-                info = mService.getInfo("パートナーアプリに開示してよい情報(method from activity)");
+                // *** POINT 7 *** Return only information that is granted to be disclosed to a partner application.
+                info = mService.getInfo("Information disclosed to partner application (method from activity)");
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-            // ★ポイント9★ パートナー限定アプリからの結果情報であっても、受信Intentの安全性を確認する
-            // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。            
-            Toast.makeText(mContext, String.format("サービスから「%s」を取得した。", info), Toast.LENGTH_SHORT).show();
+            // *** POINT 9 *** Handle the received result data carefully and securely,
+            // even though the data came from a partner application.
+            // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
+            Toast.makeText(mContext, String.format("Received \"%s\" from service.", info), Toast.LENGTH_SHORT).show();
          }
     }
 }

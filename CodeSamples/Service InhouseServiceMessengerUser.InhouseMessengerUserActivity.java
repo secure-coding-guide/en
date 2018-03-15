@@ -23,46 +23,46 @@ public class InhouseMessengerUserActivity extends Activity {
     private boolean mIsBound;
     private Context mContext;
 
-    // 利用先のActivity情報
+    // Destination (Requested) service application information
     private static final String TARGET_PACKAGE =  "org.jssec.android.service.inhouseservice.messenger";
     private static final String TARGET_CLASS = "org.jssec.android.service.inhouseservice.messenger.InhouseMessengerService";
 
-    // 自社のSignature Permission
+    // In-house signature permission
     private static final String MY_PERMISSION = "org.jssec.android.service.inhouseservice.messenger.MY_PERMISSION";
 
-    // 自社の証明書のハッシュ値
+    // In-house certificate hash value
     private static String sMyCertHash = null;
     private static String myCertHash(Context context) {
         if (sMyCertHash == null) {
             if (Utils.isDebuggable(context)) {
-                // debug.keystoreの"androiddebugkey"の証明書ハッシュ値
+                // Certificate hash value of debug.keystore "androiddebugkey"
                 sMyCertHash = "0EFB7236 328348A9 89718BAD DF57F544 D5CCB4AE B9DB34BC 1E29DD26 F77C8255";
             } else {
-                // keystoreの"my company key"の証明書ハッシュ値
+                // Certificate hash value of keystore "my company key"
                 sMyCertHash = "D397D343 A5CBC10F 4EDDEB7C A10062DE 5690984F 1FB9E88B D7B3A7C2 42E142CA";
             }
         }
         return sMyCertHash;
     }
 
-    // Serviceからデータを受信するときに利用するMessenger
+    // Messenger used when this application receives data from service.
     private Messenger mServiceMessenger = null;
 
-    // Serviceにデータを送信するときに利用するMessenger
+    // Messenger used when this application sends data to service.
     private final Messenger mActivityMessenger = new Messenger(new ActivitySideHandler());
 
-    // Serviceから受け取ったMessageを処理するHandler
+    // Handler which handles message received from service
     private class ActivitySideHandler extends Handler {
-
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case CommonValue.MSG_SET_VALUE:
                     Bundle data = msg.getData();
                     String info = data.getString("key");
-                    // ★ポイント13★ 自社アプリからの結果情報であっても、値の安全性を確認する
-                    // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
-                    Toast.makeText(mContext, String.format("サービスから「%s」を取得した。", info),
+                    // *** POINT 13 *** Handle the received result data carefully and securely,
+                    // even though the data came from an in-house application
+                    // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
+                    Toast.makeText(mContext, String.format("Received \"%s\" from service.", info),
                             Toast.LENGTH_SHORT).show();
                     break;
                 default:
@@ -71,26 +71,26 @@ public class InhouseMessengerUserActivity extends Activity {
         }
     }
 
-    // Serviceと接続する時に利用するコネクション。bindServiceで実装する場合は必要になる。
+    // Connection used to connect with service. This is necessary when service is implemented with bindService(). 
     private ServiceConnection mConnection = new ServiceConnection() {
 
-        // Serviceに接続された場合に呼ばれる
+        // This is called when the connection with the service has been established.
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             mServiceMessenger = new Messenger(service);
             Toast.makeText(mContext, "Connect to service", Toast.LENGTH_SHORT).show();
 
             try {
-                // Serviceに自分のMessengerを渡す
+                // Send own messenger to service
                 Message msg = Message.obtain(null, CommonValue.MSG_REGISTER_CLIENT);
                 msg.replyTo = mActivityMessenger;
                 mServiceMessenger.send(msg);
             } catch (RemoteException e) {
-                // Serviceが異常終了していた場合
+                // Service stopped abnormally
             }
         }
 
-        // Serviceが異常終了して、コネクションが切断された場合に呼ばれる
+        // This is called when the service stopped abnormally and connection is disconnected.
         @Override
         public void onServiceDisconnected(ComponentName className) {
             mServiceMessenger = null;
@@ -102,22 +102,22 @@ public class InhouseMessengerUserActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.publicservice_activity);
+        setContentView(R.layout.inhouseservice_activity);
 
         mContext = this;
     }
-    // サービス開始ボタン
+    
+    // --- StartService control ---
+
     public void onStartServiceClick(View v) {
-        // bindServiceを実行する
+        // Start bindService
         doBindService();
     }
 
-    // 情報取得ボタン
     public void onGetInfoClick(View v) {
         getServiceinfo();
     }
 
-    // サービス停止ボタン
     public void onStopServiceClick(View v) {
         doUnbindService();
     }
@@ -129,28 +129,28 @@ public class InhouseMessengerUserActivity extends Activity {
     }
 
     /**
-     * Serviceに接続する
+     * Connect to service
      */
     void doBindService() {
         if (!mIsBound){
-            // ★ポイント9★ 独自定義Signature Permissionが自社アプリにより定義されていることを確認する
+            // *** POINT 9 *** Verify that the in-house signature permission is defined by an in-house application.
             if (!SigPerm.test(this, MY_PERMISSION, myCertHash(this))) {
-                Toast.makeText(this, "独自定義Signature Permissionが自社アプリにより定義されていない。", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "In-house defined signature permission is not defined by in-house application.", Toast.LENGTH_LONG).show();
                 return;
             }
 
-            // ★ポイント10★ 利用先アプリの証明書が自社の証明書であることを確認する
+            // *** POINT 10 *** Verify that the destination application is signed with the in-house certificate.
             if (!PkgCert.test(this, TARGET_PACKAGE, myCertHash(this))) {
-                Toast.makeText(this, "利用先サービスは自社アプリではない。", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Destination(Requested) service application is not in-house application.", Toast.LENGTH_LONG).show();
                 return;
             }
 
           Intent intent = new Intent();
 
-            // ★ポイント11★ 利用先アプリは自社アプリであるから、センシティブな情報を送信してもよい
-          intent.putExtra("PARAM", "センシティブな情報");
+            // *** POINT 11 *** Sensitive information can be sent since the destination application is in-house one.
+          intent.putExtra("PARAM", "Sensitive information");
 
-            // ★ポイント12★ 明示的Intentにより自社限定Serviceを呼び出す
+            // *** POINT 12 *** Use the explicit intent to call an in-house service.
           intent.setClassName(TARGET_PACKAGE, TARGET_CLASS);
 
           bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -159,7 +159,7 @@ public class InhouseMessengerUserActivity extends Activity {
     }
 
     /**
-     * Serviceへの接続を切断する
+     * Disconnect service
      */
     void doUnbindService() {
         if (mIsBound) {
@@ -169,18 +169,17 @@ public class InhouseMessengerUserActivity extends Activity {
     }
 
     /**
-     * Serviceから情報を取得する
+     * Get information from service
      */
     void getServiceinfo() {
         if (mServiceMessenger != null) {
             try {
-                  // 情報の送信を要求する
+                // Request sending information
                 Message msg = Message.obtain(null, CommonValue.MSG_SET_VALUE);
                 mServiceMessenger.send(msg);
             } catch (RemoteException e) {
-                // Serviceが異常終了していた場合
+                // Service stopped abnormally
             }
          }
     }
-
 }

@@ -18,25 +18,25 @@ import javax.crypto.spec.PBEKeySpec;
 
 public final class AesCryptoPBEKey {
 
-    // ★ポイント1★ 明示的に暗号モードとパディングを設定する
-    // ★ポイント2★ 脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
-    // Cipher クラスの getInstance に渡すパラメータ （/[暗号アルゴリズム]/[ブロック暗号モード]/[パディングルール])
-    // サンプルでは、暗号アルゴリズム=AES、ブロック暗号モード=CBC、パディングルール=PKCS7Padding
+    // *** POINT 1 *** Explicitly specify the encryption mode and the padding.
+    // *** POINT 2 *** Use strong encryption technologies (specifically, technologies that meet the relevant criteria), including algorithms, block cipher modes, and padding modes.
+    // Parameters passed to the getInstance method of the Cipher class: Encryption algorithm, block encryption mode, padding rule 
+    // In this sample, we choose the following parameter values: encryption algorithm=AES, block encryption mode=CBC, padding rule=PKCS7Padding
     private static final String TRANSFORMATION = "AES/CBC/PKCS7Padding";
 
-    // 鍵を生成するクラスのインスタンスを取得するための文字列
+    //  A string used to fetch an instance of the class that generates the key
     private static final String KEY_GENERATOR_MODE = "PBEWITHSHA256AND128BITAES-CBC-BC";
 
-    // ★ポイント3★ パスワードから鍵を生成する場合は、Saltを使用する
-    // Saltのバイト長
+    // *** POINT 3 *** When generating a key from a password, use Salt.
+    // Salt length in bytes 
     public static final int SALT_LENGTH_BYTES = 20;
 
-    // ★ポイント4★ パスワードから鍵を生成する場合は、適正なハッシュの繰り返し回数を指定する
-    // PBE で鍵を生成する際の攪拌の繰り返し回数
+    // *** POINT 4 *** When generating a key from a password, specify an appropriate hash iteration count.
+    // Set the number of mixing repetitions used when generating keys via PBE
     private static final int KEY_GEN_ITERATION_COUNT = 1024;
 
-    // ★ポイント5★ 十分安全な長さを持つ鍵を利用する
-    // 鍵のビット長
+    // *** POINT 5 *** Use a key of length sufficient to guarantee the strength of encryption.
+    // Key length in bits
     private static final int KEY_LENGTH_BITS = 128;
 
     private byte[] mIV = null;
@@ -70,11 +70,11 @@ public final class AesCryptoPBEKey {
         byte[] encrypted = null;
 
         try {
-            // ★ポイント1★ 明示的に暗号モードとパディングを設定する
-            // ★ポイント2★ 脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
+            // *** POINT 1 *** Explicitly specify the encryption mode and the padding.
+            // *** POINT 2 *** Use strong encryption technologies (specifically, technologies that meet the relevant criteria), including algorithms, modes, and padding.
             Cipher cipher = Cipher.getInstance(TRANSFORMATION);
 
-            // ★ポイント3★ パスワードから鍵を生成する場合は、Saltを使用する
+            // *** POINT 3 *** When generating keys from passwords, use Salt.
             SecretKey secretKey = generateKey(password, mSalt);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
             mIV = cipher.getIV();
@@ -95,11 +95,11 @@ public final class AesCryptoPBEKey {
         byte[] plain = null;
 
         try {
-            // ★ポイント1★ 明示的に暗号モードとパディングを設定する
-            // ★ポイント2★ 脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
+            // *** POINT 1 *** Explicitly specify the encryption mode and the padding.
+            // *** POINT 2 *** Use strong encryption technologies (specifically, technologies that meet the relevant criteria), including algorithms, block cipher modes, and padding modes.
             Cipher cipher = Cipher.getInstance(TRANSFORMATION);
 
-            // ★ポイント3★ パスワードから鍵を生成する場合は、Saltを使用する
+            // *** POINT 3 *** When generating a key from a password, use Salt.
             SecretKey secretKey = generateKey(password, mSalt);
             IvParameterSpec ivParameterSpec = new IvParameterSpec(mIV);
             cipher.init(Cipher.DECRYPT_MODE, secretKey, ivParameterSpec);
@@ -122,18 +122,18 @@ public final class AesCryptoPBEKey {
         PBEKeySpec keySpec = null;
 
         try {
-            // ★ポイント2★ 脆弱でない(基準を満たす)アルゴリズム・モード・パディングを使用する
-            // 鍵を生成するクラスのインスタンスを取得する
-            // 例では、AES-CBC 128 ビット用の鍵を SHA256 を利用して生成する KeyFactory を使用。
+            // *** POINT 2 *** Use strong encryption technologies (specifically, technologies that meet the relevant criteria), including algorithms, block cipher modes, and padding modes.
+            // Fetch an instance of the class that generates the key
+            // In this example, we use a KeyFactory that uses SHA256 to generate AES-CBC 128-bit keys.
             SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance(KEY_GENERATOR_MODE);
 
-            // ★ポイント3★ パスワードから鍵を生成する場合は、Saltを使用する
-            // ★ポイント4★ パスワードから鍵を生成する場合は、適正なハッシュの繰り返し回数を指定する
-            // ★ポイント5★ 十分安全な長さを持つ鍵を利用する
+            // *** POINT 3 *** When generating a key from a password, use Salt.
+            // *** POINT 4 *** When generating a key from a password, specify an appropriate hash iteration count.
+            // *** POINT 5 *** Use a key of length sufficient to guarantee the strength of encryption.
             keySpec = new PBEKeySpec(password, salt, KEY_GEN_ITERATION_COUNT, KEY_LENGTH_BITS);
-            // passwordのクリア
+            // Clear password
             Arrays.fill(password, '?');
-            // 鍵を生成する
+            // Generate the key
             secretKey = secretKeyFactory.generateSecret(keySpec);
         } catch (NoSuchAlgorithmException e) {
         } catch (InvalidKeySpecException e) {

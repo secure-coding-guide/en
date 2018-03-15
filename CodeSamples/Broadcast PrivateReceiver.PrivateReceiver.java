@@ -11,16 +11,17 @@ public class PrivateReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         
-        // ★ポイント2★ 同一アプリ内から送信されたBroadcastであっても、受信Intentの安全性を確認する
-        // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+        // *** POINT 2 *** Handle the received intent carefully and securely,
+        // even though the intent was sent from within the same application.
+        // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
         String param = intent.getStringExtra("PARAM");
         Toast.makeText(context,
-                String.format("「%s」を受信した。", param),
+                String.format("Received param: \"%s\"", param),
                 Toast.LENGTH_SHORT).show();
         
-        // ★ポイント3★ 送信元は同一アプリ内であるから、センシティブな情報を返送してよい
+        // *** POINT 3 *** Sensitive information can be sent as the returned results since the requests come from within the same application.
         setResultCode(Activity.RESULT_OK);
-        setResultData("センシティブな情報 from Receiver");
+        setResultData("Sensitive Info from Receiver");
         abortBroadcast();
     }
 }

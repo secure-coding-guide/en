@@ -17,11 +17,11 @@ public class NetworkUtil {
         HttpURLConnection urlConnection = null;
 
         try {
-            // サーバー接続
+            // Connect server
             urlConnection = setupRequest(_url, sendCookie);
             urlConnection.connect();
 
-            // Cookie取得
+            // Fetch Cookie
             cookie = getResponseCookie(urlConnection, key);
         } finally {
             if (urlConnection != null)
@@ -37,16 +37,16 @@ public class NetworkUtil {
         HttpURLConnection urlConnection = null;
 
         try {
-            // サーバー接続
-            // JSON 受信用の設定を追加
+            // Connect server
+            // Add settings for receiving JSON data.
             urlConnection = setupRequest(_url, sendCookie);
             urlConnection.setRequestProperty("Accept", "application/json");
             urlConnection.connect();
 
-            // レスポンスBODY取得
+            // Get response BODY
             String jsondata = getResponseBody(urlConnection);
 
-            // JOSNのパース
+            // Parse JOSN data
             JSONObject rootObject = new JSONObject(jsondata);
             data = rootObject.getString(key);
         } finally {
@@ -63,18 +63,18 @@ public class NetworkUtil {
         HttpURLConnection urlConnection = null;
 
         try {
-            // サーバー接続
-            // JSON 送信用の設定を追加
+            // Connect server
+            // Add settings for receiving JSON data.
             urlConnection = setupRequest(_url, sendCookie);
             urlConnection
                     .setRequestProperty("Content-Type", "application/json");
             urlConnection.setDoOutput(true);
             urlConnection.connect();
 
-            // JOSNデータをリクエストBODYにセット
+            // Set JOSN data to request body
             writeRequestBody(urlConnection, jsondata);
 
-            // レスポンスBODY取得
+            // Get response BODY
             data = getResponseBody(urlConnection);
         } finally {
             if (urlConnection != null)
@@ -102,7 +102,7 @@ public class NetworkUtil {
         BufferedReader br = null;
         StringBuilder sb = new StringBuilder();
         try {
-            // BODY取得
+            // Get response BODY
             br = new BufferedReader(new InputStreamReader(
                     urlConnection.getInputStream()));
             String line;
@@ -117,7 +117,7 @@ public class NetworkUtil {
 
     private static String getResponseCookie(HttpURLConnection urlConnection,
             String key) throws IOException {
-        // Cookie取得
+        // Get cookie
         List<String> cookieList = urlConnection.getHeaderFields().get(
                 "Set-Cookie");
         if (cookieList != null && key != null) {
@@ -134,7 +134,7 @@ public class NetworkUtil {
             String data) throws IOException {
         OutputStream os = null;
         try {
-            // Request　BODY用データの設定
+            // Set a request BODY data
             byte[] outputBytes = data.getBytes("UTF-8");
             os = urlConnection.getOutputStream();
             os.write(outputBytes);

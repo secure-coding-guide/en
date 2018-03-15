@@ -32,7 +32,7 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
     protected void onStart() {
         super.onStart();
 
-        // Location情報取得用
+        // Used to obtain location data
         if (mLocationClient != null) {
             mLocationClient.connect();
         }
@@ -53,7 +53,7 @@ public class MainActivity extends FragmentActivity implements GooglePlayServices
     }
 
     public void onStartMap(View view) {
-        // ★ポイント1★ 取得した情報を端末内部でのみ利用する場合、アプリ・プライバシーポリシーを表示しなくても良い
+        // *** POINT 1 *** You do not need to display an application privacy policy if your application will only use the information it obtains within the device.
         if (mLocationClient != null && mLocationClient.isConnected()) {
             Location currentLocation = mLocationClient.getLastLocation();
             if (currentLocation != null) {

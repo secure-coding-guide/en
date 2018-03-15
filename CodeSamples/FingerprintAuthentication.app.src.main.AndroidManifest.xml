@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="authentication.fingerprint.android.jssec.org.fingerprintauthentication" >
 
-    <!-- ★ポイント1★ 指紋認証機能を使用するためには、USE_FINGERPRINTパーミッションを利用宣言する -->
+    <!-- +++ POINT 1 *** Declare the use of the USE_FINGERPRINT permission -->
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
 
     <application

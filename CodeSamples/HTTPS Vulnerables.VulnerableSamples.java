@@ -20,13 +20,13 @@ public class VulnerableSamples {
             @Override
             public void checkClientTrusted(X509Certificate[] chain,
                     String authType) throws CertificateException {
-                // 何もしない → どんな証明書でも受付ける
+                // Do nothing -> accept any certificates
             }
 
             @Override
             public void checkServerTrusted(X509Certificate[] chain,
                     String authType) throws CertificateException {
-                // 何もしない → どんな証明書でも受付ける
+                // Do nothing -> accept any certificates
             }
 
             @Override
@@ -39,7 +39,7 @@ public class VulnerableSamples {
         HostnameVerifier hv = new HostnameVerifier() {
             @Override
             public boolean verify(String hostname, SSLSession session) {
-                // 常にtrueを返す → どんなホスト名でも受付ける
+                // Always return true -> Accespt any host names
                 return true;
             }
         };

@@ -2,9 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.jssec.android.file.externalfile" >
 
-    <!-- android.permission.WRITE_EXTERNAL_STORAGE Permissionを利用宣言する -->
-    <!-- Android 4.4 (API Level 19)以降では、外部ストレージのアプリデータ領域を
-    読み書きする際にPermissionが不要なため、maxSdkVersionを宣言する -->
+    <!-- declare android.permission.WRITE_EXTERNAL_STORAGE permission to write to the external strage --> 
+    <!-- In Android 4.4 (API Level 19) and later, the application, which read/write only files in its specific
+    directories on external storage media, need not to require the permission and it should declare
+    the maxSdkVersion -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="18"/>
 

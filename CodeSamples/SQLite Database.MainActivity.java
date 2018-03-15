@@ -27,15 +27,15 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 
 public class MainActivity extends Activity {
-    private SampleDbOpenHelper       mSampleDbOpenHelper;   //データベースオープンヘルパー
-    private Cursor                   mCursor = null;        //画面表示に使用するカーソル
+    private SampleDbOpenHelper       mSampleDbOpenHelper;   //Database open helper
+    private Cursor                   mCursor = null;        //Cursor to use for the screen display
     
-    //設定中の検索条件
+    //Search conditions being set
     private String  mItemIdNoSearch = null;
     private String  mItemNameSearch = null;
     private String  mItemInfoSearch = null;   
     
-    //現在選択されている行の情報
+    //Selecting row's information
     private String  mItemIdNo = null;
     private String  mItemName = null;
     private String  mItemInfo = null;   
@@ -46,7 +46,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        //OpenHelperの準備
+        //Prepare the openHelper
         mSampleDbOpenHelper = SampleDbOpenHelper.newHelper(this);
         mSampleDbOpenHelper.openDatabaseWithHelper();
     }
@@ -55,7 +55,7 @@ public class MainActivity extends Activity {
     protected void onStart() {
         super.onStart();
         
-        //リストが選択された時の処理
+        //Listener used when a list is selected
         ListView lv = (ListView)findViewById(R.id.DataList);
         lv.setOnItemSelectedListener(new OnItemSelectedListener() {
 
@@ -66,78 +66,78 @@ public class MainActivity extends Activity {
 
             @Override
             public void onNothingSelected(AdapterView<?> arg0) {
-                //選択行データのクリア
+                //clear data of selected row
                 clearCurrentData();
             }
         });
 
-        //リストがクリックされた時の処理
+        //Listener used when a item is clicked
         lv.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-                //選択された行のデータをセットする
+                //Set data of selected row
                 setCurrentData(arg1);
-                //編集画面の呼び出し
+                //Call for edit screen
                 startEditActivity();
             }
         });
 
-        //長押しされた時の処理
+        //Listener used when a item is longclicked
         lv.setOnItemLongClickListener(new OnItemLongClickListener() {
 
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-                //選択された行のデータをセットする
+                //Set data of selected row
                 setCurrentData(arg1);
                 return false;
             }
         });
 
-        //コンテクストメニューの準備
+        //Prepare context menu
         lv.setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
 
             @Override
             public void onCreateContextMenu(ContextMenu arg0, View arg1, ContextMenuInfo arg2) {
-                //タイトルの設定
+                //Set a title
                 String strTitle = mItemIdNo + "/" + mItemName; 
                 arg0.setHeaderTitle(strTitle);
-                // メニューの作成
+                //Create a menu
                 arg0.add(0, EDIT_MENUITEM_ID, 1, R.string.EDIT_MENUITEM);
                 arg0.add(0, DELETE_MENUITEM_ID, 2, R.string.DELETE_MENUITEM);
             }
         });
         
-        //初期データ作成
+        //Create initial data
         initData();
 
-        //DBデータの表示
+        //Show Database data
         showDbData();
     }
 
-    //現在選択されている行の情報をセットする
+    //Set information of selected row
     private void setCurrentData(View currentLine) {
         mItemIdNo   = ((TextView)currentLine.findViewById(R.id.dlc_IdNo)).getText().toString();
         mItemName = ((TextView)currentLine.findViewById(R.id.dlc_Name)).getText().toString();
         mItemInfo = ((TextView)currentLine.findViewById(R.id.dlc_Info)).getText().toString();      
     }
 
-    //現在選択されている行の情報をクリアする
+    //Clear information of selected row
     private void clearCurrentData() {
         mItemIdNo   = null;
         mItemName = null;
         mItemInfo = null;       
     }
 
-    //DB版初期データ作成（テスト用）
+    //Create initial data for DataBase (for test)
     private void initData() {
-        //データが１件でもあったらデータ投入しない
+        //Set no data when data exists
         Cursor cur = mSampleDbOpenHelper.getDb().rawQuery("SELECT * FROM " + CommonData.TABLE_NAME + " LIMIT 1", null);
         if (cur.getCount() > 0) {
             cur.close();
-            return;   //データがあるので初期投入しない
+            return;   //Set no data
         }
 
-        //初期データの作成
+        //Create initial data
         ContentValues insertValues = new ContentValues();
         for (int i = 1; i <= 31; i++) {
             insertValues.put("idno", String.valueOf(i));
@@ -147,7 +147,7 @@ public class MainActivity extends Activity {
         }
     }
     
-    //後始末
+    //Pick up after
     @Override
     protected void onPause() {
         if (mCursor != null && !mCursor.isClosed()) {
@@ -168,7 +168,7 @@ public class MainActivity extends Activity {
     } 
 
     //-----------------------------------------------------------------------------
-    // メニュー関連
+    // Menu
     //-----------------------------------------------------------------------------
     private static final int INSERT_MENUITEM_ID = Menu.FIRST + 1;
     private static final int SEARCH_MENUITEM_ID = Menu.FIRST + 2;
@@ -187,25 +187,25 @@ public class MainActivity extends Activity {
     }
  
     /**
-     * メニュー選択時
+     * When a menu is selected
      */
     @Override
-    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {           
         switch (item.getItemId()) {
         case INSERT_MENUITEM_ID:
-            //編集画面を新規追加モードで呼び出す
+            //Call an edit screen with registration mode
             startAddActivity();
             break;
         case SEARCH_MENUITEM_ID:
-            //検索画面を新規追加モードで呼び出す
+            //Call a search screen with registration mode
              startSearchActivity();
             break;
         case EDIT_MENUITEM_ID:
-            //編集画面を編集モードで呼び出す
+            //Call an edit screen with edit mode
             startEditActivity();
             break;
         case DELETE_MENUITEM_ID:
-            //削除確認画面を呼び出す
+            //Call a confirming deletion screen
             startDeleteActivity();
             break;
         default:
@@ -215,9 +215,9 @@ public class MainActivity extends Activity {
         return super.onMenuItemSelected(featureId, item);
     }
     //-----------------------------------------------------------------------------
-    //  子画面の呼び出し
+    //  Call child screens
     //-----------------------------------------------------------------------------
-    //新規画面の呼び出し
+    //Call a new screen
     private void startAddActivity() {
         Intent intentAdd = new Intent(this, EditActivity.class);
         intentAdd.putExtra(CommonData.EXTRA_REQUEST_MODE, CommonData.REQUEST_NEW);
@@ -228,7 +228,7 @@ public class MainActivity extends Activity {
             String idno, String name, String info) {
         Intent intent = new Intent(context, cls);
 
-        //データをIntentに設定する。
+        //Set data to the intent
         intent.putExtra(CommonData.EXTRA_ITEM_IDNO, idno);
         intent.putExtra(CommonData.EXTRA_ITEM_NAME, name);
         intent.putExtra(CommonData.EXTRA_ITEM_INFO, info);            
@@ -236,7 +236,7 @@ public class MainActivity extends Activity {
         return intent;
     }
     
-    //検索開始画面の呼び出し
+    //Call a search start screen
     private void startSearchActivity() {
         Intent intentSearch = newIntent(this, SearchActivity.class, 
                                     mItemIdNoSearch, mItemNameSearch, mItemInfoSearch);
@@ -244,7 +244,7 @@ public class MainActivity extends Activity {
         startActivityForResult(intentSearch, CommonData.REQUEST_SEARCH);
     }
     
-    //編集画面の呼び出し
+    //Call an edit screen
     private void startEditActivity() {
         Intent intentEdit = newIntent(this, EditActivity.class, 
                                             mItemIdNo, mItemName, mItemInfo);
@@ -253,7 +253,7 @@ public class MainActivity extends Activity {
         startActivityForResult(intentEdit, CommonData.REQUEST_EDIT);
     }
 
-    //削除画面の呼び出し
+    //Call delete screen
     private void startDeleteActivity() {
         Intent intentDelete = newIntent(this, DeleteActivity.class, 
                                             mItemIdNo, mItemName, mItemInfo);
@@ -261,20 +261,20 @@ public class MainActivity extends Activity {
         startActivityForResult(intentDelete, CommonData.REQUEST_DELETE);
     }
 
-    /* 編集・削除・検索画面から戻った時の処理 */
+    /* Called when returning from edit, delete or search screen */
     @Override
     protected void onActivityResult (int requestCode, int resultCode, Intent data) {
-        //キャンセルの場合は何もしない
+        //Do nothing when cancel is selected
         if (resultCode == Activity.RESULT_CANCELED) {
-            showDbData();            //ユーザー情報の表示
+            showDbData();            //Display user information
             return;
         }
 
-        //リクエストコード毎に処理を分ける
+        //Processing of each request code
         switch(requestCode) {
         case CommonData.REQUEST_NEW:
-            addUserData(data.getStringExtra(CommonData.EXTRA_ITEM_IDNO),
-                        data.getStringExtra(CommonData.EXTRA_ITEM_NAME),
+            addUserData(data.getStringExtra(CommonData.EXTRA_ITEM_IDNO), 
+                        data.getStringExtra(CommonData.EXTRA_ITEM_NAME), 
                         data.getStringExtra(CommonData.EXTRA_ITEM_INFO));
             break;
         case CommonData.REQUEST_SEARCH:
@@ -295,64 +295,63 @@ public class MainActivity extends Activity {
         }
     }
     
-    //データを画面に反映する
+    //Reflect data to a screen
     public void updateCursor(Cursor cur) {
-        //アダプターの作成
+        //Create an adapter
         String  cols2[]  =   {"idno","name","info"};
         int     views[] = {R.id.dlc_IdNo, R.id.dlc_Name, R.id.dlc_Info};
 
-        //リストビューの取得
+        //Get a listView
         ListView lv = (ListView)findViewById(R.id.DataList);
 
-        //以前のカーソルがあったら破棄
+        //Close cursor if previous data exists
         if (mCursor != null && !mCursor.isClosed()) {
             mCursor.close();
         }
 
         mCursor = cur;
 
-        //画面表示用データの設定
-        CursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.data_list_contents, mCursor, cols2, views, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+        //Set data to display screen
+        CursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.data_list_contents, mCursor, cols2, views);
         lv.setAdapter(adapter);
     }
 
-
    //---------------------------------------
-    //DBに対する処理
+    //Processes to DataBase
     //---------------------------------------
-    //DBデータ表示処理
+    //DataBase data displaying process
     public void showDbData() {
-        //画面表示処理（非同期タスク）
+        //Display screen process (asynchronous task)
         DataSearchTask task = new DataSearchTask(mSampleDbOpenHelper.getDb(), this);
         task.execute(mItemIdNoSearch, mItemNameSearch, mItemInfoSearch);
     }
     
-    //追加処理
+    //Addition process
     private void addUserData(String idno, String name, String info) {
-        //データ追加処理
+        //add data process
         DataInsertTask task = new DataInsertTask(mSampleDbOpenHelper.getDb(), this);
         task.execute(idno, name, info);        
     }
     
-    //検索処理
+    //Search process
     private void searchUserData(String idno, String name, String info) {
         mItemIdNoSearch   = idno; 
 
         mItemNameSearch = name;
         mItemInfoSearch = info;
 
-        //データ検索処理
+        //Search data process
         DataSearchTask task = new DataSearchTask(mSampleDbOpenHelper.getDb(), this);
         task.execute(idno, name, info);
         }
     
-    //更新処理
+    //Update process
     private void editUserData(String idno, String name, String info) {
         DataUpdateTask task = new DataUpdateTask(mSampleDbOpenHelper.getDb(), this);
         task.execute(idno, name, info);
     }
 
-    //削除処理
+    //Delete process
     private void deleteUserData(String idno) {     
         DataDeleteTask task = new DataDeleteTask(mSampleDbOpenHelper.getDb(), this);
         task.execute(idno);

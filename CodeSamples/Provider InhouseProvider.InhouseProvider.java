@@ -18,7 +18,7 @@ public class InhouseProvider extends ContentProvider {
     public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.org.jssec.contenttype";
     public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.org.jssec.contenttype";
 
-    // Content Providerが提供するインターフェースを公開
+    // Expose the interface that the Content Provider provides.
     public interface Download {
         public static final String PATH = "downloads";
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/" + PATH);
@@ -42,12 +42,13 @@ public class InhouseProvider extends ContentProvider {
         sUriMatcher.addURI(AUTHORITY, Address.PATH + "/#", ADDRESSES_ID_CODE);
     }
 
-    // DBを使用せずに固定値を返す例にしているため、queryメソッドで返すCursorを事前に定義
-    private static MatrixCursor sAddressCursor = new MatrixCursor(new String[] { "_id", "pref" });
+    // Since this is a sample program,
+    // query method returns the following fixed result always without using database.
+    private static MatrixCursor sAddressCursor = new MatrixCursor(new String[] { "_id", "city" });
     static {
-        sAddressCursor.addRow(new String[] { "1", "北海道" });
-        sAddressCursor.addRow(new String[] { "2", "青森" });
-        sAddressCursor.addRow(new String[] { "3", "岩手" });
+        sAddressCursor.addRow(new String[] { "1", "New York" });
+        sAddressCursor.addRow(new String[] { "2", "London" });
+        sAddressCursor.addRow(new String[] { "3", "Paris" });
     }
     private static MatrixCursor sDownloadCursor = new MatrixCursor(new String[] { "_id", "path" });
     static {
@@ -55,18 +56,18 @@ public class InhouseProvider extends ContentProvider {
         sDownloadCursor.addRow(new String[] { "2", "/sdcard/downloads/sample.txt" });
     }
 
-    // 自社のSignature Permission
+    // In-house Signature Permission
     private static final String MY_PERMISSION = "org.jssec.android.provider.inhouseprovider.MY_PERMISSION";
 
-    // 自社の証明書のハッシュ値
+    // In-house certificate hash value
     private static String sMyCertHash = null;
     private static String myCertHash(Context context) {
         if (sMyCertHash == null) {
             if (Utils.isDebuggable(context)) {
-                // debug.keystoreの"androiddebugkey"の証明書ハッシュ値
+                // Certificate hash value of "androiddebugkey" in the debug.keystore.
                 sMyCertHash = "0EFB7236 328348A9 89718BAD DF57F544 D5CCB4AE B9DB34BC 1E29DD26 F77C8255";
             } else {
-                // keystoreの"my company key"の証明書ハッシュ値
+                // Certificate hash value of "my company key" in the keystore.
                 sMyCertHash = "D397D343 A5CBC10F 4EDDEB7C A10062DE 5690984F 1FB9E88B D7B3A7C2 42E142CA";
             }
         }
@@ -91,7 +92,7 @@ public class InhouseProvider extends ContentProvider {
             return CONTENT_ITEM_TYPE;
 
         default:
-            throw new IllegalArgumentException("Invalid URI：" + uri);
+            throw new IllegalArgumentException("Invalid URI:" + uri);
         }
     }
 
@@ -99,16 +100,19 @@ public class InhouseProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) {
 
-        // ★ポイント4★ 独自定義Signature Permissionが自社アプリにより定義されていることを確認する
+        // *** POINT 4 *** Verify if the in-house signature permission is defined by an in-house application.
         if (!SigPerm.test(getContext(), MY_PERMISSION, myCertHash(getContext()))) {
-            throw new SecurityException("独自定義Signature Permissionが自社アプリにより定義されていない。");
+            throw new SecurityException("The in-house signature permission is not declared by in-house application.");
         }
 
-        // ★ポイント5★ 自社アプリからのリクエストであっても、パラメータの安全性を確認する
-        // ここではuriが想定の範囲内であることを、UriMatcher#match()とswitch caseで確認している。
-        // 「3.2 入力データの安全性を確認する」を参照。
-        // ★ポイント6★ 利用元アプリは自社アプリであるから、センシティブな情報を返送してよい
-        // queryの結果が自社アプリに開示してよい情報かどうかはアプリ次第。
+        // *** POINT 5 *** Handle the received request data carefully and securely,
+        // even though the data came from an in-house application.
+        // Here, whether uri is within expectations or not, is verified by UriMatcher#match() and switch case. 
+        // Checking for other parameters are omitted here, due to sample.
+        // Refer to "3.2 Handle Input Data Carefully and Securely."
+        
+        // *** POINT 6 *** Sensitive information can be returned since the requesting application is in-house.
+        // It depends on application whether the query result has sensitive meaning or not.
         switch (sUriMatcher.match(uri)) {
         case DOWNLOADS_CODE:
         case DOWNLOADS_ID_CODE:
@@ -119,23 +123,26 @@ public class InhouseProvider extends ContentProvider {
             return sAddressCursor;
 
         default:
-            throw new IllegalArgumentException("Invalid URI：" + uri);
+            throw new IllegalArgumentException("Invalid URI:" + uri);
         }
     }
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
 
-        // ★ポイント4★ 独自定義Signature Permissionが自社アプリにより定義されていることを確認する
+        // *** POINT 4 *** Verify if the in-house signature permission is defined by an in-house application.
         if (!SigPerm.test(getContext(), MY_PERMISSION, myCertHash(getContext()))) {
-            throw new SecurityException("独自定義Signature Permissionが自社アプリにより定義されていない。");
+            throw new SecurityException("The in-house signature permission is not declared by in-house application.");
         }
 
-        // ★ポイント5★ 自社アプリからのリクエストであっても、パラメータの安全性を確認する
-        // ここではuriが想定の範囲内であることを、UriMatcher#match()とswitch caseで確認している。
-        // 「3.2 入力データの安全性を確認する」を参照。
-        // ★ポイント6★ 利用元アプリは自社アプリであるから、センシティブな情報を返送してよい
-        // Insert結果、発番されるIDが自社アプリに開示してよい情報かどうかはアプリ次第。
+        // *** POINT 5 *** Handle the received request data carefully and securely,
+        // even though the data came from an in-house application.
+        // Here, whether uri is within expectations or not, is verified by UriMatcher#match() and switch case. 
+        // Checking for other parameters are omitted here, due to sample.
+        // Refer to "3.2 Handle Input Data Carefully and Securely."
+        
+        // *** POINT 6 *** Sensitive information can be returned since the requesting application is in-house.
+        // It depends on application whether the issued ID has sensitive meaning or not.
         switch (sUriMatcher.match(uri)) {
         case DOWNLOADS_CODE:
             return ContentUris.withAppendedId(Download.CONTENT_URI, 3);
@@ -144,7 +151,7 @@ public class InhouseProvider extends ContentProvider {
             return ContentUris.withAppendedId(Address.CONTENT_URI, 4);
 
         default:
-            throw new IllegalArgumentException("Invalid URI：" + uri);
+            throw new IllegalArgumentException("Invalid URI:" + uri);
         }
     }
 
@@ -152,19 +159,22 @@ public class InhouseProvider extends ContentProvider {
     public int update(Uri uri, ContentValues values, String selection,
             String[] selectionArgs) {
 
-        // ★ポイント4★ 独自定義Signature Permissionが自社アプリにより定義されていることを確認する
+        // *** POINT 4 *** Verify if the in-house signature permission is defined by an in-house application.
         if (!SigPerm.test(getContext(), MY_PERMISSION, myCertHash(getContext()))) {
-            throw new SecurityException("独自定義Signature Permissionが自社アプリにより定義されていない。");
+            throw new SecurityException("The in-house signature permission is not declared by in-house application.");
         }
 
-        // ★ポイント5★ 自社アプリからのリクエストであっても、パラメータの安全性を確認する
-        // ここではuriが想定の範囲内であることを、UriMatcher#match()とswitch caseで確認している。
-        // 「3.2 入力データの安全性を確認する」を参照。
-        // ★ポイント6★ 利用元アプリは自社アプリであるから、センシティブな情報を返送してよい
-        // Updateされたレコード数がセンシティブな意味を持つかどうかはアプリ次第。
+        // *** POINT 5 *** Handle the received request data carefully and securely,
+        // even though the data came from an in-house application.
+        // Here, whether uri is within expectations or not, is verified by UriMatcher#match() and switch case. 
+        // Checking for other parameters are omitted here, due to sample.
+        // Refer to "3.2 Handle Input Data Carefully and Securely."
+        
+        // *** POINT 6 *** Sensitive information can be returned since the requesting application is in-house.
+        // It depends on application whether the number of updated records has sensitive meaning or not.
         switch (sUriMatcher.match(uri)) {
         case DOWNLOADS_CODE:
-            return 5;   // updateされたレコード数を返す
+            return 5;   // Return number of updated records
 
         case DOWNLOADS_ID_CODE:
             return 1;
@@ -176,26 +186,29 @@ public class InhouseProvider extends ContentProvider {
             return 1;
 
         default:
-            throw new IllegalArgumentException("Invalid URI：" + uri);
+            throw new IllegalArgumentException("Invalid URI:" + uri);
         }
     }
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
 
-        // ★ポイント4★ 独自定義Signature Permissionが自社アプリにより定義されていることを確認する
+        // *** POINT 4 *** Verify if the in-house signature permission is defined by an in-house application.
         if (!SigPerm.test(getContext(), MY_PERMISSION, myCertHash(getContext()))) {
-            throw new SecurityException("独自定義Signature Permissionが自社アプリにより定義されていない。");
+            throw new SecurityException("The in-house signature permission is not declared by in-house application.");
         }
 
-        // ★ポイント5★ 自社アプリからのリクエストであっても、パラメータの安全性を確認する
-        // ここではuriが想定の範囲内であることを、UriMatcher#match()とswitch caseで確認している。
-        // 「3.2 入力データの安全性を確認する」を参照。
-        // ★ポイント6★ 利用元アプリは自社アプリであるから、センシティブな情報を返送してよい
-        // Deleteされたレコード数がセンシティブな意味を持つかどうかはアプリ次第。
+        // *** POINT 5 *** Handle the received request data carefully and securely,
+        // even though the data came from an in-house application.
+        // Here, whether uri is within expectations or not, is verified by UriMatcher#match() and switch case. 
+        // Checking for other parameters are omitted here, due to sample.
+        // Refer to "3.2 Handle Input Data Carefully and Securely."
+        
+        // *** POINT 6 *** Sensitive information can be returned since the requesting application is in-house.
+        // It depends on application whether the number of deleted records has sensitive meaning or not.
         switch (sUriMatcher.match(uri)) {
         case DOWNLOADS_CODE:
-            return 10;  // deleteされたレコード数を返す
+            return 10;  // Return number of deleted records
 
         case DOWNLOADS_ID_CODE:
             return 1;
@@ -207,7 +220,7 @@ public class InhouseProvider extends ContentProvider {
             return 1;
 
         default:
-            throw new IllegalArgumentException("Invalid URI：" + uri);
+            throw new IllegalArgumentException("Invalid URI:" + uri);
         }
     }
 }

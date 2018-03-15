@@ -20,7 +20,7 @@ import android.widget.TextView;
 
 public class UserActivity extends Activity {
 
-    // 利用するAuthenticatorの情報
+    // Information of the Authenticator to be used
     private static final String JSSEC_ACCOUNT_TYPE = "org.jssec.android.accountmanager";
     private static final String JSSEC_TOKEN_TYPE = "webservice";
     private TextView mLogView;
@@ -35,9 +35,9 @@ public class UserActivity extends Activity {
 
     public void addAccount(View view) {
         logLine();
-        logLine("新しいアカウントを追加します");
+        logLine("Add a new account");
 
-        // ★ポイント1★ Authenticatorが正規のものであることを確認してからアカウント処理を実施する
+        // *** POINT 1 *** Execute the account process after verifying if the authenticator is regular one.
         if (!checkAuthenticator()) return;
 
         AccountManager am = AccountManager.get(this);
@@ -50,14 +50,14 @@ public class UserActivity extends Activity {
                             String type = result.getString(AccountManager.KEY_ACCOUNT_TYPE);
                             String name = result.getString(AccountManager.KEY_ACCOUNT_NAME);
                             if (type != null && name != null) {
-                                logLine("以下のアカウントを追加しました：");
-                                logLine("　　アカウント種別: %s", type);
-                                logLine("　　アカウント名: %s", name);
+                                logLine("Add the following accounts:");
+                                logLine("  Account type: %s", type);
+                                logLine("  Account name: %s", name);
                             } else {
                                 String code = result.getString(AccountManager.KEY_ERROR_CODE);
                                 String msg = result.getString(AccountManager.KEY_ERROR_MESSAGE);
-                                logLine("アカウントが追加できませんでした");
-                                logLine("  エラーコード %s: %s", code, msg);
+                                logLine("The account cannot be added");
+                                logLine("  Error code %s: %s", code, msg);
                             }
                         } catch (OperationCanceledException e) {
                         } catch (AuthenticatorException e) {
@@ -70,9 +70,9 @@ public class UserActivity extends Activity {
 
     public void getAuthToken(View view) {
         logLine();
-        logLine("トークンを取得します");
+        logLine("Get token");
 
-        // ★ポイント1★ Authenticatorが正規のものであることを確認してからアカウント処理を実施する
+        // *** POINT 1 *** After checking that the Authenticator is the regular one, execute account process.
         if (!checkAuthenticator()) return;
 
         AccountManager am = AccountManager.get(this);
@@ -87,27 +87,27 @@ public class UserActivity extends Activity {
                                 Bundle result = future.getResult();
                                 String name = result.getString(AccountManager.KEY_ACCOUNT_NAME);
                                 String authtoken = result.getString(AccountManager.KEY_AUTHTOKEN);
-                                logLine("  %sさんのトークン:", name);
+                                logLine("%s-san's token:", name);
                                 if (authtoken != null) {
                                     logLine("    %s", authtoken);
                                 } else {
-                                    logLine("    取得できませんでした");
+                                    logLine("    Couldn't get");
                                 }
                             } catch (OperationCanceledException e) {
-                                logLine("  例外: %s",e.getClass().getName());
+                                logLine("  Exception: %s",e.getClass().getName());
                             } catch (AuthenticatorException e) {
-                                logLine("  例外: %s",e.getClass().getName());
+                                logLine("  Exception: %s",e.getClass().getName());
                             } catch (IOException e) {
-                                logLine("  例外: %s",e.getClass().getName());
+                                logLine("  Exception: %s",e.getClass().getName());
                             }
                         }
                     }, null);
         } else {
-            logLine("アカウントが登録されていません");
+            logLine("Account is not registered.");
         }
     }
 
-    // ★ポイント1★ Authenticatorが正規のものであることを確認する
+    // *** POINT 1 *** Verify that Authenticator is regular one.
     private boolean checkAuthenticator() {
         AccountManager am = AccountManager.get(this);
         String pkgname = null;
@@ -119,31 +119,31 @@ public class UserActivity extends Activity {
         }
         
         if (pkgname == null) {
-            logLine("Authenticatorが見つかりません");
+            logLine("Authenticator cannot be found.");
             return false;
         }
         
-        logLine("  アカウントタイプ： %s", JSSEC_ACCOUNT_TYPE);
-        logLine("  Authenticatorのパッケージ名：");
+        logLine("  Account type: %s", JSSEC_ACCOUNT_TYPE);
+        logLine("  Package name of Authenticator: ");
         logLine("    %s", pkgname);
 
         if (!PkgCert.test(this, pkgname, getTrustedCertificateHash(this))) {
-            logLine("  正規のAuthenticatorではありません（証明書不一致）");
+            logLine("  It's not regular Authenticator(certificate is not matched.)");
             return false;
         }
         
-        logLine("  正規のAuthenticatorです");
+        logLine("  This is regular Authenticator.");
         return true;
     }
 
-    // 正規のAuthenticatorアプリの証明書ハッシュ値
-    // サンプルアプリ JSSEC CertHash Checker で証明書ハッシュ値は確認できる
+    // Certificate hash value of regular Authenticator application 
+    // Certificate hash value can be checked in sample applciation JSSEC CertHash Checker
     private String getTrustedCertificateHash(Context context) {
         if (Utils.isDebuggable(context)) {
-            // debug.keystoreの"androiddebugkey"の証明書ハッシュ値
+            // Certificate hash value of  debug.keystore "androiddebugkey"
             return "0EFB7236 328348A9 89718BAD DF57F544 D5CCB4AE B9DB34BC 1E29DD26 F77C8255";
         } else {
-            // keystoreの"my company key"の証明書ハッシュ値
+            // Certificate hash value of  keystore "my company key"
             return "D397D343 A5CBC10F 4EDDEB7C A10062DE 5690984F 1FB9E88B D7B3A7C2 42E142CA";
         }
     }

@@ -47,23 +47,23 @@ public class MainActivity extends AppCompatActivity {
     private boolean authenticateByFingerprint() {
 
         if (!mFingerprintAuthentication.isFingerprintHardwareDetected()) {
-            // 指紋センサーが端末に搭載されていない
+            // Terminal is not equipped with a fingerprint sensor
             return false;
         }
 
         if (!mFingerprintAuthentication.isFingerprintAuthAvailable()) {
-            // ★ポイント3★ 鍵を生成するためには指紋の登録が必要である旨をユーザーに伝える
+            // *** POINT 3 *** Notify users that fingerprint registration will be required to create a key
             new AlertDialog.Builder(this)
                     .setTitle(R.string.app_name)
-                    .setMessage("指紋情報が登録されていません。\n" +
-                            "設定メニューの「セキュリティ」で指紋を登録してください。\n" +
-                            "指紋を登録することにより、簡単に認証することができます。")
+                    .setMessage("No fingerprint information has been registered.\n" +
+                            "Click \"Security\" on the Settings menu to register fingerprints. \n" +
+                            "Registering fingerprints allows easy authentication.")
                     .setPositiveButton("OK", null)
                     .show();
             return false;
         }
 
-        // 指紋認証の結果を受け取るコールバック
+        // Callback that receives the results of fingerprint authentication
         FingerprintManager.AuthenticationCallback callback = new FingerprintManager.AuthenticationCallback() {
             @Override
             public void onAuthenticationError(int errorCode, CharSequence errString) {
@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
 
                 Cipher cipher = result.getCryptoObject().getCipher();
                 try {
-                    // ★ポイント7★ 暗号化するデータは、指紋認証以外の手段で復元(代替)可能なものに限る
+                    // *** POINT 7*** Restrict encrypted data to items that can be restored (replaced) by methods other than fingerprint authentication
                     byte[] encrypted = cipher.doFinal(SENSITIVE_DATA.getBytes());
                     showEncryptedData(encrypted);
                 } catch (IllegalBlockSizeException | BadPaddingException e) {

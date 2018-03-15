@@ -7,10 +7,10 @@ public class DeleteActivity extends SubActivity {
     protected void init(Intent intent) {
         this.setTitle(R.string.ACTIVITY_TITLE_DELETE);            
 
-        //‰æ–Ê‚Ì•\Ž¦
+        //Display a screen
         setContentView(R.layout.data_delete);       
     }
-    protected boolean reflectEditText() {
+    protected boolean refrectEditText() {
         return false;
     }
 }

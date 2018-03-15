@@ -7,7 +7,7 @@ import android.webkit.WebView;
 
 public class WebViewAssetsActivity extends Activity {
     /**
-     * assets内のコンテンツを表示する
+     * Show contents in assets
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -17,13 +17,13 @@ public class WebViewAssetsActivity extends Activity {
         WebView webView = (WebView) findViewById(R.id.webView);
         WebSettings webSettings = webView.getSettings();
 
-        // ★ポイント1★ assetsとresディレクトリ以外の場所に配置したファイルへのアクセスを禁止にする
+        // *** POINT 1 *** Disable to access files (except files under assets/ and res/ in this apk)
         webSettings.setAllowFileAccess(false);
 
-        // ★ポイント2★ JavaScriptを有効にしてよい
+        // *** POINT 2 *** Enable JavaScript (Optional)
         webSettings.setJavaScriptEnabled(true);
 
-        // assets内に配置したコンテンツを表示する
+        // Show contents which were stored under assets/ in this apk
         webView.loadUrl("file:///android_asset/sample/index.html");
     }
 }

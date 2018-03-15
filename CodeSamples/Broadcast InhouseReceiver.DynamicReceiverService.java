@@ -26,13 +26,13 @@ public class DynamicReceiverService extends Service {
         mReceiver.isDynamic = true;
         IntentFilter filter = new IntentFilter();
         filter.addAction(MY_BROADCAST_INHOUSE);
-        filter.setPriority(1);  // 静的Broadcast Receiverより動的Broadcast Receiverを優先させる
+        filter.setPriority(1);  // Prioritize Dynamic Broadcast Receiver, rather than Static Broadcast Receiver.
 
-        // ★ポイント5★ 動的Broadcast Receiverを登録するとき、独自定義Signature Permissionを要求宣言する
+        // *** POINT 5 *** When registering a dynamic broadcast receiver, require the in-house signature permission.
         registerReceiver(mReceiver, filter, "org.jssec.android.broadcast.inhousereceiver.MY_PERMISSION", null);
 
         Toast.makeText(this,
-                "動的 Broadcast Receiver を登録した。",
+                "Registered Dynamic Broadcast Receiver.",
                 Toast.LENGTH_SHORT).show();
     }
 
@@ -42,7 +42,7 @@ public class DynamicReceiverService extends Service {
         unregisterReceiver(mReceiver);
         mReceiver = null;
         Toast.makeText(this,
-                "動的 Broadcast Receiver を登録解除した。",
+                "Unregistered Dynamic Broadcast Receiver.",
                 Toast.LENGTH_SHORT).show();
     }
 }

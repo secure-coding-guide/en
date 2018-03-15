@@ -16,14 +16,14 @@
             </intent-filter>
         </activity>
 
-        <!-- 一時許可Content Provider -->
-        <!-- ★ポイント1★ exported="false"により、一時許可するPath以外を非公開設定する -->
+        <!-- Temporary Content Provider -->
+        <!-- *** POINT 1 *** Explicitly set the exported attribute to false. -->
         <provider
             android:name=".TemporaryProvider"
             android:authorities="org.jssec.android.provider.temporaryprovider"
             android:exported="false" >
 
-            <!-- ★ポイント2★ grant-uri-permissionにより、一時許可するPathを指定する -->
+            <!-- *** POINT 2 *** Specify the path to grant access temporarily with the grant-uri-permission. -->
             <grant-uri-permission android:path="/addresses" />
 
         </provider>

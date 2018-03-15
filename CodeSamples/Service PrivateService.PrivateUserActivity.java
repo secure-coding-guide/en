@@ -12,47 +12,45 @@ public class PrivateUserActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.privateservice_activity);
     }
-    
-    // サービス開始
+
+    // --- StartService control ---
     
     public void onStartServiceClick(View v) {
-          // ★ポイント4★ 同一アプリ内Serviceはクラス指定の明示的Intentで呼び出す                
+        // *** POINT 4 *** Use the explicit intent with class specified to call a service in the same application.
         Intent intent = new Intent(this, PrivateStartService.class);
-          
-          // ★ポイント5★ 利用先アプリは同一アプリであるから、センシティブな情報を送信してもよい
-        intent.putExtra("PARAM", "センシティブな情報");
+
+        // *** POINT 5 *** Sensitive information can be sent since the destination service is in the same application.
+        intent.putExtra("PARAM", "Sensitive information");
 
         startService(intent);
     }
-    
-    // サービス停止ボタン
+
     public void onStopServiceClick(View v) {
         doStopService();
     }
-        
+
     @Override
-    public void onStop(){
+    public void onStop() {
         super.onStop();
-        // サービスが終了していない場合は終了する
+        // Stop service if the service is running.
         doStopService();
     }
-    // サービスを停止する
+
     private void doStopService() {
-        // ★ポイント4★ 同一アプリ内Serviceはクラス指定の明示的Intentで呼び出す                
+        // *** POINT 4 *** Use the explicit intent with class specified to call a service in the same application.
         Intent intent = new Intent(this, PrivateStartService.class);
-        stopService(intent);        
+        stopService(intent);
     }
 
-    // IntentService 開始ボタン
+    // --- IntentService control ---
 
     public void onIntentServiceClick(View v) {
-          // ★ポイント4★ 同一アプリ内Serviceはクラス指定の明示的Intentで呼び出す                
+        // *** POINT 4 *** Use the explicit intent with class specified to call a service in the same application.
         Intent intent = new Intent(this, PrivateIntentService.class);
           
-          // ★ポイント5★ 利用先アプリは同一アプリであるから、センシティブな情報を送信してもよい
-        intent.putExtra("PARAM", "センシティブな情報");
+        // *** POINT 5 *** Sensitive information can be sent since the destination service is in the same application.
+        intent.putExtra("PARAM", "Sensitive information");
 
         startService(intent);
     }
-        
 }

@@ -14,38 +14,38 @@ public class PublicSenderActivity extends Activity {
         "org.jssec.android.broadcast.MY_BROADCAST_PUBLIC";
     
     public void onSendNormalClick(View view) {
-        // ★ポイント4★ センシティブな情報を送信してはならない
+        // *** POINT 4 *** Do not send sensitive information.
         Intent intent = new Intent(MY_BROADCAST_PUBLIC);
-        intent.putExtra("PARAM", "センシティブではない情報 from Sender");
+        intent.putExtra("PARAM", "Not Sensitive Info from Sender");
         sendBroadcast(intent);
     }
     
     public void onSendOrderedClick(View view) {
-        // ★ポイント4★ センシティブな情報を送信してはならない
+        // *** POINT 4 *** Do not send sensitive information.
         Intent intent = new Intent(MY_BROADCAST_PUBLIC);
-        intent.putExtra("PARAM", "センシティブではない情報 from Sender");
+        intent.putExtra("PARAM", "Not Sensitive Info from Sender");
         sendOrderedBroadcast(intent, null, mResultReceiver, null, 0, null, null);
     }
     
     public void onSendStickyClick(View view) {
-        // ★ポイント4★ センシティブな情報を送信してはならない
+        // *** POINT 4 *** Do not send sensitive information.
         Intent intent = new Intent(MY_BROADCAST_PUBLIC);
-        intent.putExtra("PARAM", "センシティブではない情報 from Sender");
-        //sendStickyBroadcastメソッドはAPI Level 21でdeprecatedとなった
+        intent.putExtra("PARAM", "Not Sensitive Info from Sender");
+        //sendStickyBroadcast is deprecated at API Level 21
         sendStickyBroadcast(intent);
     }
 
     public void onSendStickyOrderedClick(View view) {
-        // ★ポイント4★ センシティブな情報を送信してはならない
+        // *** POINT 4 *** Do not send sensitive information.
         Intent intent = new Intent(MY_BROADCAST_PUBLIC);
-        intent.putExtra("PARAM", "センシティブではない情報 from Sender");
-        //sendStickyBroadcastメソッドはAPI Level 21でdeprecatedとなった
+        intent.putExtra("PARAM", "Not Sensitive Info from Sender");
+        //sendStickyOrderedBroadcast is deprecated at API Level 21
         sendStickyOrderedBroadcast(intent, mResultReceiver, null, 0, null, null);
     }
     
     public void onRemoveStickyClick(View view) {
         Intent intent = new Intent(MY_BROADCAST_PUBLIC);
-        //removeStickyBroadcastメソッドはdeprecatedとなっている
+        //removeStickyBroadcast is deprecated at API Level 21
         removeStickyBroadcast(intent);
     }
 
@@ -53,11 +53,11 @@ public class PublicSenderActivity extends Activity {
         @Override
         public void onReceive(Context context, Intent intent) {
             
-            // ★ポイント5★ 結果を受け取る場合、結果データの安全性を確認する
-            // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+            // *** POINT 5 *** When receiving a result, handle the result data carefully and securely.
+            // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
             String data = getResultData();
             PublicSenderActivity.this.logLine(
-                    String.format("結果「%s」を受信した。", data));
+                    String.format("Received result: \"%s\"", data));
         }
     };
 

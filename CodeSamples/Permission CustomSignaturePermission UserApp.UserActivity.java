@@ -13,22 +13,22 @@ import android.widget.Toast;
 
 public class UserActivity extends Activity {
 
-    // 利用先のActivity情報
+    // Requested (Destination) application's Activity information
     private static final String TARGET_PACKAGE  = "org.jssec.android.permission.protectedapp";
     private static final String TARGET_ACTIVITY = "org.jssec.android.permission.protectedapp.ProtectedActivity";
 
-    // 自社のSignature Permission
+    // In-house Signature Permission
     private static final String MY_PERMISSION = "org.jssec.android.permission.protectedapp.MY_PERMISSION";
 
-    // 自社の証明書のハッシュ値
+    // Hash value of in-house certificate
     private static String sMyCertHash = null;
     private static String myCertHash(Context context) {
         if (sMyCertHash == null) {
             if (Utils.isDebuggable(context)) {
-                // debug.keystoreの"androiddebugkey"の証明書ハッシュ値
+                // Certificate hash value of "androiddebugkey" of debug.keystore.
                 sMyCertHash = "0EFB7236 328348A9 89718BAD DF57F544 D5CCB4AE B9DB34BC 1E29DD26 F77C8255";
             } else {
-                // keystoreの"my company key"の証明書ハッシュ値
+                // Certificate hash value of "my company key" of keystore.
                 sMyCertHash = "D397D343 A5CBC10F 4EDDEB7C A10062DE 5690984F 1FB9E88B D7B3A7C2 42E142CA";
             }
         }
@@ -43,26 +43,27 @@ public class UserActivity extends Activity {
 
     public void onSendButtonClicked(View view) {
 
-        // ★ポイント8★ ソースコード上で、独自定義Signature Permissionが自社アプリにより定義されていることを確認する
+        // *** POINT 8 *** Verify if the in-house signature permission is defined by the application that provides the component on the program code.
+
         if (!SigPerm.test(this, MY_PERMISSION, myCertHash(this))) {
-            Toast.makeText(this, "独自定義Signature Permissionが自社アプリにより定義されていない。", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "In-house-defined signature permission is not defined by In house application.", Toast.LENGTH_LONG).show();
             return;
         }
 
-        // ★ポイント9★ 利用先アプリが自社アプリであることを確認する
+        // *** POINT 9 *** Verify if the destination application is an in-house application.
         if (!PkgCert.test(this, TARGET_PACKAGE, myCertHash(this))) {
-            Toast.makeText(this, "利用先アプリは自社アプリではない。", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Requested (Destination) application is not in-house application.", Toast.LENGTH_LONG).show();
             return;
         }
 
-        // ★ポイント10★ 利用先ComponentがActivityの場合、明示的Intentを使う
+        // *** POINT 10 *** Use an explicit intent when the destination component is an activity.
         try {
             Intent intent = new Intent();
             intent.setClassName(TARGET_PACKAGE, TARGET_ACTIVITY);
             startActivity(intent);
         } catch(Exception e) {
             Toast.makeText(this,
-                    String.format("例外発生:%s", e.getMessage()),
+                    String.format("Exception occurs:%s", e.getMessage()),
                     Toast.LENGTH_LONG).show();
         }
     }

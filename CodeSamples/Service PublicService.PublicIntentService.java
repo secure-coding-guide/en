@@ -7,14 +7,14 @@ import android.widget.Toast;
 public class PublicIntentService extends IntentService{
 
     /**
-     * IntentServiceを継承した場合、引数無しのコンストラクタを必ず用意する。
-     * これが無い場合、エラーになる。
+     * Default constructor must be provided when a service extends IntentService class.
+     * If it does not exist, an error occurs.
      */
     public PublicIntentService() {
         super("CreatingTypeBService");
     }
 
-    // Serviceが起動するときに１回だけ呼び出される
+    // The onCreate gets called only one time when the Service starts.
     @Override
     public void onCreate() {
         super.onCreate();
@@ -22,18 +22,18 @@ public class PublicIntentService extends IntentService{
         Toast.makeText(this, this.getClass().getSimpleName() + " - onCreate()", Toast.LENGTH_SHORT).show();
     }
     
-    // Serviceで行いたい処理をこのメソッドに記述する
+    // The onHandleIntent gets called each time after the startService gets called.
     @Override
     protected void onHandleIntent(Intent intent) {        
-        // ★ポイント2★ 受信Intentの安全性を確認する
-        // 公開Activityであるため利用元アプリがマルウェアである可能性がある。
-        // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+        // *** POINT 2 *** Handle intent carefully and securely.
+        // Since it's public service, the intent may come from malicious application.
+        // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
         String param = intent.getStringExtra("PARAM");
-        Toast.makeText(this, String.format("パラメータ「%s」を受け取った。", param), Toast.LENGTH_LONG).show();
+        Toast.makeText(this, String.format("Recieved parameter \"%s\"", param), Toast.LENGTH_LONG).show();
     }
 
 
-    // Serviceが終了するときに１回だけ呼び出される
+    // The onDestroy gets called only one time when the service stops.
     @Override
     public void onDestroy() {
         Toast.makeText(this, this.getClass().getSimpleName() + " - onDestroy()", Toast.LENGTH_SHORT).show();

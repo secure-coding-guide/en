@@ -2,11 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.jssec.android.permission.permissionrequestingpermissionatruntime" >
 
-    <!-- ★ポイント1★ アプリで利用するPermissionを利用宣言する -->
-    <!-- 連絡先情報を読み取るPermission (Protection Level: dangerous) -->
+    <!-- *** POINT 1 *** Apps declare the Permissions they will use -->
+    <!-- Permission to read information on contacts (Protection Level: dangerous) -->
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
-    <!-- ★ポイント2★  不必要なPermissionは利用宣言しない -->
+    <!-- *** POINT 2 *** Do not declare the use of unnecessary Permissions -->
 
     <application
         android:allowBackup="true"

@@ -9,15 +9,15 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 public class SignatureCheckActivity extends Activity {
-    // 自己証明書のハッシュ値
+    // Self signed certificate hash value
     private static String sMyCertHash = null;
     private static String myCertHash(Context context) {
         if (sMyCertHash == null) {
             if (Utils.isDebuggable(context)) {
-                // debug.keystoreの"androiddebugkey"の証明書ハッシュ値
+                // Certificate hash value of "androiddebugkey" of debug.
                 sMyCertHash = "0EFB7236 328348A9 89718BAD DF57F544 D5CCB4AE B9DB34BC 1E29DD26 F77C8255";
             } else {
-                // keystoreの"my company key"の証明書ハッシュ値
+                // Certificate hash value of "my company key" of keystore
                 sMyCertHash = "D397D343 A5CBC10F 4EDDEB7C A10062DE 5690984F 1FB9E88B D7B3A7C2 42E142CA";
             }
         }
@@ -29,12 +29,12 @@ public class SignatureCheckActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        // ★ポイント1★ 主要な処理を行うまでの間に、アプリの証明書が開発者の証明書であることを確認する
+        // *** POINT 1 *** Verify that an application's certificate belongs to the developer before major processing is started
         if (!PkgCert.test(this, this.getPackageName(), myCertHash(this))) {
-            Toast.makeText(this, "自己署名の照合　NG", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Self-sign match  NG", Toast.LENGTH_LONG).show();
             finish();
             return;
         }
-        Toast.makeText(this, "自己署名の照合　OK", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Self-sign match  OK", Toast.LENGTH_LONG).show();
     }
 }

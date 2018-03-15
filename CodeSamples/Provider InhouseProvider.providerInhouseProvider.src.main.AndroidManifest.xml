@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.jssec.android.provider.inhouseprovider">
 
-    <!-- ★ポイント1★ 独自定義Signature Permissionを定義する -->
+    <!-- *** POINT 1 *** Define an in-house signature permission -->
     <permission
         android:name="org.jssec.android.provider.inhouseprovider.MY_PERMISSION"
         android:protectionLevel="signature" />
@@ -11,12 +11,12 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
 
-        <!-- ★ポイント2★ 独自定義Signature Permissionを要求宣言する -->
-        <!-- ★ポイント3★ exported="true"により、明示的に公開設定する -->
+        <!-- *** POINT 2 *** Require the in-house signature permission -->
+        <!-- *** POINT 3 *** Explicitly set the exported attribute to true. -->
         <provider
-            android:name="org.jssec.android.provider.inhouseprovider.InhouseProvider"
+            android:name=".InhouseProvider"
             android:authorities="org.jssec.android.provider.inhouseprovider"
             android:permission="org.jssec.android.provider.inhouseprovider.MY_PERMISSION" 
-            android:exported="true"/>
+            android:exported="true" />
     </application>
 </manifest>

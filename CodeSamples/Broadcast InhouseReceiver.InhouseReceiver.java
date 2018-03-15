@@ -11,18 +11,18 @@ import android.widget.Toast;
 
 public class InhouseReceiver extends BroadcastReceiver {
 
-    // 自社のSignature Permission
+    // In-house Signature Permission
     private static final String MY_PERMISSION = "org.jssec.android.broadcast.inhousereceiver.MY_PERMISSION";
 
-    // 自社の証明書のハッシュ値
+    // In-house certificate hash value
     private static String sMyCertHash = null;
     private static String myCertHash(Context context) {
         if (sMyCertHash == null) {
             if (Utils.isDebuggable(context)) {
-                // debug.keystoreの"androiddebugkey"の証明書ハッシュ値
+                // Certificate hash value of "androiddebugkey" in the debug.keystore.
                 sMyCertHash = "0EFB7236 328348A9 89718BAD DF57F544 D5CCB4AE B9DB34BC 1E29DD26 F77C8255";
             } else {
-                // keystoreの"my company key"の証明書ハッシュ値
+                // Certificate hash value of "my company key" in the keystore.
                 sMyCertHash = "D397D343 A5CBC10F 4EDDEB7C A10062DE 5690984F 1FB9E88B D7B3A7C2 42E142CA";
             }
         }
@@ -34,30 +34,32 @@ public class InhouseReceiver extends BroadcastReceiver {
 
     public boolean isDynamic = false;
     private String getName() {
-        return isDynamic ? "自社限定動的 Broadcast Receiver" : "自社限定静的 Broadcast Receiver";
+        return isDynamic ? "In-house Dynamic Broadcast Receiver" : "In-house Static Broadcast Receiver";
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        // ★ポイント6★ 独自定義Signature Permissionが自社アプリにより定義されていることを確認する
+        // *** POINT 6 *** Verify that the in-house signature permission is defined by an in-house application.
         if (!SigPerm.test(context, MY_PERMISSION, myCertHash(context))) {
-            Toast.makeText(context, "独自定義Signature Permissionが自社アプリにより定義されていない。", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "The in-house signature permission is not declared by in-house application.",
+                    Toast.LENGTH_LONG).show();
             return;
         }
 
-        // ★ポイント7★ 自社アプリからのBroadcastであっても、受信Intentの安全性を確認する
-        // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+        // *** POINT 7 *** Handle the received intent carefully and securely,
+        // even though the Broadcast was sent from an in-house application..
+        // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
         if (MY_BROADCAST_INHOUSE.equals(intent.getAction())) {
             String param = intent.getStringExtra("PARAM");
             Toast.makeText(context,
-                    String.format("%s:\n「%s」を受信した。", getName(), param),
+                    String.format("%s:\nReceived param: \"%s\"", getName(), param),
                     Toast.LENGTH_SHORT).show();
         }
 
-        // ★ポイント8★ 送信元は自社アプリであるから、センシティブな情報を返送してよい
+        // *** POINT 8 *** Sensitive information can be returned since the requesting application is in-house.
         setResultCode(Activity.RESULT_OK);
-        setResultData(String.format("センシティブな情報 from %s", getName()));
+        setResultData(String.format("Sensitive Info from %s", getName()));
         abortBroadcast();
     }
 }

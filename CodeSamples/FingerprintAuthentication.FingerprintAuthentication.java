@@ -54,7 +54,7 @@ public class FingerprintAuthentication {
 
         mCancellationSignal = new CancellationSignal();
 
-        // 指紋認証の結果を受け取るコールバック
+        // Callback to receive the results of fingerprint authentication
         FingerprintManager.AuthenticationCallback hook = new FingerprintManager.AuthenticationCallback() {
             @Override
             public void onAuthenticationError(int errorCode, CharSequence errString) {
@@ -79,7 +79,7 @@ public class FingerprintAuthentication {
             }
         };
 
-        // 指紋認証を実行
+        // Execute fingerprint authentication
         mFingerprintManager.authenticate(cryptoObject, mCancellationSignal, 0, hook, null);
 
         return true;
@@ -98,7 +98,7 @@ public class FingerprintAuthentication {
 
     private void reset() {
         try {
-            // ★ポイント2★ "AndroidKeyStore" Providerからインスタンスを取得する
+            // *** POINT 2 ***  Obtain an instance from the "AndroidKeyStore" Provider
             mKeyStore = KeyStore.getInstance(PROVIDER_NAME);
             mKeyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, PROVIDER_NAME);
             mCipher = Cipher.getInstance(KeyProperties.KEY_ALGORITHM_AES
@@ -126,14 +126,14 @@ public class FingerprintAuthentication {
             if (mKeyStore.containsAlias(KEY_NAME))
                 mKeyStore.deleteEntry(KEY_NAME);
             mKeyGenerator.init(
-                    // ★ポイント4★ 鍵生成(登録)時、暗号アルゴリズムは脆弱でないもの（基準を満たすもの）を使用する
+                    // *** POINT 4 *** When creating (registering) keys, use an encryption algorithm that is not vulnerable (meets standards)
                     new KeyGenParameterSpec.Builder(KEY_NAME, KeyProperties.PURPOSE_ENCRYPT)
                             .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
                             .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
-                            // ★ポイント5★ 鍵生成(登録)時、ユーザー(指紋)認証の要求を有効にする（認証の有効期限は設定しない）
+                            // *** POINT 5 *** When creating (registering) keys, enable requests for user (fingerprint) authentication (do not specify the duration over which authentication is enabled)
                             .setUserAuthenticationRequired(true)
                             .build());
-            // 鍵を生成し、Keystore(AndroidKeyStore)に保存する
+            // Generate a key and store it in Keystore(AndroidKeyStore)
             mKeyGenerator.generateKey();
             return true;
         } catch (IllegalStateException e) {
@@ -154,7 +154,7 @@ public class FingerprintAuthentication {
             mCipher.init(Cipher.ENCRYPT_MODE, key);
             return true;
         } catch (KeyPermanentlyInvalidatedException e) {
-            // ★ポイント6★ 鍵を作る時点と鍵を使う時点で指紋の登録状況が変わることを前提に設計を行う
+            // *** POINT 6 *** Design your app on the assumption that the status of fingerprint registration will change between when keys are created and when keys are used
             return false;
         } catch (KeyStoreException | CertificateException | UnrecoverableKeyException | IOException
                 | NoSuchAlgorithmException | InvalidKeySpecException | NoSuchProviderException | InvalidKeyException e) {

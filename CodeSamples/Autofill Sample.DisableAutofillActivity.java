@@ -61,7 +61,7 @@ public class DisableAutofillActivity extends AppCompatActivity {
             }
         };
 
-        //フローティングツールバーから「自動入力」を削除する
+        //Delete "Automatic Input" from floating-toolbar
         setMenu();
     }
 
@@ -69,12 +69,12 @@ public class DisableAutofillActivity extends AppCompatActivity {
         if (mActionModeCallback == null) {
             return;
         }
-         //Activityに含まれる全ての編集可能なTextViewについてセットすること
+         //Register callback for all editable TextViews contained in Activity
          mUsernameEditText.setCustomInsertionActionModeCallback(mActionModeCallback);
          mPasswordEditText.setCustomInsertionActionModeCallback(mActionModeCallback);
     }
 
-    //Menuの階層を巡って「自動入力」を削除する
+    //Traverse all menu levels, deleting "Automatic Input" from each
     void removeAutofillFromMenu(Menu menu) {
         if (menu.findItem(android.R.id.autofill) != null) {
             menu.removeItem(android.R.id.autofill);
@@ -92,12 +92,12 @@ public class DisableAutofillActivity extends AppCompatActivity {
         String username = mUsernameEditText.getText().toString();
         String password = mPasswordEditText.getText().toString();
 
-        //Viewから取得したデータの安全性を確認する
+        //Validate data obtained from View
         if (!Util.validateUsername(username) || Util.validatePassword(password)) {
-            //適切なエラー処理をする
+            //appropriate error handling
         }
 
-        //サーバーにusername, passwordを送信
+        //Send username, password to server
 
         finish();
     }

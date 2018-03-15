@@ -3,21 +3,21 @@ package org.jssec.android.accountmanager.webservice;
 public class WebService {
 
     /**
-     * オンラインサービスのアカウント管理機能にアクセスする想定
+     * Suppose to access to account managemnet function of online service.
      * 
-     * @param username アカウント名文字列
-     * @param password パスワード文字列
-     * @return 認証トークンを返す
+     * @param username Account name character string
+     * @param password password character string
+     * @return Return authentication token
      */
     public String login(String username, String password) {
-        // ★ポイント7★ Authenticatorとオンラインサービスとの通信はHTTPSで行う
-        // 実際には、サーバーとの通信処理を実装するが、 サンプルにつき割愛
+        // *** POINT 7 *** HTTPS should be used for communication between an authenticator and the online services.
+        // Actually, communication process with servers is implemented here, but Omit here, since this is a sample.
         return getAuthToken(username, password);
     }
 
     private String getAuthToken(String username, String password) {
-        // 実際にはサーバーから、ユニーク性と推測不可能性を保証された値を取得するが
-        // サンプルにつき、通信は行わずに固定値を返す
+        // In fact, get the value which uniqueness and impossibility of speculation are guaranteed by the server,
+        // but the fixed value is returned without communication here, since this is sample.
         return "c2f981bda5f34f90c0419e171f60f45c";
     }
 }

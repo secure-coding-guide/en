@@ -16,13 +16,12 @@ public class BrowsableIntentActivity extends Activity {
         Intent intent = getIntent();
         Uri uri = intent.getData();
         if (uri != null) {
-            // URLパラメータで渡されたユーザーIDを取得する
-            // ★ポイント2★ URLのパラメータを利用する前に値の安全性を確認する
-            // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+            // Get UserID which is passed by URI parameter
+            // *** POINT 2 *** Handle the URL parameter carefully and securely.
+            // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
             String userID = "User ID = " +  uri.getQueryParameter("user");
             TextView tv = (TextView)findViewById(R.id.text_userid);
             tv.setText(userID);
         }
     }
-
 }

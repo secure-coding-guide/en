@@ -1,13 +1,13 @@
 package org.jssec.android.service.privateservice.localbind;
 
 /**
- * Serviceが提供するメソッドを定義する。
- * 本クラス内のメソッドは、Activityから呼び出す。
+ * Define methods which are provided by service
+ * Methods in this class are called by activity.
  */
 public interface IPrivateLocalBindService {
 
     /**
-     * センシティブな情報（文字列）を取得する
+     * Get sensitive information (strings)
      */
-    String getInfo();
+    public String getInfo();
 }

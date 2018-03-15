@@ -36,25 +36,14 @@ public abstract class PrivateCertificateHttpsGet extends AsyncTask<String, Void,
 
         try {
             URL url = new URL(params[0]);
-            // ★ポイント1★ プライベート証明書でサーバー証明書を検証する
-            // assetsに格納しておいたプライベート証明書だけを含むKeyStoreを設定
+            // *** POINT 1 *** Verify a server certificate with the root certificate of a private certificate authority.
+            // Set keystore which includes only private certificate that is stored in assets, to client.
             KeyStore ks = KeyStoreUtil.getEmptyKeyStore();
             KeyStoreUtil.loadX509Certificate(ks,
                     mContext.getResources().getAssets().open("cacert.crt"));
 
-            // ホスト名の検証を行う
-            HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession session) {
-                    if (!hostname.equals(session.getPeerHost())) {
-                        return false;
-                    }
-                    return true;
-                }
-            });
-
-            // ★ポイント2★ URIはhttps://で始める
-            // ★ポイント3★ 送信データにセンシティブな情報を含めてよい
+            // *** POINT 2 *** URI starts with https://.
+            // *** POINT 3 *** Sensitive information may be contained in send data.
             trustManager = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trustManager.init(ks);
             SSLContext sslCon = SSLContext.getInstance("TLS");
@@ -67,7 +56,7 @@ public abstract class PrivateCertificateHttpsGet extends AsyncTask<String, Void,
             response.setSSLSocketFactory(sslCon.getSocketFactory());
             checkResponse(response);
 
-            // ★ポイント4★ 受信データを接続先サーバーと同じ程度に信用してよい
+            // *** POINT 4 *** Received data can be trusted as same as the server.
             inputStream = new BufferedInputStream(response.getInputStream());
             responseArray = new ByteArrayOutputStream();
             while ((length = inputStream.read(buff)) != -1) {
@@ -77,8 +66,8 @@ public abstract class PrivateCertificateHttpsGet extends AsyncTask<String, Void,
             }
             return responseArray.toByteArray();
         } catch(SSLException e) {
-            // ★ポイント5★ SSLExceptionに対しユーザーに通知する等の適切な例外処理をする
-            // サンプルにつき例外処理は割愛
+            // *** POINT 5 *** SSLException should be handled with an appropriate sequence in an application.
+            // Exception process is omitted here since it's sample.
             return e;
         } catch(Exception e) {
             return e;
@@ -87,14 +76,14 @@ public abstract class PrivateCertificateHttpsGet extends AsyncTask<String, Void,
                 try {
                     inputStream.close();
                 } catch (Exception e) {
-                    // 例外処理は割愛
+                    // This is sample, so omit the exception process
                 }
             }
             if (responseArray != null) {
                 try {
                     responseArray.close();
                 } catch (Exception e) {
-                    // 例外処理は割愛
+                    // This is sample, so omit the exception process
                 }
             }
         }

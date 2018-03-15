@@ -40,7 +40,7 @@ public class KeyStoreUtil {
             String alias = x509.getSubjectDN().getName();
             ks.setCertificateEntry(alias, x509);
         } finally {
-            try { is.close(); } catch (IOException e) { /* ó·äOèàóùÇÕäÑà§ */ }
+            try { is.close(); } catch (IOException e) { /* This is sample, so omit the exception process */ }
         }
     }
 }

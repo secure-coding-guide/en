@@ -9,8 +9,8 @@
         android:layout_height="wrap_content"
         android:text="@string/unlongclickable_description" />
 
-    <!-- コピー・カットを禁止するEditText -->
-    <!-- ★ポイント1★ コピー・カットを禁止するViewはandroid:longClickableをfalseにする。 -->
+    <!-- EditText to prohibit copy/cut EditText -->
+    <!-- *** POINT 1 *** Set false to android:longClickable in View to prohibit copy/cut. -->
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

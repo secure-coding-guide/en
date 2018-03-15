@@ -13,21 +13,20 @@ public class PublicActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        // ★ポイント2★ 受信Intentの安全性を確認する
-        // 公開Activityであるため利用元アプリがマルウェアである可能性がある。
-        // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+        // *** POINT 2 *** Handle the received intent carefully and securely.
+        // Since this is a public activity, it is possible that the sending application may be malware.
+        // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
         String param = getIntent().getStringExtra("PARAM");
-        Toast.makeText(this, String.format("パラメータ「%s」を受け取った。", param), Toast.LENGTH_LONG).show();
+        Toast.makeText(this, String.format("Received param: \"%s\"", param), Toast.LENGTH_LONG).show();
     }
 
     public void onReturnResultClick(View view) {
         
-        // ★ポイント3★ 結果を返す場合、センシティブな情報を含めない
-        // 公開Activityであるため利用元アプリがマルウェアである可能性がある。
-        // マルウェアに取得されても問題のない情報であれば結果として返してもよい。
-
+        // *** POINT 3 *** When returning a result, do not include sensitive information.
+        // Since this is a public activity, it is possible that the receiving application may be malware.
+        // If there is no problem if the data gets received by malware, then it can be returned as a result. 
         Intent intent = new Intent();
-        intent.putExtra("RESULT", "センシティブではない情報");
+        intent.putExtra("RESULT", "Not Sensitive Info");
         setResult(RESULT_OK, intent);
         finish();
     }

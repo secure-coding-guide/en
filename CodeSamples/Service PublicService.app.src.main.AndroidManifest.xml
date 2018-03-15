@@ -7,16 +7,16 @@
         android:label="@string/app_name"
         android:allowBackup="false" >
               
-        <!-- 最も標準的なService -->
-        <!-- ★ポイント1★ exported="true"により、明示的に公開設定する -->
+        <!-- Most standard Service -->
+        <!-- *** POINT 1 *** Explicitly set the exported attribute to true. -->
         <service android:name=".PublicStartService" android:exported="true">
             <intent-filter>
                 <action android:name="org.jssec.android.service.publicservice.action.startservice" />
             </intent-filter>
         </service>
         
-        <!-- IntentServiceを継承したService -->
-        <!-- ★ポイント1★ exported="true"により、明示的に公開設定する -->
+        <!-- Public Service derived from IntentService class -->
+        <!-- *** POINT 1 *** Explicitly set the exported attribute to true. -->
         <service android:name=".PublicIntentService" android:exported="true">
             <intent-filter>
                 <action android:name="org.jssec.android.service.publicservice.action.intentservice" />

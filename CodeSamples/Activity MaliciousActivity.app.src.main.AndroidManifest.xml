@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.jssec.android.intent.maliciousactivity" >
 
-    <!-- GET_TASKS Permission‚ðŽw’è‚·‚é -->
+    <!-- Use GET_TASKS Permission -->
     <uses-permission android:name="android.permission.GET_TASKS" />
 
     <application

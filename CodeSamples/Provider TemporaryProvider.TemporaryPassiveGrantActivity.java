@@ -12,17 +12,18 @@ public class TemporaryPassiveGrantActivity extends Activity {
         setContentView(R.layout.passive_grant);
     }
 
-    // 一時的なアクセス許可を求めてきたアプリにContent Provider側アプリが受動的にアクセス許可を与えるケース
+    // In the case that Content Provider application passively grants access permission
+    // to the application that requested Content Provider access.
     public void onGrantClick(View view) {
         Intent intent = new Intent();
 
-        // ★ポイント5★ 一時的にアクセスを許可するURIをIntentに指定する
+        // *** POINT 5 *** Specify URI for the intent to grant temporary access.
         intent.setData(TemporaryProvider.Address.CONTENT_URI);
 
-        // ★ポイント6★ 一時的に許可するアクセス権限をIntentに指定する
+        // *** POINT 6 *** Specify access rights for the intent to grant temporary access.
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-        // ★ポイント8★ 一時許可の要求元アプリにIntentを返信する
+        // *** POINT 8 *** Return the intent to the application that requests temporary access.
         setResult(Activity.RESULT_OK, intent);
         finish();
     }

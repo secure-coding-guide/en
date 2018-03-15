@@ -17,11 +17,11 @@
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-                // 暗黙的intentを受け付ける
+                // Accept implicit Intent
                 <category android:name="android.intent.category.DEFAULT" />
-                // Browsable intentを受け付ける
+                // Accept Browsable intent
                 <category android:name="android.intent.category.BROWSABLE" />
-                // URI 'secure://jssec' を受け付ける
+                // Accept URI 'secure://jssec'
                 <data android:scheme="secure" android:host="jssec"/>
             </intent-filter>
         </activity>

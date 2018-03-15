@@ -7,7 +7,7 @@ import android.view.View;
 
 public class PublicUserActivity extends Activity {
 
-    // 利用先Service情報
+    // Using Service Info
     private static final String TARGET_PACKAGE = "org.jssec.android.service.publicservice";
     private static final String TARGET_START_CLASS = "org.jssec.android.service.publicservice.PublicStartService";
     private static final String TARGET_INTENT_CLASS = "org.jssec.android.service.publicservice.PublicIntentService";
@@ -19,38 +19,37 @@ public class PublicUserActivity extends Activity {
         setContentView(R.layout.publicservice_activity);
     }
     
-    // サービス開始
+    // --- StartService control ---
+    
     public void onStartServiceClick(View v) {              
-
         Intent intent = new Intent("org.jssec.android.service.publicservice.action.startservice");
 
-        // ★ポイント4★ Serviceは明示的Intentで呼び出す
+        // *** POINT 4 *** Call service by Explicit Intent
         intent.setClassName(TARGET_PACKAGE, TARGET_START_CLASS);
-          
-        // ★ポイント5★ センシティブな情報を送信してはならない
-        intent.putExtra("PARAM", "センシティブではない情報");
+
+        // *** POINT 5 *** Do not send sensitive information.
+        intent.putExtra("PARAM", "Not sensitive information");
 
         startService(intent);
-        
-     // ★ポイント6★ 結果を受け取る場合、結果データの安全性を確認する
-     // 本サンプルは startService()を使ったService利用の例の為、結果情報は受け取らない
+        // *** POINT 6 *** When receiving a result, handle the result data carefully and securely.
+        // This sample code uses startService(), so receiving no result.
     }
     
-    // サービス停止ボタン
+
     public void onStopServiceClick(View v) {
         doStopService();
     }
         
-    // IntentService 開始ボタン
+    // --- IntentService control ---
 
     public void onIntentServiceClick(View v) {      
         Intent intent = new Intent("org.jssec.android.service.publicservice.action.intentservice");
 
-        // ★ポイント4★ Serviceは明示的Intentで呼び出す
+        // *** POINT 4 *** Call service by Explicit Intent
         intent.setClassName(TARGET_PACKAGE, TARGET_INTENT_CLASS);
 
-        // ★ポイント5★ センシティブな情報を送信してはならない
-        intent.putExtra("PARAM", "センシティブではない情報");
+        // *** POINT 5 *** Do not send sensitive information.
+        intent.putExtra("PARAM", "Not sensitive information");
 
         startService(intent);
     }
@@ -58,15 +57,15 @@ public class PublicUserActivity extends Activity {
     @Override
     public void onStop(){
         super.onStop();
-        // サービスが終了していない場合は終了する
+        // Stop service if the service is running.
         doStopService();
     }
     
-    // サービスを停止する
+    // Stop service
     private void doStopService() {            
         Intent intent = new Intent("org.jssec.android.service.publicservice.action.startservice");
 
-        // ★ポイント4★ Serviceは明示的Intentで呼び出す
+        // *** POINT 4 *** Call service by Explicit Intent
         intent.setClassName(TARGET_PACKAGE, TARGET_START_CLASS);
 
         stopService(intent);        

@@ -20,4 +20,5 @@ public class InhouseReceiverActivity extends Activity {
     public void onUnregisterReceiverClick(View view) {
         Intent intent = new Intent(this, DynamicReceiverService.class);
         stopService(intent);
-    }}
+    }
+}

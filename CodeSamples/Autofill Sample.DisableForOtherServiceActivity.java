@@ -35,8 +35,8 @@ public class DisableForOtherServiceActivity extends AppCompatActivity {
                 resetFields();
             }
         });
-        //このActivityではフローティングツールバーの対応をしていないため、
-        // 「自動入力」の選択でAutofill機能が利用可能になります。
+        //Because the floating-toolbar is not supported for this Activity, 
+        // Autofill may be used by selecting "Automatic Input"
     }
 
     @Override
@@ -51,11 +51,11 @@ public class DisableForOtherServiceActivity extends AppCompatActivity {
 
         if (!mIsAutofillEnabled) {
             View rootView = this.getWindow().getDecorView();
-            //同一パッケージ内のAutofill serviceを利用しない場合は、全てのViewをAutofillの対象外にする
+            //If not using Autofill service within the same package, make all Views ineligible for Autofill
             rootView.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS);
         } else {
-            //同一パッケージ内のAutofill serviceを利用する場合は、全てのViewをAutofillの対象にする
-            //特定のViewに対してView#setImportantForAutofill()を呼び出すことも可能
+            //If using Autofill service within the same package, make all Views eligible for Autofill
+            //View#setImportantForAutofill() may also be called for specific Views
             View rootView = this.getWindow().getDecorView();
             rootView.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_AUTO);
         }
@@ -64,12 +64,12 @@ public class DisableForOtherServiceActivity extends AppCompatActivity {
         String username = mUsernameEditText.getText().toString();
         String password = mPasswordEditText.getText().toString();
 
-        //Viewから取得したデータの安全性を確認する
+        //Validate data obtained from View
         if (!Util.validateUsername(username) || !Util.validatePassword(password)) {
-            //適切なエラー処理をする
+            //appropriate error handling
         }
 
-        //サーバーにusername, passwordを送信
+        //Send username, password to server
 
         finish();
     }
@@ -85,11 +85,11 @@ public class DisableForOtherServiceActivity extends AppCompatActivity {
         mIsAutofillEnabled = mgr.hasEnabledAutofillServices();
 
         TextView statusView = (TextView) findViewById(R.id.label_autofill_status);
-        String status = "自社のautofill serviceが--です";
+        String status = "Our autofill service is --.";
         if (mIsAutofillEnabled) {
-            status = "同一パッケージ内のautofill serviceが有効です";
+            status = "autofill service within same package is enabled";
         } else {
-            status = "同一パッケージ内のautofill serviceが無効です";
+            status = "autofill service within same package is disabled";
         }
         statusView.setText(status);
     }

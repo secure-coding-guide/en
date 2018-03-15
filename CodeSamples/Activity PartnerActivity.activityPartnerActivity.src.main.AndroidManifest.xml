@@ -7,10 +7,10 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
         
-        <!-- パートナー限定Activity -->
-        <!-- ★ポイント1★ taskAffinityを指定しない -->
-        <!-- ★ポイント2★ launchModeを指定しない -->
-        <!-- ★ポイント3★ Intent Filterを定義せず、exported="true"を明示的に設定する -->
+        <!-- Partner activity -->
+        <!-- *** POINT 1 *** Do not specify taskAffinity -->
+        <!-- *** POINT 2 *** Do not specify launchMode -->
+        <!-- *** POINT 3 *** Do not define the intent filter and explicitly set the exported attribute to true -->
         <activity
             android:name=".PartnerActivity"
             android:exported="true" />

@@ -9,7 +9,7 @@ import android.widget.Toast;
 public class PrivateLocalBindService extends Service
 implements IPrivateLocalBindService{   
     /**
-     * Serviceに接続するためのクラス
+     * Class to connect service
      */
     public class LocalBinder extends Binder {
         PrivateLocalBindService getService() {
@@ -19,10 +19,11 @@ implements IPrivateLocalBindService{
 
     @Override
     public IBinder onBind(Intent intent) {
-        // ★ポイント3★ 同一アプリからのIntentであっても、受信Intentの安全性を確認する
-        // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+        // *** POINT 3 *** Handle intent carefully and securely,
+        // even though the intent came from the same application.
+        // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
         String param = intent.getStringExtra("PARAM");
-        Toast.makeText(this, String.format("パラメータ「%s」を受け取った。", param), Toast.LENGTH_LONG).show();
+        Toast.makeText(this, String.format("Received parameter \"%s\".", param), Toast.LENGTH_LONG).show();
         
         return new LocalBinder();
     }
@@ -37,10 +38,10 @@ implements IPrivateLocalBindService{
         Toast.makeText(this, this.getClass().getSimpleName() + " - onDestroy()", Toast.LENGTH_SHORT).show();
     }
     
-    // 用意したインターフェース
+    // Interface
     @Override
     public String getInfo() {
-        // ★ポイント2★ 利用元アプリは同一アプリであるから、センシティブな情報を返してもよい
-        return "センシティブな情報(from Service)";
+        // *** POINT 5 *** Sensitive information can be returned since the requesting application is in the same application.       
+        return "Sensitive information (from Service)";
     }
 }

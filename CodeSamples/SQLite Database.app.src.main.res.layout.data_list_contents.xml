@@ -6,7 +6,7 @@
     android:background="@color/transparent"
     >
     
-    <!-- ユーザー番号 -->
+    <!-- User number -->
     <TextView 
         android:id="@+id/dlc_IdNo"
         android:layout_width="wrap_content"
@@ -15,7 +15,7 @@
     android:background="@color/transparent"
     />
     
-    <!-- ユーザー名 -->
+    <!-- User name -->
     <TextView 
         android:id="@+id/dlc_Name"
         android:layout_width="wrap_content"
@@ -24,7 +24,7 @@
     android:background="@color/transparent"
     />
 
-    <!-- 情報欄 -->
+    <!-- Information section -->
     <TextView 
         android:id="@+id/dlc_Info"
         android:layout_width="wrap_content"

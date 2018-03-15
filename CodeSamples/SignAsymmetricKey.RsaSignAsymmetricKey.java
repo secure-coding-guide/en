@@ -14,32 +14,32 @@ import java.security.spec.X509EncodedKeySpec;
 
 public final class RsaSignAsymmetricKey {
 
-    // ★ポイント1★ 明示的に暗号モードとパディングを設定する
-    // ★ポイント2★ 脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
-    // Cipher クラスの getInstance に渡すパラメータ （/[暗号アルゴリズム]/[ブロック暗号モード]/[パディングルール])
-    // サンプルでは、暗号アルゴリズム=RSA、ブロック暗号モード=NONE、パディングルール=OAEPPADDING
+    // *** POINT 1 *** Explicitly specify the encryption mode and the padding.
+    // *** POINT 2 *** Use strong encryption methods (specifically, technologies that meet the relevant criteria), including algorithms, block cipher modes, and padding modes.
+    // Parameters passed to the getInstance method of the Cipher class: Encryption algorithm, block encryption mode, padding rule 
+    // In this sample, we choose the following parameter values: encryption algorithm=RSA, block encryption mode=NONE, padding rule=OAEPPADDING.
     private static final String TRANSFORMATION = "SHA256withRSA";
     
-    // 暗号アルゴリズム
+    // encryption algorithm
     private static final String KEY_ALGORITHM = "RSA";
     
-    // ★ポイント3★ 十分安全な長さを持つ鍵を利用する
-    // 鍵長チェック
+    // *** POINT 3 *** Use a key of length sufficient to guarantee the signature strength.
+    // Check the length of the key
     private static final int MIN_KEY_LENGTH = 2000;
 
     RsaSignAsymmetricKey() {
     }
     
     public final byte[] sign(final byte[] plain, final byte[] keyData) {
-        // 本来、署名処理はサーバー側で実装すべきものであるが、
-        // 本サンプルでは動作確認用に、アプリ内でも署名処理を実装した。
-        // 実際にサンプルコードを利用する場合は、アプリ内に秘密鍵を保持しないようにすること。
+        // In general, signature procedures should be implemented on the server side;
+        // however, in this sample code we have implemented signature processing within the application to ensure confirmation of proper execution.
+        // When using this sample code in real-world applications, be careful not to retain any private keys within the application. 
 
         byte[] sign = null;
 
         try {
-            // ★ポイント1★ 明示的に暗号モードとパディングを設定する
-            // ★ポイント2★ 脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
+            // *** POINT 1 *** Explicitly specify the encryption mode and the padding.
+            // *** POINT 2 *** Use strong encryption methods (specifically, technologies that meet the relevant criteria), including algorithms, block cipher modes, and padding modes.
             Signature signature = Signature.getInstance(TRANSFORMATION);
 
             PrivateKey privateKey = generatePriKey(keyData);
@@ -61,8 +61,8 @@ public final class RsaSignAsymmetricKey {
         boolean ret = false;
         
         try {
-            // ★ポイント1★ 明示的に暗号モードとパディングを設定する
-            // ★ポイント2★ 脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
+            // *** POINT 1 *** Explicitly specify the encryption mode and the padding.
+            // *** POINT 2 *** Use strong encryption methods (specifically, technologies that meet the relevant criteria), including algorithms, block cipher modes, and padding modes.
             Signature signature = Signature.getInstance(TRANSFORMATION);
 
             PublicKey publicKey = generatePubKey(keyData);
@@ -93,8 +93,8 @@ public final class RsaSignAsymmetricKey {
         } finally {
         }
 
-        // ★ポイント3★ 十分安全な長さを持つ鍵を利用する
-        // 鍵長のチェック
+        // *** POINT 3 *** Use a key of length sufficient to guarantee the signature strength.
+        // Check the length of the key
         if (publicKey instanceof RSAPublicKey) {
             int len = ((RSAPublicKey) publicKey).getModulus().bitLength();
             if (len < MIN_KEY_LENGTH) {

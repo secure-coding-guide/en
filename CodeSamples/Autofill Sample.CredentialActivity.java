@@ -41,12 +41,13 @@ public class CredentialActivity extends AppCompatActivity {
         String username = mUsernameEditText.getText().toString();
         String password = mPasswordEditText.getText().toString();
 
-        //Viewから取得したデータの安全性を確認する
+        //Validate security of data obtained from View
         if (!Util.validateUsername(username) || Util.validatePassword(password)) {
-            //適切なエラー処理をする
+            //appropriate error handling
         }
-        //サーバーにusername, passwordを送信
 
+        //Send username, password to server
+        
         finish();
     }
 

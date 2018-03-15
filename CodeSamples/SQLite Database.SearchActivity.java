@@ -6,10 +6,10 @@ public class SearchActivity extends SubActivity {
     protected void init(Intent intent) {
         this.setTitle(R.string.ACTIVITY_TITLE_SEARCH);            
 
-        //‰æ–Ê‚Ì•\Ž¦
+        //Display a screen
         setContentView(R.layout.data_search);
     }
-    protected boolean reflectEditText() {
+    protected boolean refrectEditText() {
         return true;
     }
 }

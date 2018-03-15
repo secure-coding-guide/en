@@ -23,7 +23,7 @@ public class DataDeleteTask extends  AsyncTask<String, Void, Void>  {
     protected Void doInBackground(String... params) {
         String  idno = params[0];
         
-        //★ポイント3★ アプリケーション要件に従って入力値をチェックする
+        //*** POINT 3 *** Validate the input value according the application requirements.
        if (!DataValidator.validateNo(idno))
         {
             return null;
@@ -31,7 +31,7 @@ public class DataDeleteTask extends  AsyncTask<String, Void, Void>  {
 
         String whereArgs[] = {idno};
         try {
-            //★ポイント2★ プレースホルダを使用する
+            //*** POINT 2 *** Use place holder.
             mSampleDb.delete(CommonData.TABLE_NAME,"idno = ?", whereArgs);
         } catch (SQLException e) {
             Log.e(DataDeleteTask.class.toString(), mActivity.getString(R.string.UPDATING_ERROR_MESSAGE)); 
@@ -41,7 +41,7 @@ public class DataDeleteTask extends  AsyncTask<String, Void, Void>  {
 
     @Override
     protected void onPostExecute(Void v) {
-        //DBデータの表示
+        //Display database data
         mActivity.showDbData();
     }
 }

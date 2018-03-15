@@ -17,32 +17,32 @@ import android.widget.TextView;
 
 public class InhouseUserActivity extends Activity {
 
-    // 利用先のContent Provider情報
+    // Target Content Provider Information
     private static final String AUTHORITY = "org.jssec.android.provider.inhouseprovider";
     private interface Address {
         public static final String PATH = "addresses";
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/" + PATH);
     }
 
-    // 自社のSignature Permission
+    // In-house Signature Permission
     private static final String MY_PERMISSION = "org.jssec.android.provider.inhouseprovider.MY_PERMISSION";
 
-    // 自社の証明書のハッシュ値
+    // In-house certificate hash value
     private static String sMyCertHash = null;
     private static String myCertHash(Context context) {
         if (sMyCertHash == null) {
             if (Utils.isDebuggable(context)) {
-                // debug.keystoreの"androiddebugkey"の証明書ハッシュ値
+                // Certificate hash value of "androiddebugkey" in the debug.keystore.
                 sMyCertHash = "0EFB7236 328348A9 89718BAD DF57F544 D5CCB4AE B9DB34BC 1E29DD26 F77C8255";
             } else {
-                // keystoreの"my company key"の証明書ハッシュ値
+                // Certificate hash value of "my company key" in the keystore.
                 sMyCertHash = "D397D343 A5CBC10F 4EDDEB7C A10062DE 5690984F 1FB9E88B D7B3A7C2 42E142CA";
             }
         }
         return sMyCertHash;
     }
 
-    // 利用先Content Providerのパッケージ名を取得
+    // Get package name of target content provider.
     private static String providerPkgname(Context context, Uri uri) {
         String pkgname = null;
         PackageManager pm = context.getPackageManager();
@@ -55,26 +55,27 @@ public class InhouseUserActivity extends Activity {
 
         logLine("[Query]");
 
-        // ★ポイント9★ 独自定義Signature Permissionが自社アプリにより定義されていることを確認する
+        // *** POINT 9 *** Verify if the in-house signature permission is defined by an in-house application.
         if (!SigPerm.test(this, MY_PERMISSION, myCertHash(this))) {
-            logLine("  独自定義Signature Permissionが自社アプリにより定義されていない。");
+            logLine("  The in-house signature permission is not declared by in-house application.");
             return;
         }
 
-        // ★ポイント10★ 利用先Content Providerアプリの証明書が自社の証明書であることを確認する
+        // *** POINT 10 *** Verify if the destination application is signed with the in-house certificate.
         String pkgname = providerPkgname(this, Address.CONTENT_URI);
         if (!PkgCert.test(this, pkgname, myCertHash(this))) {
-            logLine("  利用先 Content Provider は自社アプリではない。");
+            logLine("  The target content provider is not served by in-house applications.");
             return;
         }
 
-        // ★ポイント11★ 自社限定Content Providerアプリに開示してよい情報に限りリクエストに含めてよい
         Cursor cursor = null;
         try {
+            // *** POINT 11 *** Sensitive information can be sent since the destination application is in-house one.
             cursor = getContentResolver().query(Address.CONTENT_URI, null, null, null, null);
 
-            // ★ポイント12★ 自社限定Content Providerアプリからの結果であっても、結果データの安全性を確認する
-            // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+            // *** POINT 12 *** Handle the received result data carefully and securely,
+            // even though the data comes from an in-house application.
+            // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
             if (cursor == null) {
                 logLine("  null cursor");
             } else {
@@ -94,27 +95,28 @@ public class InhouseUserActivity extends Activity {
 
         logLine("[Insert]");
 
-        // ★ポイント9★ 独自定義Signature Permissionが自社アプリにより定義されていることを確認する
+        // *** POINT 9 *** Verify if the in-house signature permission is defined by an in-house application.
         String correctHash = myCertHash(this);
         if (!SigPerm.test(this, MY_PERMISSION, correctHash)) {
-            logLine("  独自定義Signature Permissionが自社アプリにより定義されていない。");
+            logLine("  The in-house signature permission is not declared by in-house application.");
             return;
         }
 
-        // ★ポイント10★ 利用先Content Providerアプリの証明書が自社の証明書であることを確認する
+        // *** POINT 10 *** Verify if the destination application is signed with the in-house certificate.
         String pkgname = providerPkgname(this, Address.CONTENT_URI);
         if (!PkgCert.test(this, pkgname, correctHash)) {
-            logLine("  利用先 Content Provider は自社アプリではない。");
+            logLine("  The target content provider is not served by in-house applications.");
             return;
         }
 
-        // ★ポイント11★ 自社限定Content Providerアプリに開示してよい情報に限りリクエストに含めてよい
+        // *** POINT 11 *** Sensitive information can be sent since the destination application is in-house one.
         ContentValues values = new ContentValues();
-        values.put("pref", "東京都");
+        values.put("city", "Tokyo");
         Uri uri = getContentResolver().insert(Address.CONTENT_URI, values);
 
-        // ★ポイント12★ 自社限定Content Providerアプリからの結果であっても、結果データの安全性を確認する
-        // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+        // *** POINT 12 *** Handle the received result data carefully and securely,
+        // even though the data comes from an in-house application.
+        // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
         logLine("  uri:" + uri);
     }
 
@@ -122,29 +124,30 @@ public class InhouseUserActivity extends Activity {
 
         logLine("[Update]");
 
-        // ★ポイント9★ 独自定義Signature Permissionが自社アプリにより定義されていることを確認する
+        // *** POINT 9 *** Verify if the in-house signature permission is defined by an in-house application.
         String correctHash = myCertHash(this);
         if (!SigPerm.test(this, MY_PERMISSION, correctHash)) {
-            logLine("  独自定義Signature Permissionが自社アプリにより定義されていない。");
+            logLine("  The in-house signature permission is not declared by in-house application.");
             return;
         }
 
-        // ★ポイント10★ 利用先Content Providerアプリの証明書が自社の証明書であることを確認する
+        // *** POINT 10 *** Verify if the destination application is signed with the in-house certificate.
         String pkgname = providerPkgname(this, Address.CONTENT_URI);
         if (!PkgCert.test(this, pkgname, correctHash)) {
-            logLine("  利用先 Content Provider は自社アプリではない。");
+            logLine("  The target content provider is not served by in-house applications.");
             return;
         }
 
-        // ★ポイント11★ 自社限定Content Providerアプリに開示してよい情報に限りリクエストに含めてよい
+        // *** POINT 11 *** Sensitive information can be sent since the destination application is in-house one.
         ContentValues values = new ContentValues();
-        values.put("pref", "東京都");
+        values.put("city", "Tokyo");
         String where = "_id = ?";
         String[] args = { "4" };
         int count = getContentResolver().update(Address.CONTENT_URI, values, where, args);
 
-        // ★ポイント12★ 自社限定Content Providerアプリからの結果であっても、結果データの安全性を確認する
-        // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+        // *** POINT 12 *** Handle the received result data carefully and securely,
+        // even though the data comes from an in-house application.
+        // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
         logLine(String.format("  %s records updated", count));
     }
 
@@ -152,25 +155,26 @@ public class InhouseUserActivity extends Activity {
 
         logLine("[Delete]");
 
-        // ★ポイント9★ 独自定義Signature Permissionが自社アプリにより定義されていることを確認する
+        // *** POINT 9 *** Verify if the in-house signature permission is defined by an in-house application.
         String correctHash = myCertHash(this);
         if (!SigPerm.test(this, MY_PERMISSION, correctHash)) {
-            logLine("  独自定義Signature Permissionが自社アプリにより定義されていない。");
+            logLine("  The target content provider is not served by in-house applications.");
             return;
         }
 
-        // ★ポイント10★ 利用先Content Providerアプリの証明書が自社の証明書であることを確認する
+        // *** POINT 10 *** Verify if the destination application is signed with the in-house certificate.
         String pkgname = providerPkgname(this, Address.CONTENT_URI);
         if (!PkgCert.test(this, pkgname, correctHash)) {
-            logLine("  利用先 Content Provider は自社アプリではない。");
+            logLine("  The target content provider is not served by in-house applications.");
             return;
         }
 
-        // ★ポイント11★ 自社限定Content Providerアプリに開示してよい情報に限りリクエストに含めてよい
+        // *** POINT 11 *** Sensitive information can be sent since the destination application is in-house one.
         int count = getContentResolver().delete(Address.CONTENT_URI, null, null);
 
-        // ★ポイント12★ 自社限定Content Providerアプリからの結果であっても、結果データの安全性を確認する
-        // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+        // *** POINT 12 *** Handle the received result data carefully and securely,
+        // even though the data comes from an in-house application.
+        // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
         logLine(String.format("  %s records deleted", count));
     }
 

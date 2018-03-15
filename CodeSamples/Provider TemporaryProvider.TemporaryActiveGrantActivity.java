@@ -9,7 +9,7 @@ import android.widget.Toast;
 
 public class TemporaryActiveGrantActivity extends Activity {
 
-    // User Activityに関する情報
+    // User Activity Information
     private static final String TARGET_PACKAGE =  "org.jssec.android.provider.temporaryuser";
     private static final String TARGET_ACTIVITY = "org.jssec.android.provider.temporaryuser.TemporaryUserActivity";
 
@@ -19,23 +19,23 @@ public class TemporaryActiveGrantActivity extends Activity {
         setContentView(R.layout.active_grant);
     }
 
-    // Content Provider側アプリが能動的に他のアプリにアクセス許可を与えるケース
+    // In the case that Content Provider application grants access permission to other application actively.
     public void onSendClick(View view) {
         try {
             Intent intent = new Intent();
 
-            // ★ポイント5★ 一時的にアクセスを許可するURIをIntentに指定する
+            // *** POINT 5 *** Specify URI for the intent to grant temporary access.
             intent.setData(TemporaryProvider.Address.CONTENT_URI);
 
-            // ★ポイント6★ 一時的に許可するアクセス権限をIntentに指定する
+            // *** POINT 6 *** Specify access rights for the intent to grant temporary access.
             intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-            // ★ポイント7★ 一時的にアクセスを許可するアプリに明示的Intentを送信する
+            // *** POINT 7 *** Send the explicit intent to an application to grant temporary access.
             intent.setClassName(TARGET_PACKAGE, TARGET_ACTIVITY);
             startActivity(intent);
 
         } catch (ActivityNotFoundException e) {
-            Toast.makeText(this, "User Activityが見つからない。", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "User Activity not found.", Toast.LENGTH_LONG).show();
         }
     }
 }

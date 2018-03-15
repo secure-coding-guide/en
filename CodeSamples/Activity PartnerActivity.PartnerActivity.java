@@ -12,20 +12,20 @@ import android.widget.Toast;
 
 public class PartnerActivity extends Activity {
     
-    // ★ポイント4★ 利用元アプリの証明書がホワイトリストに登録されていることを確認する
+    // *** POINT 4 *** Verify the requesting application's certificate through a predefined whitelist.
     private static PkgCertWhitelists sWhitelists = null;
     private static void buildWhitelists(Context context) {
         boolean isdebug = Utils.isDebuggable(context);
         sWhitelists = new PkgCertWhitelists();
         
-        // パートナーアプリ org.jssec.android.activity.partneruser の証明書ハッシュ値を登録
+        // Register certificate hash value of partner application org.jssec.android.activity.partneruser.
         sWhitelists.add("org.jssec.android.activity.partneruser", isdebug ?
-                // debug.keystoreの"androiddebugkey"の証明書ハッシュ値
+                // Certificate hash value of "androiddebugkey" in the debug.keystore.
                 "0EFB7236 328348A9 89718BAD DF57F544 D5CCB4AE B9DB34BC 1E29DD26 F77C8255" :
-                // keystoreの"partner key"の証明書ハッシュ値
+                // Certificate hash value of "partner key" in the keystore.
                 "1F039BB5 7861C27A 3916C778 8E78CE00 690B3974 3EB8259F E2627B8D 4C0EC35A");
         
-        // 以下同様に他のパートナーアプリを登録...
+        // Register the other partner applications in the same way.
     }
     private static boolean checkPartner(Context context, String pkgname) {
         if (sWhitelists == null) buildWhitelists(context);
@@ -36,24 +36,26 @@ public class PartnerActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        
-        // ★ポイント4★ 利用元アプリの証明書がホワイトリストに登録されていることを確認する
+            
+        // *** POINT 4 *** Verify the requesting application's certificate through a predefined whitelist.
         if (!checkPartner(this, getCallingActivity().getPackageName())) {
-            Toast.makeText(this, "利用元アプリはパートナーアプリではない。", Toast.LENGTH_LONG).show();
+            Toast.makeText(this,
+                    "Requesting application is not a partner application.",
+                    Toast.LENGTH_LONG).show();
             finish();
             return;
         }
         
-        // ★ポイント5★ パートナーアプリからのIntentであっても、受信Intentの安全性を確認する
-        // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
-        Toast.makeText(this, "パートナーアプリからアクセスあり", Toast.LENGTH_LONG).show();
+        // *** POINT 5 *** Handle the received intent carefully and securely, even though the intent was sent from a partner application.
+        // Omitted, since this is a sample. Refer to "3.2 Handling Input Data Carefully and Securely."
+        Toast.makeText(this, "Accessed by Partner App", Toast.LENGTH_LONG).show();
     }
     
     public void onReturnResultClick(View view) {
 
-        // ★ポイント6★ パートナーアプリに開示してよい情報に限り返送してよい
+        // *** POINT 6 *** Only return Information that is granted to be disclosed to a partner application.
         Intent intent = new Intent();
-        intent.putExtra("RESULT", "パートナーアプリに開示してよい情報");
+        intent.putExtra("RESULT", "Information for partner applications");
         setResult(RESULT_OK, intent);
         finish();
     }

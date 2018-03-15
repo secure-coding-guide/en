@@ -37,7 +37,7 @@ public class MyAutofillService extends AutofillService {
         StructureParser parser = new StructureParser(structure);
         parser.parseForSave();
 
-        //ï€ë∂èàóù
+        // Processing for storing
         Database db = new Database(this);
         db.add(parser.getValue(View.AUTOFILL_HINT_USERNAME), parser.getValue(View.AUTOFILL_HINT_PASSWORD));
     }

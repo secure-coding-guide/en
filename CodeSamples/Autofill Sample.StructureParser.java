@@ -48,7 +48,7 @@ final public class StructureParser {
         if (viewNode.getAutofillHints() != null) {
             String[] filteredHints = filterSupportedHints(viewNode.getAutofillHints());
             if (filteredHints != null && filteredHints.length == 1) {
-                //サンプルではHintsが1つ指定されている場合のみ扱う
+                // This is just a sample for a single 'Hints'.
 //                printLog("StructureParser::parse() filteredHints=" + filteredHints[0]);
                 if (forFill) {
                     if (filteredHints[0].equals(AUTOFILL_HINT_USERNAME)) {
@@ -91,7 +91,7 @@ final public class StructureParser {
     }
 
 
-    //このサービスが対象とするhintsを指定
+    // Check if hints contains supported hints.
     static private String[] filterSupportedHints(String[] hints) {
         if (Arrays.asList(hints).contains(AUTOFILL_HINT_USERNAME) || Arrays.asList(hints).contains(View.AUTOFILL_HINT_PASSWORD)) {
             return hints;
@@ -99,8 +99,7 @@ final public class StructureParser {
         return new String[] {};
     }
 
-    //デバッグ用の出力
-    //AutofillServiceは重要な情報を扱うため、本来はこのようなデバッグ用の出力をするべきではない
+    // Output just for debug. It should be removed at release build.
     private void dumpNode(ViewNode viewNode, boolean forFill, int layer) {
         String autofillStringValue = "N/A";
         AutofillValue value = viewNode.getAutofillValue();

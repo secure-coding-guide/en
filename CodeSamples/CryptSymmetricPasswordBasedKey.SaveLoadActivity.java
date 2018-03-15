@@ -87,7 +87,7 @@ public class SaveLoadActivity extends Activity {
     private void clearEditableText(Editable editable) {
         if (editable != null) {
             int length = editable.length();
-            // editableの内部バッファをクリアする場合、文字列の後ろからreplace()で上書きすることによって、意図しない文字のコピーを抑制できる
+            // When you clear the editable buffer, overwriting it from the back of a string with replace(), it is possible to suppress the copy of unintended character.
             for (int i = 0; i < length; i++) {
                 editable.replace(length - i - 1, length - i, "?");
             }

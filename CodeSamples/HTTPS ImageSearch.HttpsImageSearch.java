@@ -17,11 +17,11 @@ public abstract class HttpsImageSearch extends AsyncTask<String, Void, Object> {
     protected Object doInBackground(String... params) {
         byte[] responseArray;
         // --------------------------------------------------------
-        // 通信1回目：画像検索する
+        // Communication 1st time : Execute image search
         // --------------------------------------------------------
             
-        // ★ポイント1★ URIはhttps://で始める
-        // ★ポイント2★ 送信データにセンシティブな情報を含めてよい
+        // *** POINT 1 *** URI starts with https://.
+        // *** POINT 2 *** Sensitive information may be contained in send data.
         StringBuilder s = new StringBuilder();
         for (String param : params){
             s.append(param);
@@ -37,8 +37,9 @@ public abstract class HttpsImageSearch extends AsyncTask<String, Void, Object> {
             return null;
         }
 
-        // ★ポイント3★ HTTPS接続したサーバーからのデータであっても、受信データの安全性を確認する
-        // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+        // *** POINT 3 *** Handle the received data carefully and securely,
+        // even though the data was sent from the server connected by HTTPS.
+        // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
         String image_url;
         try {
             String json = new String(responseArray);
@@ -49,11 +50,11 @@ public abstract class HttpsImageSearch extends AsyncTask<String, Void, Object> {
         }
             
         // --------------------------------------------------------
-        // 通信2回目：画像を取得する
+        // Communication 2nd time : Get image
         // --------------------------------------------------------
             
-        // ★ポイント1★ URIはhttps://で始める
-        // ★ポイント2★ 送信データにセンシティブな情報を含めてよい
+        // *** POINT 1 *** URI starts with https://.
+        // *** POINT 2 *** Sensitive information may be contained in send data.
         if (image_url != null ) {
             responseArray = getByteArray(image_url);
             if (responseArray == null) {
@@ -95,14 +96,14 @@ public abstract class HttpsImageSearch extends AsyncTask<String, Void, Object> {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    // 例外処理は割愛
+                    // This is sample, so omit the exception process
                 }
             }
             if (responseArray != null) {
                 try {
                     responseArray.close();
                 } catch (IOException e) {
-                    // 例外処理は割愛
+                    // This is sample, so omit the exception process
                 }
             }
         }

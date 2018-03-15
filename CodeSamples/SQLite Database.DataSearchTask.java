@@ -12,7 +12,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 
-//データ検索タスク
+//Data search task
 public class DataSearchTask extends AsyncTask<String, Void, Cursor> {
     private MainActivity    mActivity;
     private SQLiteDatabase      mSampleDB;
@@ -31,13 +31,13 @@ public class DataSearchTask extends AsyncTask<String, Void, Cursor> {
 
         Cursor cur;
 
-        //★ポイント3★ アプリ要件に従って入力値をチェックする
+        //*** POINT 3 *** Validate the input value according the application requirements.
         if (!DataValidator.validateData(idno, name, info))
         {
             return null;
         }
 
-        //引数が全部nullだったら全件検索する）
+        //When all parameters are null, execute all search
         if ((idno == null || idno.length() == 0) &&
                 (name == null || name.length() == 0) &&
                 (info == null || info.length() == 0) ) {
@@ -50,12 +50,12 @@ public class DataSearchTask extends AsyncTask<String, Void, Cursor> {
             return cur;
         }
 
-        //Noが指定されていたらNoで検索
+        //When No is specified, execute searching by No  
         if (idno != null && idno.length() > 0) {
             String selectionArgs[] = {idno};
 
             try {
-                //★ポイント2★ プレースホルダを使用する
+                //*** POINT 2 *** Use place holder.
                 cur = mSampleDB.query(CommonData.TABLE_NAME, cols, "idno = ?", selectionArgs, null, null, null);
             } catch (SQLException e) {
                 Log.e(DataSearchTask.class.toString(), mActivity.getString(R.string.SEARCHING_ERROR_MESSAGE));
@@ -64,11 +64,11 @@ public class DataSearchTask extends AsyncTask<String, Void, Cursor> {
             return cur;
         }
 
-        //Nameが指定されていたらNameで完全一致検索
+        //When Name is specified, execute perfect match search by Name
         if (name != null && name.length() > 0) {
             String selectionArgs[] = {name};
             try {
-                //★ポイント2★ プレースホルダを使用する
+                //*** POINT 2 *** Use place holder.
                 cur = mSampleDB.query(CommonData.TABLE_NAME, cols, "name = ?", selectionArgs, null, null, null);
             } catch (SQLException e) {
                 Log.e(DataSearchTask.class.toString(), mActivity.getString(R.string.SEARCHING_ERROR_MESSAGE));
@@ -77,14 +77,14 @@ public class DataSearchTask extends AsyncTask<String, Void, Cursor> {
             return cur;
         }
 
-        //それ以外の場合はinfoを条件にして部分一致検索
-        String argString = info.replaceAll("@", "@@"); //入力として受け取ったinfo内の$をエスケープ
-        argString = argString.replaceAll("%", "@%"); //入力として受け取ったinfo内の%をエスケープ
-        argString = argString.replaceAll("_", "@_"); //入力として受け取ったinfo内の_をエスケープ
+        //Other than above, execute partly match searching with the condition of info.
+        String argString = info.replaceAll("@", "@@"); //Escape $ in info which was received as input.
+        argString = argString.replaceAll("%", "@%"); //Escape % in info which was received as input.
+        argString = argString.replaceAll("_", "@_"); //Escape _ in info which was received as input.
         String selectionArgs[] = {argString};
 
         try {
-            //★ポイント2★ プレースホルダを使用する
+            //*** POINT 2 *** Use place holder.
             cur = mSampleDB.query(CommonData.TABLE_NAME, cols, "info LIKE '%' || ? || '%' ESCAPE '@'", selectionArgs, null, null, null);
         } catch (SQLException e) {
             Log.e(DataSearchTask.class.toString(), mActivity.getString(R.string.SEARCHING_ERROR_MESSAGE));

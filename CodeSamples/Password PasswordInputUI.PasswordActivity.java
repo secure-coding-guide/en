@@ -15,42 +15,41 @@ import android.widget.Toast;
 
 public class PasswordActivity extends Activity {
 
-    // 状態保存用のキー
+    // Key to save the state
     private static final String KEY_DUMMY_PASSWORD = "KEY_DUMMY_PASSWORD";
 
-    // Activity内のView
+    // View inside Activity
     private EditText mPasswordEdit;
     private CheckBox mPasswordDisplayCheck;
 
-    // パスワードがダミー表示かを表すフラグ
+    // Flag to show whether password is dummy display or not
     private boolean mIsDummyPassword;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.password_activity);
-
-        // スクリーンキャプチャを無効化する
+        // Set Disabling Screen Capture
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
 
-        // Viewの取得
+        // Get View
         mPasswordEdit = (EditText) findViewById(R.id.password_edit);
         mPasswordDisplayCheck = (CheckBox) findViewById(R.id.password_display_check);
 
-        // 前回入力パスワードがあるか
+        // Whether last Input password exist or not.
         if (getPreviousPassword() != null) {
-            // ★ポイント4★ Activity初期表示時に前回入力したパスワードがある場合、
-            // 前回入力パスワードの桁数を推測されないよう固定桁数の●文字でダミー表示する
+            // *** POINT 4 *** In the case there is the last input password in an initial display,
+            // display the fixed digit numbers of black dot as dummy in order not that the digits number of last password is guessed.
 
-            // 表示はダミーパスワードにする
+            // Display should be dummy password.
             mPasswordEdit.setText("**********");
-            // パスワード入力時にダミーパスワードをクリアするため、テキスト変更リスナーを設定
+            // To clear the dummy password when inputting password, set text change listener.
             mPasswordEdit.addTextChangedListener(new PasswordEditTextWatcher());
-            // ダミーパスワードフラグを設定する
+            // Set dummy password flag
             mIsDummyPassword = true;
         }
 
-        // パスワードを表示するオプションのチェック変更リスナーを設定
+        // Set a listner to change check state of password display option.
         mPasswordDisplayCheck
                 .setOnCheckedChangeListener(new OnPasswordDisplayCheckedChangeListener());
     }
@@ -59,8 +58,8 @@ public class PasswordActivity extends Activity {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        // 画面の縦横変更でActivityが再生成されないよう指定した場合には不要
-        // Activityの状態保存
+        // Unnecessary when specifying not to regenerate Activity by the change in screen aspect ratio.
+        // Save Activity state
         outState.putBoolean(KEY_DUMMY_PASSWORD, mIsDummyPassword);
     }
 
@@ -68,128 +67,128 @@ public class PasswordActivity extends Activity {
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-        // 画面の縦横変更でActivityが再生成されないよう指定した場合には不要
-        // Activityの状態の復元
+        // Unnecessary when specifying not to regenerate Activity by the change in screen aspect ratio.
+        // Restore Activity state
         mIsDummyPassword = savedInstanceState.getBoolean(KEY_DUMMY_PASSWORD);
     }
 
     /**
-     * パスワードを入力した場合の処理
+     * Process in case password is input
      */
     private class PasswordEditTextWatcher implements TextWatcher {
 
         public void beforeTextChanged(CharSequence s, int start, int count,
                 int after) {
-            // 未使用
+            // Not used
         }
 
         public void onTextChanged(CharSequence s, int start, int before,
                 int count) {
-            // ★ポイント6★ 前回入力パスワードをダミー表示しているとき、ユーザーがパスワードを入力しようと
-            // した場合、前回入力パスワードをクリアし、ユーザーの入力を新たなパスワードとして扱う
+            // *** POINT 6 *** When last Input password is displayed as dummy, in the case an user tries to input password,
+            // Clear the last Input password, and treat new user input as new password.
             if (mIsDummyPassword) {
-                // ダミーパスワードフラグを設定する
+                // Set dummy password flag
                 mIsDummyPassword = false;
-                // パスワードを入力した文字だけにする
+                // Trim space
                 CharSequence work = s.subSequence(start, start + count);
                 mPasswordEdit.setText(work);
-                // カーソル位置が最初に戻るので最後にする
+                // Cursor position goes back the beginning, so bring it at the end.
                 mPasswordEdit.setSelection(work.length());
             }
         }
 
         public void afterTextChanged(Editable s) {
-            // 未使用
+            // Not used
         }
 
     }
 
     /**
-     * パスワードの表示オプションチェックを変更した場合の処理
+     * Process when check of password display option is changed.
      */
     private class OnPasswordDisplayCheckedChangeListener implements
             OnCheckedChangeListener {
 
         public void onCheckedChanged(CompoundButton buttonView,
                 boolean isChecked) {
-            // ★ポイント5★ 前回入力パスワードをダミー表示しているとき、「パスワードを表示」した場合、
-            // 前回入力パスワードをクリアして、新規にパスワードを入力できる状態とする
+            // *** POINT 5 ***  When the dummy password is displayed and the "Show password" button is pressed,
+            // clear the last input password and provide the state for new password input.
             if (mIsDummyPassword && isChecked) {
-                // ダミーパスワードフラグを設定する
+                // Set dummy password flag
                 mIsDummyPassword = false;
-                // パスワードを空表示にする
+                // Set password empty
                 mPasswordEdit.setText(null);
             }
 
-            // カーソル位置が最初に戻るので今のカーソル位置を記憶する
+            // Cursor position goes back the beginning, so memorize the current cursor position.
             int pos = mPasswordEdit.getSelectionStart();
 
-            // ★ポイント2★ パスワードを平文表示するオプションを用意する
-            // InputTypeの作成
+            // *** POINT 2 *** Provide the option to display the password in a plain text
+            // Create InputType
             int type = InputType.TYPE_CLASS_TEXT;
             if (isChecked) {
-                // チェックON時は平文表示
+                // Plain display when check is ON.
                 type |= InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
             } else {
-                // チェックOFF時はマスク表示
+                // Masked display when check is OFF.
                 type |= InputType.TYPE_TEXT_VARIATION_PASSWORD;
             }
 
-            // パスワードEditTextにInputTypeを設定
+            // Set InputType to password EditText
             mPasswordEdit.setInputType(type);
 
-            // カーソル位置を設定する
+            // Set cursor position
             mPasswordEdit.setSelection(pos);
         }
 
     }
 
-    // 以下のメソッドはアプリに合わせて実装すること
+    // Implement the following method depends on application 
 
     /**
-     * 前回入力パスワードを取得する
+     * Get the last Input password
      *
-     * @return 前回入力パスワード
+     * @return Last Input password
      */
     private String getPreviousPassword() {
-        // 保存パスワードを復帰させたい場合にパスワード文字列を返す
-        // パスワードを保存しない用途ではnullを返す
+        // When need to restore the saved password, return password character string
+        // For the case password is not saved, return null
         return "hirake5ma";
     }
 
     /**
-     * キャンセルボタンの押下処理
+     * Process when cancel button is clicked 
      *
      * @param view
      */
     public void onClickCancelButton(View view) {
-        // Activityを閉じる
+        // Close Activity
         finish();
     }
 
     /**
-     * OKボタンの押下処理
+     * Process when OK button is clicked
      *
      * @param view
      */
     public void onClickOkButton(View view) {
-        // passwordを保存するとか認証に使うとか必要な処理を行う
+        // Execute necessary processes like saving password or using for authentication
 
         String password = null;
 
         if (mIsDummyPassword) {
-            // 最後までダミーパスワード表示だった場合は前回入力パスワードを確定パスワードとする
+            // When dummy password is displayed till the final moment, grant last iInput password as fixed password.
             password = getPreviousPassword();
         } else {
-            // ダミーパスワード表示じゃない場合はユーザー入力パスワードを確定パスワードとする
+            // In case of not dummy password display, grant the user input password as fixed password.
             password = mPasswordEdit.getText().toString();
         }
 
-        // パスワードをToast表示する
+        // Display password by Toast
         Toast.makeText(this, "password is \"" + password + "\"",
                 Toast.LENGTH_SHORT).show();
 
-        // Activityを閉じる
+        // Close Activity
         finish();
     }
 }

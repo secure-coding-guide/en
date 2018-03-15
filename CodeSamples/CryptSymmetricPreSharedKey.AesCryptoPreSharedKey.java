@@ -14,20 +14,20 @@ import javax.crypto.spec.SecretKeySpec;
 
 public final class AesCryptoPreSharedKey {
 
-    // ★ポイント1★ 明示的に暗号モードとパディングを設定する
-    // ★ポイント2★ 脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
-    // Cipher クラスの getInstance に渡すパラメータ （/[暗号アルゴリズム]/[ブロック暗号モード]/[パディングルール])
-    // サンプルでは、暗号アルゴリズム=AES、ブロック暗号モード=CBC、パディングルール=PKCS7Padding
+    // *** POINT 1 *** Explicitly specify the encryption mode and the padding.
+    // *** POINT 2 *** Use strong encryption methods (specifically, technologies that meet the relevant criteria), including algorithms, block cipher modes, and padding modes.
+    // Parameters passed to getInstance method of the Cipher class: Encryption algorithm, block encryption mode, padding rule
+    // In this sample, we choose the following parameter values: encryption algorithm=AES, block encryption mode=CBC, padding rule=PKCS7Padding
     private static final String TRANSFORMATION = "AES/CBC/PKCS7Padding";
 
-    // 暗号アルゴリズム
+    // Encryption algorithm
     private static final String KEY_ALGORITHM = "AES";
 
-    // IVのバイト長
+    // Length of IV in bytes
     public static final int IV_LENGTH_BYTES = 16;
 
-    // ★ポイント3★ 十分安全な長さを持つ鍵を利用する
-    // 鍵長チェック
+    // *** POINT 3 *** Use a key of length sufficient to guarantee the strength of encryption
+    // Check the length of the key
     private static final int MIN_KEY_LENGTH_BYTES = 16;
 
     private byte[] mIV = null;
@@ -47,8 +47,8 @@ public final class AesCryptoPreSharedKey {
         byte[] encrypted = null;
 
         try {
-            // ★ポイント1★ 明示的に暗号モードとパディングを設定する
-            // ★ポイント2★ 脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
+            // *** POINT 1 *** Explicitly specify the encryption mode and the padding.
+            // *** POINT 2 *** Use strong encryption methods (specifically, technologies that meet the relevant criteria), including algorithms, block cipher modes, and padding modes.
             Cipher cipher = Cipher.getInstance(TRANSFORMATION);
 
             SecretKey secretKey = generateKey(keyData);
@@ -73,8 +73,8 @@ public final class AesCryptoPreSharedKey {
         byte[] plain = null;
 
         try {
-            // ★ポイント1★ 明示的に暗号モードとパディングを設定する
-            // ★ポイント2★ 脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
+            // *** POINT 1 *** Explicitly specify the encryption mode and the padding.
+            // *** POINT 2 *** Use strong encryption methods (specifically, technologies that meet the relevant criteria), including algorithms, block cipher modes, and padding modes.
             Cipher cipher = Cipher.getInstance(TRANSFORMATION);
 
             SecretKey secretKey = generateKey(keyData);
@@ -100,9 +100,9 @@ public final class AesCryptoPreSharedKey {
         SecretKey secretKey = null;
 
         try {
-            // ★ポイント3★ 十分安全な長さを持つ鍵を利用する
+            // *** POINT 3 *** Use a key of length sufficient to guarantee the strength of encryption
             if (keyData.length >= MIN_KEY_LENGTH_BYTES) {
-                // ★ポイント2★ 脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
+                // *** POINT 2 *** Use strong encryption methods (specifically, technologies that meet the relevant criteria), including algorithms, block cipher modes, and padding modes.
                 secretKey = new SecretKeySpec(keyData, KEY_ALGORITHM);
             }
         } catch (IllegalArgumentException e) {

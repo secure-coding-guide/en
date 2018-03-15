@@ -40,12 +40,12 @@ public class ExternalUserActivity extends Activity {
         try {
             startActivity(intent);
         } catch (ActivityNotFoundException e) {
-            mFileView.setText("(File Activity がありませんでした)");
+            mFileView.setText("(File Activity does not exist)");
         }
     }
 
     /**
-     * ファイルActivityの呼び出し処理
+     * Call file Activity process
      *
      * @param view
      */
@@ -54,7 +54,7 @@ public class ExternalUserActivity extends Activity {
     }
 
     /**
-     * ファイルの読み込み処理
+     * Read file process
      *
      * @param view
      */
@@ -68,40 +68,40 @@ public class ExternalUserActivity extends Activity {
 
             fis.read(data);
 
-            // ★ポイント3★ ファイルに格納された情報に対しては、その入手先に関わらず内容の安全性を確認する
-            // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+            // *** POINT 3 *** Regarding the information to be stored in files, handle file data carefully and securely.
+            // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
             String str = new String(data);
 
             mFileView.setText(str);
         } catch (FileNotFoundException e) {
             mFileView.setText(R.string.file_view);
         } catch (IOException e) {
-            android.util.Log.e("ExternalUserActivity", "ファイルの読込に失敗しました");
+            android.util.Log.e("ExternalUserActivity", "failed to read file");
         } finally {
             if (fis != null) {
                 try {
                     fis.close();
                 } catch (IOException e) {
-                    android.util.Log.e("ExternalUserActivity", "ファイルの終了に失敗しました");
+                    android.util.Log.e("ExternalUserActivity", "failed to close file");
                 }
             }
         }
     }
 
     /**
-     * ファイルの追記処理
+     * Rewrite file process
      *
      * @param view
      */
     public void onWriteFileClick(View view) {
 
-        // ★ポイント4★ 利用側のアプリで書き込みを行わない仕様にする
-        // ただし、悪意のあるアプリが上書き・削除などを行うことを想定してアプリの設計を行うこと
+        // *** POINT 4 *** Writing file by the requesting application should be prohibited as the specification.
+        // Application should be designed supposing malicious application may overwrite or delete file.
 
         final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                 this);
-        alertDialogBuilder.setTitle("ポイント4");
-        alertDialogBuilder.setMessage("利用側のアプリで書き込みを行わないこと");
+        alertDialogBuilder.setTitle("POINT 4");
+        alertDialogBuilder.setMessage("Do not write in calling appllication.");
         alertDialogBuilder.setPositiveButton("OK",
                 new DialogInterface.OnClickListener() {
 
@@ -124,7 +124,7 @@ public class ExternalUserActivity extends Activity {
             File file = new File(ctx.getExternalFilesDir(TARGET_TYPE), filename);
             path = file.getPath();
         } catch (NameNotFoundException e) {
-            android.util.Log.e("ExternalUserActivity", "ファイルがありません");
+            android.util.Log.e("ExternalUserActivity", "no file");
         }
         return path;
     }

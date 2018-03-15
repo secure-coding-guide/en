@@ -15,33 +15,34 @@ import android.widget.TextView;
 
 public class PartnerUserActivity extends Activity {
 
-    // 利用先のContent Provider情報
+    // Target Content Provider Information
     private static final String AUTHORITY = "org.jssec.android.provider.partnerprovider";
     private interface Address {
         public static final String PATH = "addresses";
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/" + PATH);
     }
 
-    // ★ポイント5★ 利用先パートナー限定Content Providerアプリの証明書がホワイトリストに登録されていることを確認する
+    // *** POINT 4 *** Verify if the certificate of the target application has been registered in the own white list.
     private static PkgCertWhitelists sWhitelists = null;
     private static void buildWhitelists(Context context) {
         boolean isdebug = Utils.isDebuggable(context);
         sWhitelists = new PkgCertWhitelists();
 
-        // パートナー限定Content Providerアプリ org.jssec.android.provider.partnerprovider の証明書ハッシュ値を登録
+        // Register certificate hash value of partner application org.jssec.android.provider.partnerprovider.
         sWhitelists.add("org.jssec.android.provider.partnerprovider", isdebug ?
-                // debug.keystoreの"androiddebugkey"の証明書ハッシュ値
+                // Certificate hash value of "androiddebugkey" in the debug.keystore.
                 "0EFB7236 328348A9 89718BAD DF57F544 D5CCB4AE B9DB34BC 1E29DD26 F77C8255" :
-                // keystoreの"my company key"の証明書ハッシュ値
+                // Certificate hash value of "partner key" in the keystore.
                 "D397D343 A5CBC10F 4EDDEB7C A10062DE 5690984F 1FB9E88B D7B3A7C2 42E142CA");
-
-        // 以下同様に他のパートナー限定Content Providerアプリを登録...
+        
+        // Register following other partner applications in the same way.
     }
     private static boolean checkPartner(Context context, String pkgname) {
         if (sWhitelists == null) buildWhitelists(context);
         return sWhitelists.test(context, pkgname);
     }
-    // uriをAUTHORITYとするContent Providerのパッケージ名を取得
+    
+    // Get package name of target content provider.
     private String providerPkgname(Uri uri) {
         String pkgname = null;
         ProviderInfo pi = getPackageManager().resolveContentProvider(uri.getAuthority(), 0);
@@ -53,19 +54,20 @@ public class PartnerUserActivity extends Activity {
 
         logLine("[Query]");
 
-        // ★ポイント5★ 利用先パートナー限定Content Providerアプリの証明書がホワイトリストに登録されていることを確認する
+        // *** POINT 4 *** Verify if the certificate of the target application has been registered in the own white list.
         if (!checkPartner(this, providerPkgname(Address.CONTENT_URI))) {
-            logLine("  利用先 Content Provider アプリはホワイトリストに登録されていない。");
+            logLine("  The target content provider is not served by partner applications.");
             return;
         }
 
-        // ★ポイント6★ パートナー限定Content Providerアプリに開示してよい情報に限りリクエストに含めてよい
         Cursor cursor = null;
         try {
+            // *** POINT 5 *** Information that is granted to disclose to partner applications can be sent.
             cursor = getContentResolver().query(Address.CONTENT_URI, null, null, null, null);
 
-            // ★ポイント7★ パートナー限定Content Providerアプリからの結果であっても、結果データの安全性を確認する
-            // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+            // *** POINT 6 *** Handle the received result data carefully and securely,
+            // even though the data comes from a partner application.
+            // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
             if (cursor == null) {
                 logLine("  null cursor");
             } else {
@@ -85,19 +87,20 @@ public class PartnerUserActivity extends Activity {
 
         logLine("[Insert]");
 
-        // ★ポイント5★ 利用先パートナー限定Content Providerアプリの証明書がホワイトリストに登録されていることを確認する
+        // *** POINT 4 *** Verify if the certificate of the target application has been registered in the own white list.
         if (!checkPartner(this, providerPkgname(Address.CONTENT_URI))) {
-            logLine("  利用先 Content Provider アプリはホワイトリストに登録されていない。");
+            logLine("  The target content provider is not served by partner applications.");
             return;
         }
 
-        // ★ポイント6★ パートナー限定Content Providerアプリに開示してよい情報に限りリクエストに含めてよい
+        // *** POINT 5 *** Information that is granted to disclose to partner applications can be sent.
         ContentValues values = new ContentValues();
-        values.put("pref", "東京都");
+        values.put("city", "Tokyo");
         Uri uri = getContentResolver().insert(Address.CONTENT_URI, values);
 
-        // ★ポイント7★ パートナー限定Content Providerアプリからの結果であっても、結果データの安全性を確認する
-        // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+        // *** POINT 6 *** Handle the received result data carefully and securely,
+        // even though the data comes from a partner application.
+        // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
         logLine("  uri:" + uri);
     }
 
@@ -105,21 +108,22 @@ public class PartnerUserActivity extends Activity {
 
         logLine("[Update]");
 
-        // ★ポイント5★ 利用先パートナー限定Content Providerアプリの証明書がホワイトリストに登録されていることを確認する
+        // *** POINT 4 *** Verify if the certificate of the target application has been registered in the own white list.
         if (!checkPartner(this, providerPkgname(Address.CONTENT_URI))) {
-            logLine("  利用先 Content Provider アプリはホワイトリストに登録されていない。");
+            logLine("  The target content provider is not served by partner applications.");
             return;
         }
 
-        // ★ポイント6★ パートナー限定Content Providerアプリに開示してよい情報に限りリクエストに含めてよい
+        // *** POINT 5 *** Information that is granted to disclose to partner applications can be sent.
         ContentValues values = new ContentValues();
-        values.put("pref", "東京都");
+        values.put("city", "Tokyo");
         String where = "_id = ?";
         String[] args = { "4" };
         int count = getContentResolver().update(Address.CONTENT_URI, values, where, args);
 
-        // ★ポイント7★ パートナー限定Content Providerアプリからの結果であっても、結果データの安全性を確認する
-        // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+        // *** POINT 6 *** Handle the received result data carefully and securely,
+        // even though the data comes from a partner application.
+        // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
         logLine(String.format("  %s records updated", count));
     }
 
@@ -127,17 +131,18 @@ public class PartnerUserActivity extends Activity {
 
         logLine("[Delete]");
 
-        // ★ポイント5★ 利用先パートナー限定Content Providerアプリの証明書がホワイトリストに登録されていることを確認する
+        // *** POINT 4 *** Verify if the certificate of the target application has been registered in the own white list.
         if (!checkPartner(this, providerPkgname(Address.CONTENT_URI))) {
-            logLine("  利用先 Content Provider アプリはホワイトリストに登録されていない。");
+            logLine("  The target content provider is not served by partner applications.");
             return;
         }
 
-        // ★ポイント6★ パートナー限定Content Providerアプリに開示してよい情報に限りリクエストに含めてよい
+        // *** POINT 5 *** Information that is granted to disclose to partner applications can be sent.
         int count = getContentResolver().delete(Address.CONTENT_URI, null, null);
 
-        // ★ポイント7★ パートナー限定Content Providerアプリからの結果であっても、結果データの安全性を確認する
-        // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+        // *** POINT 6 *** Handle the received result data carefully and securely,
+        // even though the data comes from a partner application.
+        // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
         logLine(String.format("  %s records deleted", count));
     }
 

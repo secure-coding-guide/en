@@ -2,19 +2,19 @@ package org.jssec.android.service.inhouseservice.messenger;
 
 public class CommonValue {
     /**
-     * クライアントとして登録する時のコマンド。
-     * Message.replyToフィールドにクライアントのMessengerをセットする。 
+     * Command to register as a client
+     * Set Messenger to Message.replyTo field 
      */
     public static final int MSG_REGISTER_CLIENT = 1;
 
     /**
-     * クライアントの登録解除を行う場合のコマンド。
-     * Message.replyToフィールドにクライアントのMessengerをセットする。 
+     * Command to unregister a client
+     * Set Messenger to Message.replyTo field  
      */
     public static final int MSG_UNREGISTER_CLIENT = 2;
 
     /**
-     * Serviceの保持している値を、登録されているクライアントに送信するコマンド。
+     * Command to send data to registered clients
      */
     public static final int MSG_SET_VALUE = 3;
 }

@@ -53,7 +53,7 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // ユーザー識別用IDをサーバーから取得する
+        // Fetch user ID from serverFetch user ID from server
         new GetDataAsyncTask().execute();
 
         findViewById(R.id.buttonStart).setEnabled(false);
@@ -76,20 +76,20 @@ public class MainActivity extends FragmentActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.action_show_pp:
-            // ★ポイント1★ ユーザーがアプリ・プライバシーポリシーを確認できる手段を用意する
+            // *** POINT 1 *** Provide methods by which the user can review the application privacy policy.
             Intent intent = new Intent();
             intent.setClass(this, WebViewAssetsActivity.class);
             startActivity(intent);
             return true;
         case R.id.action_del_id:
-            // ★ポイント2★ 送信した情報をユーザー操作により削除する手段を用意する
+            // *** POINT 2 *** Provide methods by which transmitted data can be deleted by user operations.
             new sendDataAsyncTack().execute(DEL_ID_URI, UserId);
             return true;
         case R.id.action_donot_send_id:
-            // ★ポイント3★ ユーザー操作により利用者情報の送信を停止する手段を用意する
+            // *** POINT 3 *** Provide methods by which transmitting data can be stopped by user operations.
 
-            // 本サンプルでは利用者情報を送信しない場合、ユーザーに提供する機能が無くなるため
-            // この段階でアプリを終了する。この処理はアプリ毎の都合に合わせて変更すること。
+            // In this sample application if the user data cannot be sent by user operations,
+            // finish the application because we do nothing.
             String message  = getString(R.string.stopSendUserData);
             Toast.makeText(MainActivity.this, this.getClass().getSimpleName() + " - " + message, Toast.LENGTH_SHORT).show();
             finish();
@@ -104,20 +104,20 @@ public class MainActivity extends FragmentActivity {
 
         @Override
         protected String doInBackground(String... params) {
-            // ★ポイント4★ 利用者情報の紐づけにはUUID/cookieを利用する
-            // 本サンプルではサーバー側で生成したIDを利用する
+            // *** POINT 4 *** Use UUIDs or cookies to keep track of user data
+            // In this sample we use an ID generated on the server side
             SharedPreferences sp = getSharedPreferences(PRIVACY_POLICY_PREF_NAME, MODE_PRIVATE);
             UserId = sp.getString(ID_KEY, null);
             if (UserId == null) {
-                // SharedPreferences内にトークンが存在しなため、サーバーからIDを取り寄せる。
+                // No token in SharedPreferences; fetch ID from server
                 try {
                     UserId = NetworkUtil.getCookie(GET_ID_URI, "", "id");
                 } catch (IOException e) {
-                    // 証明書エラーなどの例外をキャッチする
+                    // Catch exceptions such as certification errors
                     extMessage = e.toString();
                 }
 
-                // 取り寄せたIDをSharedPreferencesに保存する。
+                // Store the fetched ID in SharedPreferences
                 sp.edit().putString(ID_KEY, UserId).commit();
             }
             return UserId;
@@ -151,7 +151,7 @@ public class MainActivity extends FragmentActivity {
 
                 result = true;
             } catch (IOException e) {
-                // 証明書エラーなどの例外をキャッチする
+                // Catch exceptions such as certification errors
                 extMessage = e.toString();
             } catch (JSONException e) {
                 extMessage = e.toString();

@@ -3,7 +3,7 @@ package org.jssec.android.signsymmetricpresharedkey;
 public class Utils {
 
     public static final byte[] decodeHex(String src) {
-        // ’·‚³‚ª‹ô”‚Å‚È‚¢ê‡‚Í¸”s
+        // Fail if the string length is not an even number.
         if (src.length() % 2 != 0) {
             return null;
         }

@@ -10,7 +10,7 @@
         android:paddingBottom="4dip"
         android:text="Simple Service" />
 
-    <!-- Serviceを開始するボタン -->
+    <!-- Start service button -->
     <Button android:id="@+id/startservice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" 
@@ -18,7 +18,7 @@
         android:onClick="onStartServiceClick"
          />
 
-    <!-- Serviceを終了するボタン -->
+    <!-- Stop service button -->
     <Button android:id="@+id/stopservice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" 
@@ -26,7 +26,7 @@
         android:onClick="onStopServiceClick"
          />
 
-    <!-- IntentServiceを開始するボタン -->
+    <!-- Start IntentService button -->
     <Button android:id="@+id/startintentservice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" 

@@ -18,10 +18,9 @@ public class PrivateUserActivity extends Activity {
     
     public void onUseActivityClick(View view) {
         
-        // 非公開Activityを"standard"モードで起動する
-        Intent intent = new Intent();       
-        intent.setClass(this, PrivateActivity.class);
-        intent.putExtra("PARAM", "センシティブな情報");
+        // Start the Private Activity with "standard" lanchMode.
+        Intent intent = new Intent(this, PrivateActivity.class);
+        intent.putExtra("PARAM", "Sensitive Info");
         
         startActivityForResult(intent, REQUEST_CODE);
     }
@@ -36,9 +35,10 @@ public class PrivateUserActivity extends Activity {
         case REQUEST_CODE:
             String result = data.getStringExtra("RESULT");
             
-            // 受信データの安全性を確認する
-            // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
-            Toast.makeText(this, String.format("結果「%s」を受け取った。", result), Toast.LENGTH_LONG).show();
+            // Handle received result data carefully and securely,
+            // even though the data came from the Activity in the same application.
+            // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
+            Toast.makeText(this, String.format("Received result: \"%s\"", result), Toast.LENGTH_LONG).show();
             break;
         }
     }

@@ -20,29 +20,29 @@ import android.widget.TextView;
 
 public class InhouseUserActivity extends Activity {
 
-    // 利用先のContent Provider情報
+    // Content Provider information of destination (requested provider)
     private static final String AUTHORITY = "org.jssec.android.file.inhouseprovider";
 
-    // 自社のSignature Permission
+    // In-house signature permission
     private static final String MY_PERMISSION = "org.jssec.android.file.inhouseprovider.MY_PERMISSION";
 
-    // 自社の証明書のハッシュ値
+    // In-house certificate hash value
     private static String sMyCertHash = null;
 
     private static String myCertHash(Context context) {
         if (sMyCertHash == null) {
             if (Utils.isDebuggable(context)) {
-                // debug.keystoreの"androiddebugkey"の証明書ハッシュ値
+                // Certificate hash value of  debug.keystore "androiddebugkey"
                 sMyCertHash = "0EFB7236 328348A9 89718BAD DF57F544 D5CCB4AE B9DB34BC 1E29DD26 F77C8255";
             } else {
-                // keystoreの"my company key"の証明書ハッシュ値
+                // Certificate hash value of  keystore "my company key"
                 sMyCertHash = "D397D343 A5CBC10F 4EDDEB7C A10062DE 5690984F 1FB9E88B D7B3A7C2 42E142CA";
             }
         }
         return sMyCertHash;
     }
 
-    // 利用先Content Providerのパッケージ名を取得
+    // Get package name of destination (requested) content provider.
     private static String providerPkgname(Context context, String authority) {
         String pkgname = null;
         PackageManager pm = context.getPackageManager();
@@ -56,26 +56,26 @@ public class InhouseUserActivity extends Activity {
 
         logLine("[ReadFile]");
 
-        // 独自定義Signature Permissionが自社アプリにより定義されていることを確認する
+        // Verify that in-house-defined signature permission is defined by in-house application.
         if (!SigPerm.test(this, MY_PERMISSION, myCertHash(this))) {
-            logLine("  独自定義Signature Permissionが自社アプリにより定義されていない。");
+            logLine("  In-house-defined signature permission is not defined by in-house application.");
             return;
         }
 
-        // 利用先Content Providerアプリの証明書が自社の証明書であることを確認する
+        // Verify that the certificate of destination (requested) content provider application is in-house certificate.
         String pkgname = providerPkgname(this, AUTHORITY);
         if (!PkgCert.test(this, pkgname, myCertHash(this))) {
-            logLine("  利用先 Content Provider は自社アプリではない。");
+            logLine("  Destination (Requested) Content Provider is not in-house application.");
             return;
         }
 
-        // 自社限定Content Providerアプリに開示してよい情報に限りリクエストに含めてよい
+        // Only the information which can be disclosed to in-house only content provider application, can be included in a request.
         ParcelFileDescriptor pfd = null;
         try {
             pfd = getContentResolver().openFileDescriptor(
                     Uri.parse("content://" + AUTHORITY), "r");
         } catch (FileNotFoundException e) {
-            android.util.Log.e("InHouseUserActivity", "ファイルがありません");
+            android.util.Log.e("InhouseUserActivity", "no file");
         }
 
         if (pfd != null) {
@@ -85,23 +85,24 @@ public class InhouseUserActivity extends Activity {
                 try {
                     byte[] buf = new byte[(int) fis.getChannel().size()];
                     fis.read(buf);
-                    // ★ポイント2★ 自社限定Content Providerアプリからの結果であっても、結果データの安全性を確認する
-                    // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+                    // *** POINT 2 *** Handle received result data carefully and securely,
+                    // even though the data came from in-house applications.
+                    // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
                     logLine(new String(buf));
                 } catch (IOException e) {
-                    android.util.Log.e("InHouseUserActivity", "ファイルの読み込みに失敗しました");
+                    android.util.Log.e("InhouseUserActivity", "failed to read file");
                 } finally {
                     try {
                         fis.close();
                     } catch (IOException e) {
-                        android.util.Log.e("InHouseUserActivity", "ファイルの終了に失敗しました");
+                        android.util.Log.e("ExternalFileActivity", "failed to close file");
                     }
                 }
             }
             try {
                 pfd.close();
             } catch (IOException e) {
-                android.util.Log.e("InHouseUserActivity", "ファイルディスクリプタの終了に失敗しました");
+                android.util.Log.e("ExternalFileActivity", "failed to close file descriptor");
             }
 
         } else {

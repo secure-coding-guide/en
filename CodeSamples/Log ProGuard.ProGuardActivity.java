@@ -13,14 +13,14 @@ public class ProGuardActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_proguard);
 
-        // ★ポイント1★ センシティブな情報はLog.e()/w()/i()、System.out/errで出力しない
-        Log.e(LOG_TAG, "センシティブではない情報(ERROR)");
-        Log.w(LOG_TAG, "センシティブではない情報(WARN)");
-        Log.i(LOG_TAG, "センシティブではない情報(INFO)");
+        // *** POINT 1 *** Sensitive information must not be output by Log.e()/w()/i(), System.out/err.
+        Log.e(LOG_TAG, "Not sensitive information (ERROR)");
+        Log.w(LOG_TAG, "Not sensitive information (WARN)");
+        Log.i(LOG_TAG, "Not sensitive information (INFO)");
 
-        // ★ポイント2★ センシティブな情報をログ出力する場合はLog.d()/v()で出力する
-        // ★ポイント3★ Log.d()/v()の呼び出しでは戻り値を使用しない(代入や比較)
-        Log.d(LOG_TAG, "センシティブな情報(DEBUG)");
-        Log.v(LOG_TAG, "センシティブな情報(VERBOSE)");
+        // *** POINT 2 *** Sensitive information should be output by Log.d()/v() in case of need.
+        // *** POINT 3 *** The return value of Log.d()/v()should not be used (with the purpose of substitution or comparison).
+        Log.d(LOG_TAG, "sensitive information (DEBUG)");
+        Log.v(LOG_TAG, "sensitive information (VERBOSE)");
     }
 }

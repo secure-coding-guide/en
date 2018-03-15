@@ -16,13 +16,13 @@ public abstract class SubActivity extends Activity {
     private String  mItemInfo;
     
     protected abstract void init(Intent intent);
-    protected abstract boolean reflectEditText();
+    protected abstract boolean refrectEditText();
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        //Intentの中からデータを取り出す
+        //Retrieve data from an intent
         Intent intent = getIntent();
         mItemIdNo    = intent.getStringExtra(CommonData.EXTRA_ITEM_IDNO);
         mItemName    = intent.getStringExtra(CommonData.EXTRA_ITEM_NAME);
@@ -30,12 +30,12 @@ public abstract class SubActivity extends Activity {
 
         init(intent);
         
-        //表示項目の編集
+        //Edit display items
         ((TextView)findViewById(R.id.Field_IdNo)).setText(mItemIdNo);
         ((TextView)findViewById(R.id.Field_Name)).setText(mItemName);
         ((TextView)findViewById(R.id.Field_Info)).setText(mItemInfo);
                         
-        //OKボタン
+        //OK button
         Button btnOK = (Button)findViewById(R.id.Button_OK);
         btnOK.setOnClickListener(new OnClickListener(){
             
@@ -53,8 +53,8 @@ public abstract class SubActivity extends Activity {
 
             @Override
             public void onClick(View v) {
-                  if (reflectEditText()) {
-                      //データを取得して更新処理を呼び出す
+                  if (refrectEditText()) {
+                      //Get data and call for update process
                     mItemIdNo = getText(R.id.Field_IdNo);
                     mItemName = getText(R.id.Field_Name);
                     mItemInfo = getText(R.id.Field_Info);
@@ -71,13 +71,13 @@ public abstract class SubActivity extends Activity {
                 finish();
             }});
         
-        //Cancelボタン
+        //Cancel button
         Button btnCancel = (Button)findViewById(R.id.Button_CANCEL);
         btnCancel.setOnClickListener(new OnClickListener(){
 
             @Override
             public void onClick(View v) {
-                // キャンセルの時は何もせずに返る
+                // Do nothing and return when cancel is selected
                 setResult(Activity.RESULT_CANCELED, null);
                 finish();
             }});

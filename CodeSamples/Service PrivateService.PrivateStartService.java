@@ -5,36 +5,37 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.widget.Toast;
 
-public class PrivateStartService extends Service{    
-    // Serviceが起動するときに１回だけ呼び出される
+public class PrivateStartService extends Service {
+    
+    // The onCreate gets called only one time when the service starts.
     @Override
-    public void onCreate() {       
-        Toast.makeText(this, this.getClass().getSimpleName() + " - onCreate()", Toast.LENGTH_SHORT).show();
+    public void onCreate() {
+        Toast.makeText(this, "PrivateStartService - onCreate()", Toast.LENGTH_SHORT).show();
     }
 
-    // startService()が呼ばれた回数だけ呼び出される
+    // The onStartCommand gets called each time after the startService gets called.
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // ★ポイント2★ 同一アプリからのIntentであっても、受信Intentの安全性を確認する
-        // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+        // *** POINT 2 *** Handle the received intent carefully and securely,
+        // even though the intent was sent from the same application.
+        // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
         String param = intent.getStringExtra("PARAM");
-        Toast.makeText(this, String.format("パラメータ「%s」を受け取った。", param), Toast.LENGTH_LONG).show();
-        
-        // サービスは明示的に終了させる
-        // stopSelf や stopService を実行したときにサービスを終了する
-        // START_NOT_STICKY は、メモリが少ない等でkillされた場合に自動的には復帰しない
+        Toast.makeText(this,
+                String.format("PrivateStartService\nReceived param: \"%s\"", param),
+                Toast.LENGTH_LONG).show();
+
         return Service.START_NOT_STICKY;
     }
-    
-    // Serviceが終了するときに１回だけ呼び出される
+
+    // The onDestroy gets called only one time when the service stops.
     @Override
     public void onDestroy() {
-        Toast.makeText(this, this.getClass().getSimpleName() + " - onDestroy()", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "PrivateStartService - onDestroy()", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        // このサービスにはバインドしない
+        // This service does not provide binding, so return null
         return null;
     }
 }

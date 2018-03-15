@@ -8,11 +8,11 @@ import android.util.Log;
 import android.widget.Toast;
 
 public class SampleDbOpenHelper extends SQLiteOpenHelper {
-    private SQLiteDatabase           mSampleDb;             //取り扱うデータを格納するデータベース
+    private SQLiteDatabase           mSampleDb;             //Database to store the data to be handled
 
     public static SampleDbOpenHelper newHelper(Context context)
     {
-        //★ポイント1★ DB作成にはSQLiteOpenHelperを使用する
+        //*** POINT 1 *** SQLiteOpenHelper should be used for database creation.
         return new SampleDbOpenHelper(context);
     }
 
@@ -20,33 +20,33 @@ public class SampleDbOpenHelper extends SQLiteOpenHelper {
         return mSampleDb;
     }
 
-    //WritableモードでDBを開く
+    //Open DB by Writable mode
     public void openDatabaseWithHelper() {
         try {
             if (mSampleDb != null && mSampleDb.isOpen()) {
-                if (!mSampleDb.isReadOnly())// 既に読み書き可能でオープン済み
+                if (!mSampleDb.isReadOnly())//  Already opened by writable mode
                     return;
                 mSampleDb.close();
               }
-            mSampleDb  = getWritableDatabase(); //この段階でオープンされる
+            mSampleDb  = getWritableDatabase(); //It's opened here.
         } catch (SQLException e) {
-            //データベース構築に失敗した場合ログ出力
+            //In case fail to construct database, output to log
             Log.e(mContext.getClass().toString(), mContext.getString(R.string.DATABASE_OPEN_ERROR_MESSAGE));
             Toast.makeText(mContext, R.string.DATABASE_OPEN_ERROR_MESSAGE, Toast.LENGTH_LONG).show();
         }
     }
 
-    //ReadOnlyモードでDBを開く
+    //Open DB by ReadOnly mode.
     public void openDatabaseReadOnly() {
         try {
             if (mSampleDb != null && mSampleDb.isOpen()) {
-                if (mSampleDb.isReadOnly())// 既にReadOnlyでオープン済み
+                if (mSampleDb.isReadOnly())// Already opened by ReadOnly.
                     return;
                 mSampleDb.close();
             }
             SQLiteDatabase.openDatabase(mContext.getDatabasePath(CommonData.DBFILE_NAME).getPath(), null, SQLiteDatabase.OPEN_READONLY);
         } catch (SQLException e) {
-            //データベース構築に失敗した場合ログ出力
+            //In case failed to construct database, output to log
             Log.e(mContext.getClass().toString(), mContext.getString(R.string.DATABASE_OPEN_ERROR_MESSAGE));
             Toast.makeText(mContext, R.string.DATABASE_OPEN_ERROR_MESSAGE, Toast.LENGTH_LONG).show();
         }
@@ -59,16 +59,16 @@ public class SampleDbOpenHelper extends SQLiteOpenHelper {
                 mSampleDb.close();
             }
         } catch (SQLException e) {
-            //データベース構築に失敗した場合ログ出力
+            //In case failed to construct database, output to log
             Log.e(mContext.getClass().toString(), mContext.getString(R.string.DATABASE_CLOSE_ERROR_MESSAGE));
             Toast.makeText(mContext, R.string.DATABASE_CLOSE_ERROR_MESSAGE, Toast.LENGTH_LONG).show();
         }
     }
 
-    //Contextを覚えておく
+    //Remember Context
     private Context mContext;
 
-    //テーブル作成コマンド
+    //Table creation command
     private static final String CREATE_TABLE_COMMANDS
             = "CREATE TABLE " + CommonData.TABLE_NAME + " ("
             + "_id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -85,16 +85,16 @@ public class SampleDbOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         try {
-            db.execSQL(CREATE_TABLE_COMMANDS);  //DB構築コマンドの実行
+            db.execSQL(CREATE_TABLE_COMMANDS);  //Execute DB construction command 
         } catch (SQLException e) {
-            //データベース構築に失敗した場合ログ出力
+            //In case failed to construct database, output to log
             Log.e(this.getClass().toString(), mContext.getString(R.string.DATABASE_CREATE_ERROR_MESSAGE));
         }
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase arg0, int arg1, int arg2) {
-        // データベースのバージョンアップ時に実行される、データ移行などの処理を記述する
+        // It's to be executed when database version up. Write processes like data transition. 
     }
 
 }

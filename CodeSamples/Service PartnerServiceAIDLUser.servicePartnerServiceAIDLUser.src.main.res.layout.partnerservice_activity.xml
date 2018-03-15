@@ -10,14 +10,14 @@
         android:paddingBottom="4dip"
         android:text="AIDL Service" />
 
-    <!-- Serviceを開始するボタン -->
+    <!-- Start service button -->
     <Button android:id="@+id/start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" 
         android:text="start service"
         android:onClick="onStartServiceClick"
          />
-    <!--  情報を取得するボタン -->
+    <!-- Get information button -->
     <Button android:id="@+id/getinfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" 
@@ -25,7 +25,7 @@
         android:onClick="onGetInfoClick"
          />
       
-    <!-- Serviceを終了するボタン -->
+    <!-- Stop service button -->
     <Button android:id="@+id/stop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" 

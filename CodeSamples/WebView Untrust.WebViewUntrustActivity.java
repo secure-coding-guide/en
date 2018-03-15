@@ -18,15 +18,14 @@ import java.text.SimpleDateFormat;
 
 public class WebViewUntrustActivity extends Activity {
     /*
-     * 自社管理以外のコンテンツを表示する (簡易ブラウザとして機能するサンプルプログラム)
+     * Show contents which are NOT managed in-house (Sample program works as a simple browser)
      */
 
     private EditText textUrl;
     private Button buttonGo;
     private WebView webView;
 
-
-    // この Activity が独自に URL リクエストをハンドリングできるようにするために定義
+    // Activity definition to handle any URL request 
     private class WebViewUnlimitedClient extends WebViewClient {
 
         @Override
@@ -36,19 +35,20 @@ public class WebViewUntrustActivity extends Activity {
             return true;
         }
 
-        // Webページの読み込み開始処理
+        // Start reading Web page 
         @Override
         public void onPageStarted(WebView webview, String url, Bitmap favicon) {
             buttonGo.setEnabled(false);
             textUrl.setText(url);
         }
 
-        // SSL通信で問題があるとエラーダイアログを表示し、
-        // 接続を中止する
+        // Show SSL error dialog
+        // And abort connection. 
         @Override
         public void onReceivedSslError(WebView webview,
                 SslErrorHandler handler, SslError error) {
-            // ★ポイント 1★ HTTPS 通信の場合にはSSL通信のエラーを適切にハンドリングする
+            
+            // *** POINT 1 *** Handle SSL error from WebView appropriately
             AlertDialog errorDialog = createSslErrorDialog(error);
             errorDialog.show();
             handler.cancel();
@@ -56,7 +56,7 @@ public class WebViewUntrustActivity extends Activity {
             buttonGo.setEnabled(true);
         }
 
-        // Webページのloadが終わったら表示されたページのURLをEditTextに表示させる
+        // After loading Web page, show the URL in EditText.
         @Override
         public void onPageFinished(WebView webview, String url) {
             textUrl.setText(url);
@@ -72,8 +72,8 @@ public class WebViewUntrustActivity extends Activity {
         webView = (WebView) findViewById(R.id.webview);
         webView.setWebViewClient(new WebViewUnlimitedClient());
 
-        // ★ポイント 2★ JavaScriptを有効にしない
-        // デフォルトの設定でJavaScript無効となっているが、明示的に無効化する
+        // *** POINT 2 *** Disable JavaScript of WebView
+        // Explicitly disable JavaScript even though it is disabled by default.
         webView.getSettings().setJavaScriptEnabled(false);
 
         webView.loadUrl(getString(R.string.texturl));
@@ -86,18 +86,18 @@ public class WebViewUntrustActivity extends Activity {
     }
 
     private AlertDialog createSslErrorDialog(SslError error) {
-        // ダイアログに表示するエラーメッセージ
+        // Error message to show in this dialog
         String errorMsg = createErrorMessage(error);
-        // ダイアログのOKボタン押下時の挙動
+        // Handler for OK button
         DialogInterface.OnClickListener onClickOk = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 setResult(RESULT_OK);
             }
         };
-        // ダイアログの作成
+        // Create a dialog
         AlertDialog dialog = new AlertDialog.Builder(
-                WebViewUntrustActivity.this).setTitle("SSL接続エラー")
+                WebViewUntrustActivity.this).setTitle("SSL connection error")
                 .setMessage(errorMsg).setPositiveButton("OK", onClickOk)
                 .create();
         return dialog;
@@ -107,26 +107,26 @@ public class WebViewUntrustActivity extends Activity {
         SslCertificate cert = error.getCertificate();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         StringBuilder result = new StringBuilder()
-        .append("サイトのセキュリティ証明書が信頼できません。接続を終了しました。\n\nエラーの原因\n");
+        .append("The site's certification is NOT valid. Connection was disconnected.\n\nError:\n");
         switch (error.getPrimaryError()) {
         case SslError.SSL_EXPIRED:
-            result.append("証明書の有効期限が切れています。\n\n終了時刻=")
+            result.append("The certificate is no longer valid.\n\nThe expiration date is ")
             .append(dateFormat.format(cert.getValidNotAfterDate()));
             return result.toString();
         case SslError.SSL_IDMISMATCH:
-            result.append("ホスト名が一致しません。\n\nCN=")
+            result.append("Host name doesn't match. \n\nCN=")
             .append(cert.getIssuedTo().getCName());
             return result.toString();
         case SslError.SSL_NOTYETVALID:
-            result.append("証明書はまだ有効ではありません\n\n開始時刻=")
+            result.append("The certificate isn't valid yet.\n\nIt will be valid from ")
             .append(dateFormat.format(cert.getValidNotBeforeDate()));
             return result.toString();
         case SslError.SSL_UNTRUSTED:
-            result.append("証明書を発行した認証局が信頼できません\n\n認証局\n")
+            result.append("Certificate Authority which issued the certificate is not reliable.\n\nCertificate Authority\n")
             .append(cert.getIssuedBy().getDName());
             return result.toString();
         default:
-            result.append("原因不明のエラーが発生しました");
+            result.append("Unknown error occured. ");
             return result.toString();
         }
     }

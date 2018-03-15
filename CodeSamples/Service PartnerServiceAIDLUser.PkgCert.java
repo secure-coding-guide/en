@@ -22,7 +22,7 @@ public class PkgCert {
         try {
             PackageManager pm = ctx.getPackageManager();
             PackageInfo pkginfo = pm.getPackageInfo(pkgname, PackageManager.GET_SIGNATURES);
-            if (pkginfo.signatures.length != 1) return null;    // ï°êîèêñºÇÕàµÇÌÇ»Ç¢
+            if (pkginfo.signatures.length != 1) return null;    // Will not handle multiple signatures.
             Signature sig = pkginfo.signatures[0];
             byte[] cert = sig.toByteArray();
             byte[] sha256 = computeSha256(cert);

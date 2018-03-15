@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteStatement;
 import android.os.AsyncTask;
 import android.util.Log;
 
-//データ追加タスク
+//Data addition task
 public class DataInsertTask extends AsyncTask<String, Void, Void> {
     private MainActivity    mActivity;
     private SQLiteDatabase  mSampleDB;
@@ -27,13 +27,13 @@ public class DataInsertTask extends AsyncTask<String, Void, Void> {
         String  name = params[1];
         String  info = params[2];
 
-        //★ポイント3★ アプリケーション要件に従って入力値をチェックする
-       if (!DataValidator.validateData(idno, name, info))
+        //*** POINT 3 *** Validate the input value according the application requirements.
+        if (!DataValidator.validateData(idno, name, info))
         {
             return null;
         }
-        //データ追加処理
-        //プレースホルダを使用する
+        //Add data process
+        //*** POINT 2 *** Use place holder.
         String commandString = "INSERT INTO " + CommonData.TABLE_NAME + " (idno, name, info) VALUES (?, ?, ?)";
         SQLiteStatement sqlStmt = mSampleDB.compileStatement(commandString);
         sqlStmt.bindString(1, idno);
@@ -51,7 +51,7 @@ public class DataInsertTask extends AsyncTask<String, Void, Void> {
 
     @Override
     protected void onPostExecute(Void v) {
-        //DBデータの表示
+        //Display database data
         mActivity.showDbData();
     }
 }

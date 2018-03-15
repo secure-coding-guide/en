@@ -22,15 +22,15 @@ public class DynamicReceiverService extends Service {
     public void onCreate() {
         super.onCreate();
         
-        // ŒöŠJ“®“IBroadcast Receiver‚ğ“o˜^‚·‚é
+        // Register Public Dynamic Broadcast Receiver.
         mReceiver = new PublicReceiver();
         mReceiver.isDynamic = true;
         IntentFilter filter = new IntentFilter();
         filter.addAction(MY_BROADCAST_PUBLIC);
-        filter.setPriority(1);  // Ã“IBroadcast Receiver‚æ‚è“®“IBroadcast Receiver‚ğ—Dæ‚³‚¹‚é
+        filter.setPriority(1);  // Prioritize Dynamic Broadcast Receiver, rather than Static Broadcast Receiver.
         registerReceiver(mReceiver, filter);
         Toast.makeText(this,
-                "“®“I Broadcast Receiver ‚ğ“o˜^‚µ‚½B",
+                "Registered Dynamic Broadcast Receiver.",
                 Toast.LENGTH_SHORT).show();
     }
 
@@ -38,11 +38,11 @@ public class DynamicReceiverService extends Service {
     public void onDestroy() {
         super.onDestroy();
         
-        // ŒöŠJ“®“IBroadcast Receiver‚ğ“o˜^‰ğœ‚·‚é
+        // Unregister Public Dynamic Broadcast Receiver.
         unregisterReceiver(mReceiver);
         mReceiver = null;
         Toast.makeText(this,
-                "“®“I Broadcast Receiver ‚ğ“o˜^‰ğœ‚µ‚½B",
+                "Unregistered Dynamic Broadcast Receiver.",
                 Toast.LENGTH_SHORT).show();
     }
 }

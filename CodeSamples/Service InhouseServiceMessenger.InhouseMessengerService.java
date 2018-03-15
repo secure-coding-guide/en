@@ -3,6 +3,7 @@ package org.jssec.android.service.inhouseservice.messenger;
 import org.jssec.android.shared.SigPerm;
 import org.jssec.android.shared.Utils;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -18,18 +19,18 @@ import android.os.RemoteException;
 import android.widget.Toast;
 
 public class InhouseMessengerService extends Service{
-    // 自社のSignature Permission
+    // In-house signature permission
     private static final String MY_PERMISSION = "org.jssec.android.service.inhouseservice.messenger.MY_PERMISSION";
     
-    // 自社の証明書のハッシュ値
+    // In-house certificate hash value
     private static String sMyCertHash = null;
     private static String myCertHash(Context context) {
         if (sMyCertHash == null) {
             if (Utils.isDebuggable(context)) {
-                // debug.keystoreの"androiddebugkey"の証明書ハッシュ値
+                // Certificate hash value of debug.keystore "androiddebugkey"
                 sMyCertHash = "0EFB7236 328348A9 89718BAD DF57F544 D5CCB4AE B9DB34BC 1E29DD26 F77C8255";
             } else {
-                // keystoreの"my company key"の証明書ハッシュ値
+                // Certificate hash value of keystore "my company key"
                 sMyCertHash = "D397D343 A5CBC10F 4EDDEB7C A10062DE 5690984F 1FB9E88B D7B3A7C2 42E142CA";
             }
         }
@@ -37,33 +38,33 @@ public class InhouseMessengerService extends Service{
     }
     
     
-    // Serviceのクライアント(データ送信先)をリストで管理する
+    // Manage clients(destinations of sending data) in a list
     private ArrayList<Messenger> mClients = new ArrayList<Messenger>();
     
-    // クライアントからのデータを受信するときに利用するMessenger
+    // Messenger used when service receive data from client
     private final Messenger mMessenger = new Messenger(new ServiceSideHandler(mClients));
     
-    // クライアントから受け取ったMessageを処理するHandler
+    // Handler which handles message received from client
     private static class ServiceSideHandler extends Handler{
 
         private ArrayList<Messenger> mClients;
 
         public ServiceSideHandler(ArrayList<Messenger> clients){
-            this.mClients = clients;
+            mClients = clients;
         }
 
         @Override
         public void handleMessage(Message msg){
             switch(msg.what){
             case CommonValue.MSG_REGISTER_CLIENT:
-                // クライアントから受け取ったMessengerを追加
+                // Add messenger received from client
                 mClients.add(msg.replyTo);
                 break;
             case CommonValue.MSG_UNREGISTER_CLIENT:
                 mClients.remove(msg.replyTo);
                 break;
             case CommonValue.MSG_SET_VALUE:
-                // クライアントにデータを送る
+                // Send data to client
                 sendMessageToClients(mClients);
                 break;
             default:
@@ -72,17 +73,17 @@ public class InhouseMessengerService extends Service{
             }
         }
     }
-
+    
     /**
-     * クライアントにデータを送る
+     * Send data to client
      */
     private static void sendMessageToClients(ArrayList<Messenger> mClients){
-
-        // ★ポイント6★ 利用元アプリは自社アプリであるから、センシティブな情報を返送してよい
-        String sendValue = "センシティブな情報(from Service)";
-
-        // 登録されているクライアントへ、順番に送信する
-        // ループ途中でremoveしても全てのデータにアクセスしたいのでIteratorを利用する
+        
+        // *** POINT 6 *** Sensitive information can be returned since the requesting application is in-house.
+        String sendValue = "Sensitive information (from Service)";
+        
+        // Send data to the registered client one by one.
+        // Use iterator to send all clients even though clients are removed in the loop process.  
         Iterator<Messenger> ite = mClients.iterator();
         while(ite.hasNext()){
             try {
@@ -96,25 +97,26 @@ public class InhouseMessengerService extends Service{
                 next.send(sendMsg);
                 
             } catch (RemoteException e) {
-                // クライアントが存在しない場合は、リストから取り除く
+                // If client does not exits, remove it from a list.
                 ite.remove();
             }
         }
     }
-
+    
     @Override
     public IBinder onBind(Intent intent) {
-
-        // ★ポイント4★ 独自定義Signature Permissionが自社アプリにより定義されていることを確認する
+        
+        // *** POINT 4 *** Verify that the in-house signature permission is defined by an in-house application.
         if (!SigPerm.test(this, MY_PERMISSION, myCertHash(this))) {
-            Toast.makeText(this, "独自定義Signature Permissionが自社アプリにより定義されていない。", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "In-house defined signature permission is not defined by in-house application.", Toast.LENGTH_LONG).show();
             return null;
         }
 
-        // ★ポイント5★ 自社アプリからのIntentであっても、受信Intentの安全性を確認する
-        // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+        // *** POINT 5 *** Handle the received intent carefully and securely,
+        // even though the intent was sent from an in-house application.
+        // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
         String param = intent.getStringExtra("PARAM");
-        Toast.makeText(this, String.format("パラメータ「%s」を受け取った。", param), Toast.LENGTH_LONG).show();
+        Toast.makeText(this, String.format("Received parameter \"%s\".", param), Toast.LENGTH_LONG).show();
 
         return mMessenger.getBinder();
     }

@@ -16,13 +16,13 @@ public class MaliciousActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.malicious_activity);
 
-        // ActivityManagerを取得する
+        // Get am ActivityManager instance.
         ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-        // タスクの履歴を最新100件取得する
+        // Get 100 recent task info.
         List<ActivityManager.RecentTaskInfo> list = activityManager
                 .getRecentTasks(100, ActivityManager.RECENT_WITH_EXCLUDED);
         for (ActivityManager.RecentTaskInfo r : list) {
-            // ルートActivityに送信されたIntentを取得し、Logに表示する
+            // Get Intent sent to root Activity and Log it.
             Intent intent = r.baseIntent;
             Log.v("baseIntent", intent.toString());
             Log.v("  action:", intent.getAction());

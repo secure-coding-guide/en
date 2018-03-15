@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.jssec.android.activity.inhouseactivity" >
 
-    <!-- ★ポイント1★ 独自定義Signature Permissionを定義する -->
+    <!-- *** POINT 1 *** Define an in-house signature permission -->
     <permission
         android:name="org.jssec.android.activity.inhouseactivity.MY_PERMISSION"
         android:protectionLevel="signature" />
@@ -12,16 +12,14 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
 
-        <!-- 自社限定Activity -->
-        <!-- ★ポイント2★ taskAffinityを指定しない -->
-        <!-- ★ポイント3★ launchModeを指定しない -->
-        <!-- ★ポイント4★ 独自定義Signature Permissionを要求宣言する -->
-        <!-- ★ポイント5★ Intent Filterを定義せず、exported="true"を明示的に設定する -->
+        <!-- In-house Activity -->
+        <!-- *** POINT 2 *** Do not specify taskAffinity -->
+        <!-- *** POINT 3 *** Do not specify launchMode -->
+        <!-- *** POINT 4 *** Require the in-house signature permission  -->
+        <!-- *** POINT 5 *** Do not define the intent filter and explicitly set the exported attribute to true -->
         <activity
-            android:name=".InhouseActivity"
+            android:name="org.jssec.android.activity.inhouseactivity.InhouseActivity"
             android:exported="true"
-            android:permission="org.jssec.android.activity.inhouseactivity.MY_PERMISSION" >
-        </activity>
+            android:permission="org.jssec.android.activity.inhouseactivity.MY_PERMISSION" />
     </application>
-
 </manifest>

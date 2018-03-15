@@ -39,7 +39,7 @@ public class Utils {
     public static String getPackageNameFromUid(Context ctx, int uid) {
         PackageManager pm = ctx.getPackageManager();
         String[] packages = pm.getPackagesForUid(uid);
-        // sharedUserIdを使用するアプリへの対応はサンプルにつき省略
+        // Case to use the sharedUserId is omitted, since thisi is a sample.
         if (packages.length == 1) {
             return packages[0];
         }

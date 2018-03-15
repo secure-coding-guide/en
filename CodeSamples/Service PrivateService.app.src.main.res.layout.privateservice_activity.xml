@@ -8,30 +8,30 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="4dip"
-        android:text="Simple Service" />
+        android:text="@string/title_service" />
 
-    <!-- Serviceを開始するボタン -->
     <Button android:id="@+id/startservice"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content" 
-        android:text="start service"
-        android:onClick="onStartServiceClick"
-         />
+        android:text="@string/start_service"
+        android:onClick="onStartServiceClick" />
 
-    <!-- Serviceを終了するボタン -->
     <Button android:id="@+id/stopservice"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content" 
-        android:text="stop service" 
-        android:onClick="onStopServiceClick"
-         />
+        android:text="@string/stop_service" 
+        android:onClick="onStopServiceClick" />
 
-    <!-- IntentServiceを開始するボタン -->
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="4dip"
+        android:text="@string/title_service" />
+    
     <Button android:id="@+id/startintentservice"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content" 
-        android:text="start intent service"
-        android:onClick="onIntentServiceClick"
-         />
+        android:text="@string/start_intentservice"
+        android:onClick="onIntentServiceClick" />
 
 </LinearLayout>

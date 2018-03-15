@@ -6,7 +6,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PermissionInfo;
 
 public class SigPerm {
-    
+
     public static boolean test(Context ctx, String sigPermName, String correctHash) {
         if (correctHash == null) return false;
         correctHash = correctHash.replaceAll(" ", "");
@@ -16,18 +16,18 @@ public class SigPerm {
     public static String hash(Context ctx, String sigPermName) {
         if (sigPermName == null) return null;
         try {
-            // sigPermNameを定義したアプリのパッケージ名を取得する
+            // Get the package name of the application which declares a permission named sigPermName.
             PackageManager pm = ctx.getPackageManager();
             PermissionInfo pi;
             pi = pm.getPermissionInfo(sigPermName, PackageManager.GET_META_DATA);
             String pkgname = pi.packageName;
-            
-            // 非Signature Permissionの場合は失敗扱い
+
+            // Fail if the permission named sigPermName is not a Signature Permission
             if (pi.protectionLevel != PermissionInfo.PROTECTION_SIGNATURE) return null;
-            
-            // sigPermNameを定義したアプリの証明書のハッシュ値を返す
+
+            // Return the certificate hash value of the application which declares a permission named sigPermName.
             return PkgCert.hash(ctx, pkgname);
-            
+
         } catch (NameNotFoundException e) {
             return null;
         }

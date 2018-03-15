@@ -13,9 +13,9 @@ public class LogActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log);
         
-        Log.i(LOG_TAG,"Log.i()でログ出力（1回目）");
-        System.out.println("System.outにログ出力");  // リリース版ではログ出力されない
-        System.err.println("System.errにログ出力");  // リリース版ではログ出力されない
-        Log.i(LOG_TAG,"Log.i()でログ出力（2回目）");
+        Log.i(LOG_TAG,"Output logs by Log.i() (1st time)");
+        System.out.println("output logs to System.out");    // Not output logs in release version.
+        System.err.println("output logs to System.err");    // Not output logs in release version.
+        Log.i(LOG_TAG,"Output logs by Log.i() (2nd time)");
     }
 }

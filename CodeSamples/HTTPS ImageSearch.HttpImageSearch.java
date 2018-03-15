@@ -17,11 +17,11 @@ public abstract class HttpImageSearch extends AsyncTask<String, Void, Object> {
     protected Object doInBackground(String... params) {
         byte[] responseArray;
         // --------------------------------------------------------
-        // 通信1回目：画像検索する
+        // Communication 1st time: Execute image search
         // --------------------------------------------------------
 
-        // ★ポイント1★ 送信データにセンシティブな情報を含めない
-        // 画像検索文字列を送信する
+        // *** POINT 1 *** Sensitive information must not be contained in send data.
+        // Send image search character string
         StringBuilder s = new StringBuilder();
         for (String param : params){
             s.append(param);
@@ -37,9 +37,9 @@ public abstract class HttpImageSearch extends AsyncTask<String, Void, Object> {
             return null;
         }
 
-        // ★ポイント2★ 受信データが攻撃者からの送信データである場合を想定する
-        // サンプルにつき検索結果が攻撃者からのデータである場合の処理は割愛
-        // サンプルにつきJSONパース時の例外処理は割愛
+        // *** POINT 2 *** Suppose that received data may be sent from attackers.
+        // This is sample, so omit the process in case of the searching result is the data from an attacker.
+        // This is sample, so omit the exception process in case of JSON purse.
         String image_url;
         try {
             String json = new String(responseArray);
@@ -50,9 +50,9 @@ public abstract class HttpImageSearch extends AsyncTask<String, Void, Object> {
         }
 
         // --------------------------------------------------------
-        // 通信2回目：画像を取得する
+        // Communication 2nd time: Get images
         // --------------------------------------------------------
-        // ★ポイント1★ 送信データにセンシティブな情報を含めない
+        // *** POINT 1 *** Sensitive information must not be contained in send data.
         if (image_url != null ) {
             responseArray = getByteArray(image_url);
             if (responseArray == null) {
@@ -60,7 +60,7 @@ public abstract class HttpImageSearch extends AsyncTask<String, Void, Object> {
             }
         }
 
-        // ★ポイント2★ 受信データが攻撃者からの送信データである場合を想定する
+        // *** POINT 2 *** Suppose that received data may be sent from attackers.
         return responseArray;
     }
 
@@ -95,14 +95,14 @@ public abstract class HttpImageSearch extends AsyncTask<String, Void, Object> {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    // 例外処理は割愛
+                    // This is sample, so omit the exception process
                 }
             }
             if (responseArray != null) {
                 try {
                     responseArray.close();
                 } catch (IOException e) {
-                    // 例外処理は割愛
+                    // This is sample, so omit the exception process
                 }
             }
         }

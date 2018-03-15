@@ -2,7 +2,7 @@
     package="org.jssec.android.accountmanager.authenticator"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Authenticatorを実装するのに必要なPermission -->
+    <!-- Necessary Permission to implement Authenticator -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
 
@@ -10,13 +10,13 @@
         android:allowBackup="false"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
-
-        <!-- AuthenticatorのIBinderをAccountManagerに提供するサービス -->
-        <!-- ★ポイント1★ Authenticatorを提供するServiceは非公開Serviceとする -->
+        
+        <!-- Service which gives IBinder of Authenticator to AccountManager -->
+        <!-- *** POINT 1 *** The service that provides an authenticator must be private. -->
         <service
             android:name=".AuthenticationService"
             android:exported="false" >
-            <!-- intent-filterとmeta-dataはお決まりのパターン -->
+            <!-- intent-filter and meta-data are usual pattern. -->
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
@@ -25,9 +25,9 @@
                 android:resource="@xml/authenticator" />
         </service>
 
-        <!-- アカウントを追加するときなどに表示されるログイン画面用のActivity -->
-        <!-- ★ポイント2★ ログイン画面ActivityはAuthenticatorアプリで実装する -->
-        <!-- ★ポイント3★ ログイン画面Activityは公開Activityとする -->
+        <!-- Activity for for login screen which is displayed when adding an account -->
+        <!-- *** POINT 2 *** The login screen activity must be implemented in an authenticator application. -->
+        <!-- *** POINT 3 *** The login screen activity must be made as a public activity. -->
         <activity
             android:name=".LoginActivity"
             android:exported="true"

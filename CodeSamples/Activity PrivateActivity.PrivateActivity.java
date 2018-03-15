@@ -13,17 +13,17 @@ public class PrivateActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.private_activity);
 
-        // ★ポイント4★ 同一アプリからのIntentであっても、受信Intentの安全性を確認する
-        // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+        // *** POINT 4 *** Handle the received Intent carefully and securely, even though the Intent was sent from the same application.
+        // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
         String param = getIntent().getStringExtra("PARAM");
-        Toast.makeText(this, String.format("パラメータ「%s」を受け取った。", param), Toast.LENGTH_LONG).show();
+        Toast.makeText(this, String.format("Received param: \"%s\"", param), Toast.LENGTH_LONG).show();
     }
 
     public void onReturnResultClick(View view) {
         
-        // ★ポイント5★ 利用元アプリは同一アプリであるから、センシティブな情報を返送してよい
+        // *** POINT 5 *** Sensitive information can be sent since it is sending and receiving all within the same application.
         Intent intent = new Intent();
-        intent.putExtra("RESULT", "センシティブな情報");
+        intent.putExtra("RESULT", "Sensitive Info");
         setResult(RESULT_OK, intent);
         finish();
     }

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.jssec.android.permission.usespermission">
+    package="org.jssec.android.permission.usespermission" >
 
-    <!-- ★ポイント1★  アプリで利用するPermissionを利用宣言する -->
-    <!-- インターネットにアクセスするPermission -->
+    <!-- *** POINT 1 *** Declare a permission used in an application with uses-permission -->
+    <!-- Permission to access Internet -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
-    <!-- ★ポイント2★  不必要なPermissionは利用宣言しない -->
-    <!-- アプリの動作に不必要なPermissionを利用宣言していると、ユーザーに不信感を与えてしまう -->
+    <!-- *** POINT 2 *** Do not declare any unnecessary permissions with uses-permission -->
+    <!-- If declaring to use Permission that is unnecessary for application behaviors, it gives users a sense of distrust. -->
     
     <application
         android:allowBackup="false"

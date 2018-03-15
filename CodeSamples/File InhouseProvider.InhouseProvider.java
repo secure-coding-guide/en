@@ -19,19 +19,19 @@ public class InhouseProvider extends ContentProvider {
 
     private static final String FILENAME = "sensitive.txt";
 
-    // 自社のSignature Permission
+    // In-house signature permission
     private static final String MY_PERMISSION = "org.jssec.android.file.inhouseprovider.MY_PERMISSION";
 
-    // 自社の証明書のハッシュ値
+    // In-house certificate hash value
     private static String sMyCertHash = null;
 
     private static String myCertHash(Context context) {
         if (sMyCertHash == null) {
             if (Utils.isDebuggable(context)) {
-                // debug.keystoreの"androiddebugkey"の証明書ハッシュ値
+                // Certificate hash value of  debug.keystore "androiddebugkey"
                 sMyCertHash = "0EFB7236 328348A9 89718BAD DF57F544 D5CCB4AE B9DB34BC 1E29DD26 F77C8255";
             } else {
-                // keystoreの"my company key"の証明書ハッシュ値
+                // Certificate hash value of  keystore "my company key"
                 sMyCertHash = "D397D343 A5CBC10F 4EDDEB7C A10062DE 5690984F 1FB9E88B D7B3A7C2 42E142CA";
             }
         }
@@ -44,16 +44,16 @@ public class InhouseProvider extends ContentProvider {
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(new File(dir, FILENAME));
-            // ★ポイント1★ 利用元アプリは自社アプリであるから、センシティブな情報を保存してよい
-            fos.write(new String("センシティブな情報").getBytes());
+            // *** POINT 1 *** The source application is In house application, so sensitive information can be saved.
+            fos.write(new String("Sensitive information").getBytes());
 
         } catch (IOException e) {
-            android.util.Log.e("InHouseProvider", "ファイル保存に失敗しました");
+            android.util.Log.e("InhouseProvider", "failed to read file");
         } finally {
             try {
                 fos.close();
             } catch (IOException e) {
-                android.util.Log.e("InHouseProvider", "ファイル終了に失敗しました");
+                android.util.Log.e("InhouseProvider", "failed to close file");
             }
         }
 
@@ -64,17 +64,17 @@ public class InhouseProvider extends ContentProvider {
     public ParcelFileDescriptor openFile(Uri uri, String mode)
             throws FileNotFoundException {
 
-        // 独自定義Signature Permissionが自社アプリにより定義されていることを確認する
+        // Verify that in-house-defined signature permission is defined by in-house application.
         if (!SigPerm
                 .test(getContext(), MY_PERMISSION, myCertHash(getContext()))) {
             throw new SecurityException(
-                    "独自定義Signature Permissionが自社アプリにより定義されていない。");
+                    "In-house-defined signature permission is not defined by in-house application.");
         }
 
         File dir = getContext().getFilesDir();
         File file = new File(dir, FILENAME);
 
-        // サンプルのため読み取り専用を常に返す
+        // Always return read-only, since this is sample
         int modeBits = ParcelFileDescriptor.MODE_READ_ONLY;
         return ParcelFileDescriptor.open(file, modeBits);
     }

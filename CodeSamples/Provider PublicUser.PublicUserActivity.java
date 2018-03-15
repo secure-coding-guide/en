@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 public class PublicUserActivity extends Activity {
 
-    // 利用先のContent Provider情報
+    // Target Content Provider Information
     private static final String AUTHORITY = "org.jssec.android.provider.publicprovider";
     private interface Address {
         public static final String PATH = "addresses";
@@ -23,19 +23,19 @@ public class PublicUserActivity extends Activity {
         logLine("[Query]");
 
         if (!providerExists(Address.CONTENT_URI)) {
-            logLine("  Content Providerが不在");
+            logLine("  Content Provider doesn't exist.");
             return;
         }
 
-        // ★ポイント4★ センシティブな情報をリクエストに含めてはならない
-        // リクエスト先のアプリがマルウェアである可能性がある。
-        // マルウェアに取得されても問題のない情報であればリクエストに含めてもよい。
         Cursor cursor = null;
         try {
+            // *** POINT 4 *** Do not send sensitive information.
+            // since the target Content Provider may be malware.
+            // If no problem when the information is taken by malware, it can be included in the request.
             cursor = getContentResolver().query(Address.CONTENT_URI, null, null, null, null);
 
-            // ★ポイント5★ 結果データの安全性を確認する
-            // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+            // *** POINT 5 *** When receiving a result, handle the result data carefully and securely.
+            // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
             if (cursor == null) {
                 logLine("  null cursor");
             } else {
@@ -56,19 +56,19 @@ public class PublicUserActivity extends Activity {
         logLine("[Insert]");
 
         if (!providerExists(Address.CONTENT_URI)) {
-            logLine("  Content Providerが不在");
+            logLine("  Content Provider doesn't exist.");
             return;
         }
 
-        // ★ポイント4★ センシティブな情報をリクエストに含めてはならない
-        // リクエスト先のアプリがマルウェアである可能性がある。
-        // マルウェアに取得されても問題のない情報であればリクエストに含めてもよい。
+        // *** POINT 4 *** Do not send sensitive information.
+        // since the target Content Provider may be malware.
+        // If no problem when the information is taken by malware, it can be included in the request.
         ContentValues values = new ContentValues();
-        values.put("pref", "東京都");
+        values.put("city", "Tokyo");
         Uri uri = getContentResolver().insert(Address.CONTENT_URI, values);
 
-        // ★ポイント5★ 結果データの安全性を確認する
-        // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+        // *** POINT 5 *** When receiving a result, handle the result data carefully and securely.
+        // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
         logLine("  uri:" + uri);
     }
 
@@ -77,21 +77,21 @@ public class PublicUserActivity extends Activity {
         logLine("[Update]");
 
         if (!providerExists(Address.CONTENT_URI)) {
-            logLine("  Content Providerが不在");
+            logLine("  Content Provider doesn't exist.");
             return;
         }
 
-        // ★ポイント4★ センシティブな情報をリクエストに含めてはならない
-        // リクエスト先のアプリがマルウェアである可能性がある。
-        // マルウェアに取得されても問題のない情報であればリクエストに含めてもよい。
+        // *** POINT 4 *** Do not send sensitive information.
+        // since the target Content Provider may be malware.
+        // If no problem when the information is taken by malware, it can be included in the request.
         ContentValues values = new ContentValues();
-        values.put("pref", "東京都");
+        values.put("city", "Tokyo");
         String where = "_id = ?";
         String[] args = { "4" };
         int count = getContentResolver().update(Address.CONTENT_URI, values, where, args);
 
-        // ★ポイント5★ 結果データの安全性を確認する
-        // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+        // *** POINT 5 *** When receiving a result, handle the result data carefully and securely.
+        // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
         logLine(String.format("  %s records updated", count));
     }
 
@@ -100,17 +100,17 @@ public class PublicUserActivity extends Activity {
         logLine("[Delete]");
 
         if (!providerExists(Address.CONTENT_URI)) {
-            logLine("  Content Providerが不在");
+            logLine("  Content Provider doesn't exist.");
             return;
         }
 
-        // ★ポイント4★ センシティブな情報をリクエストに含めてはならない
-        // リクエスト先のアプリがマルウェアである可能性がある。
-        // マルウェアに取得されても問題のない情報であればリクエストに含めてもよい。
+        // *** POINT 4 *** Do not send sensitive information.
+        // since the target Content Provider may be malware.
+        // If no problem when the information is taken by malware, it can be included in the request.
         int count = getContentResolver().delete(Address.CONTENT_URI, null, null);
 
-        // ★ポイント5★ 結果データの安全性を確認する
-        // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+        // *** POINT 5 *** When receiving a result, handle the result data carefully and securely.
+        // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
         logLine(String.format("  %s records deleted", count));
     }
 

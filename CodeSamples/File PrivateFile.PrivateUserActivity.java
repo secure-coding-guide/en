@@ -32,7 +32,7 @@ public class PrivateUserActivity extends Activity {
     }
 
     /**
-     * ファイルActivityの呼び出し処理
+     *  Call file Activity process
      * 
      * @param view
      */
@@ -41,7 +41,7 @@ public class PrivateUserActivity extends Activity {
     }
 
     /**
-     * ファイルの読み込み処理
+     *  Read file process
      * 
      * @param view
      */
@@ -54,57 +54,56 @@ public class PrivateUserActivity extends Activity {
 
             fis.read(data);
 
-            // ★ポイント4★ ファイルに格納された情報に対しては、その入手先に関わらず内容の安全性を確認する
-            // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+            // *** POINT 4 *** Regarding the information to be stored in files, handle file data carefully and securely.
+            // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
             String str = new String(data);
 
             mFileView.setText(str);
         } catch (FileNotFoundException e) {
             mFileView.setText(R.string.file_view);
         } catch (IOException e) {
-            android.util.Log.d("PrivateFileActivity", "ファイルの読込に失敗しました");
+            android.util.Log.e("PrivateUserActivity", "failed to read file");
         } finally {
             if (fis != null) {
                 try {
                     fis.close();
                 } catch (IOException e) {
-                    android.util.Log.d("PrivateFileActivity", "ファイルの終了に失敗しました");
+                    android.util.Log.e("PrivateUserActivity", "failed to close file");
                 }
             }
         }
     }
 
     /**
-     * ファイルの追記処理
+     * Rewrite file process
      * 
      * @param view
      */
     public void onWriteFileClick(View view) {
         FileOutputStream fos = null;
         try {
-            // ★ポイント1★ ファイルは、アプリケーションディレクトリ内に作成する
-            // ★ポイント2★ ファイルのアクセス権は、他のアプリが利用できないようにプライベートモードにする
+            // *** POINT 1 *** Files must be created in application directory.
+            // *** POINT 2 *** The access privilege of file must be set private mode in order not to be used by other applications.
             fos = openFileOutput(FILE_NAME, MODE_APPEND);
 
-            // ★ポイント3★ センシティブな情報を格納することができる
-            // ★ポイント4★ ファイルに格納する情報に対しては、その入手先に関わらず内容の安全性を確認する
-            // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
-            fos.write(new String("センシティブな情報(User Activity)\n").getBytes());
+            // *** POINT 3 *** Sensitive information can be stored.
+            // *** POINT 4 *** Regarding the information to be stored in files, handle file data carefully and securely.
+            // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
+            fos.write(new String("Sensitive information (User Activity)\n").getBytes());
         } catch (FileNotFoundException e) {
             mFileView.setText(R.string.file_view);
         } catch (IOException e) {
-            android.util.Log.d("PrivateFileActivity", "ファイルの作成に失敗しました");
+            android.util.Log.e("PrivateUserActivity", "failed to read file");
         } finally {
             if (fos != null) {
                 try {
                     fos.close();
                 } catch (IOException e) {
-                    android.util.Log.d("PrivateFileActivity", "ファイルの終了に失敗しました");
+                    android.util.Log.e("PrivateUserActivity", "failed to close file");
                 }
             }
         }
 
         callFileActivity();
     }
-
 }

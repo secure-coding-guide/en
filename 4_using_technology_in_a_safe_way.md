@@ -1853,7 +1853,7 @@ PkgCert.java
 
 AndroidManifest.xml
 ```eval_rst
-.. literalinclude:: CodeSamples/Provider InhouseUser.inhouseUserActivity.src.main.AndroidManifest.xml
+.. literalinclude:: CodeSamples/Provider InhouseUser.providerInhouseUser.src.main.AndroidManifest.xml
    :language: xml
    :encoding: shift-jis
 ```

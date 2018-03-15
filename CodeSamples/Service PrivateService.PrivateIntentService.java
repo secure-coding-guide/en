@@ -4,43 +4,45 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.widget.Toast;
 
-public class PrivateIntentService extends IntentService{
-    /**
-     * IntentServiceを継承した場合、引数無しのコンストラクタを必ず用意する。
-     * これが無い場合、エラーになる。
-     */
+public class PrivateIntentService extends IntentService {
+    
+    // Default constructor must be implemented when the service extends IntentService class.
     public PrivateIntentService() {
         super("PrivateIntentService");
     }
 
-    // Serviceが起動するときに１回だけ呼び出される
+    // The onCreate gets called only one time when the Service starts.
     @Override
     public void onCreate() {
         super.onCreate();
-        Toast.makeText(this, this.getClass().getSimpleName() + " - onCreate()", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "PrivateIntentService - onCreate()", Toast.LENGTH_SHORT).show();
     }
     
-    // Serviceで行いたい処理をこのメソッドに記述する
+    // The onHandleIntent gets called each time after the startService gets called.
     @Override
     protected void onHandleIntent(Intent intent) {      
-        // ★ポイント2★ 同一アプリからのIntentであっても、受信Intentの安全性を確認する
-        // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+        // *** POINT 2 *** Handle the received intent carefully and securely,
+        // even though the intent was sent from the same application.
+        // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
         String param = intent.getStringExtra("PARAM");
-        Toast.makeText(this, String.format("パラメータ「%s」を受け取った。", param), Toast.LENGTH_LONG).show();
+        Toast.makeText(this,
+                String.format("PrivateIntentService\nReceived param: \"%s\"", param),
+                Toast.LENGTH_LONG).show();
 
-        // 別スレッドになっているので、時間のかかる処理を行っても良い
+        // Long term operation is allowed here
+        // since the onHandleIntent gets called from a worker thread.
         try {
-            // 5秒間スリープ
+            // sleep 5 seconds
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    // Serviceが終了するときに１回だけ呼び出される
+    // The onDestroy gets called only one time when the service stops.
     @Override
     public void onDestroy() {
-        Toast.makeText(this, this.getClass().getSimpleName() + " - onDestroy()", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "PrivateIntentService - onDestroy()", Toast.LENGTH_SHORT).show();
     }
     
 }

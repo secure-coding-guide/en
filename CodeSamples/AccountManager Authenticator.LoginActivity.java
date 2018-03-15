@@ -24,23 +24,23 @@ public class LoginActivity extends AccountAuthenticatorActivity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         
-        // アラートアイコン表示
+        // Display alert icon
         requestWindowFeature(Window.FEATURE_LEFT_ICON);
         setContentView(R.layout.login_activity);
         getWindow().setFeatureDrawableResource(Window.FEATURE_LEFT_ICON,
                 android.R.drawable.ic_dialog_alert);
 
-        // widgetを見つけておく
+        // Find a widget in advance
         mNameEdit = (EditText) findViewById(R.id.username_edit);
         mPassEdit = (EditText) findViewById(R.id.password_edit);
         
-        // ★ポイント3★ ログイン画面Activityは公開Activityとして他のアプリからの攻撃アクセスを想定する
-        // 外部入力はIntent#extrasのString型のRE_AUTH_NAMEだけしか扱わない
-        // この外部入力StringはTextEdit#setText()、WebService#login()、new Account()に
-        // 引数として渡されるが、どんな文字列が与えられても問題が起きないことを確認している
+        // *** POINT 3 *** The login screen activity must be made as a public activity, and suppose the attack access from other application.
+        // Regarding external input, only RE_AUTH_NAME which is String type of Intent#extras, are handled.
+        // This external input String is passed toextEdit#setText(), WebService#login(),new Account(),
+        // as a parameter,it's verified that there's no problem if any character string is passed.
         mReAuthName = getIntent().getStringExtra(JssecAuthenticator.RE_AUTH_NAME);
         if (mReAuthName != null) {
-            // ユーザー名指定でLoginActivityが呼び出されたので、ユーザー名を編集不可とする
+            // Since LoginActivity is called with the specified user name, user name should not be editable.
             mNameEdit.setText(mReAuthName);
             mNameEdit.setInputType(InputType.TYPE_NULL);
             mNameEdit.setFocusable(false);
@@ -48,35 +48,35 @@ public class LoginActivity extends AccountAuthenticatorActivity {
         }
     }
 
-    // ログインボタン押下時に実行される
+    // It's executed when login button is pressed.
     public void handleLogin(View view) {
         String name = mNameEdit.getText().toString();
         String pass = mPassEdit.getText().toString();
 
         if (TextUtils.isEmpty(name) || TextUtils.isEmpty(pass)) {
-            // 入力値が不正である場合の処理
+            // Process when the inputed value is incorrect
             setResult(RESULT_CANCELED);
             finish();
         }
 
-        // 入力されたアカウント情報によりオンラインサービスにログインする
+        // Login to online service based on the inpputted account information.
         WebService web = new WebService();
         String authToken = web.login(name, pass);
         if (TextUtils.isEmpty(authToken)) {
-            // 認証が失敗した場合の処理
+            // Process when authentication failed
             setResult(RESULT_CANCELED);
             finish();
         }
         
-        //　以下、ログイン成功時の処理
+        // Process when login was successful, is as per below.
 
-        // ★ポイント5★ アカウント情報や認証トークンなどのセンシティブな情報はログ出力しない
+        // *** POINT 5 *** Sensitive information (like account information or authentication token) must not be output to the log.
         Log.i(TAG, "WebService login succeeded");
 
 
         if (mReAuthName == null) {
-            // ログイン成功したアカウントをAccountManagerに登録する
-            // ★ポイント6★ Account Managerにパスワードを保存しない
+            // Register accounts which logged in successfully, to aAccountManager
+            // *** POINT 6 *** Password should not be saved in Account Manager.
             AccountManager am = AccountManager.get(this);
             Account account = new Account(name, JssecAuthenticator.JSSEC_ACCOUNT_TYPE);
             am.addAccountExplicitly(account, null, null);
@@ -88,7 +88,7 @@ public class LoginActivity extends AccountAuthenticatorActivity {
             setAccountAuthenticatorResult(intent.getExtras());
             setResult(RESULT_OK, intent);
         } else {
-            // 認証トークンを返却する
+            // Return authentication token
             Bundle bundle = new Bundle();
             bundle.putString(AccountManager.KEY_ACCOUNT_NAME, name);
             bundle.putString(AccountManager.KEY_ACCOUNT_TYPE,

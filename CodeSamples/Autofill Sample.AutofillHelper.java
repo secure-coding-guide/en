@@ -3,7 +3,7 @@ package org.jssec.android.autofillframework.autofillservice;
 import android.content.Context;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
-import android.service.autofill.SaveInfo;
+import android.service.autofill.SaveInfo;f
 import android.support.annotation.DrawableRes;
 import android.util.Log;
 import android.view.autofill.AutofillId;
@@ -25,7 +25,7 @@ public class AutofillHelper {
         }
 
         FillResponse.Builder responseBuilder = new FillResponse.Builder();
-        //Autofillèàóù
+        // Processing for Autofill
         if (data != null) {
             for (int i=0; i<data.size(); i++) {
                 Database.Credential cred = data.get(i);

@@ -16,38 +16,38 @@ import android.widget.Toast;
 public class PartnerAIDLService extends Service {
        private static final int REPORT_MSG = 1;
        private static final int GETINFO_MSG = 2;
-    
-    // Serviceからクライアントに通知する値
+
+    // The value which this service informs to client
     private int mValue = 0;
 
-    // ★ポイント2★ 利用元アプリの証明書がホワイトリストに登録されていることを確認する
+    // *** POINT 2 *** Verify that the certificate of the requesting application has been registered in the own white list.
     private static PkgCertWhitelists sWhitelists = null;
     private static void buildWhitelists(Context context) {
         boolean isdebug = Utils.isDebuggable(context);
         sWhitelists = new PkgCertWhitelists();
-        
-        // パートナーアプリ org.jssec.android.service.partnerservice.aidluser の証明書ハッシュ値を登録
+
+        // Register certificate hash value of partner application "org.jssec.android.service.partnerservice.aidluser"
         sWhitelists.add("org.jssec.android.service.partnerservice.aidluser", isdebug ?
-                // debug.keystoreの"androiddebugkey"の証明書ハッシュ値
+                // Certificate hash value of  debug.keystore "androiddebugkey"
                 "0EFB7236 328348A9 89718BAD DF57F544 D5CCB4AE B9DB34BC 1E29DD26 F77C8255" :
-                // keystoreの"partner key"の証明書ハッシュ値
+                // Certificate hash value of keystore "partner key"
                 "1F039BB5 7861C27A 3916C778 8E78CE00 690B3974 3EB8259F E2627B8D 4C0EC35A");
-        
-        // 以下同様に他のパートナーアプリを登録...
+
+        // Register other partner applications in the same way
     }
-    
+
     private static boolean checkPartner(Context context, String pkgname) {
         if (sWhitelists == null) buildWhitelists(context);
         return sWhitelists.test(context, pkgname);
     }
-    
-    // コールバックを登録するオブジェクト。
-    // RemoteCallbackList の提供するメソッドはスレッドセーフになっている。
-    private final RemoteCallbackList<IPartnerAIDLServiceCallback> mCallbacks =
-        new RemoteCallbackList<>();
 
-    // コールバックに対してServiceからデータを送信するためのHandler
-    protected static class ServiceHandler extends Handler{
+    // Object to register callback
+    // Methods which RemoteCallbackList provides are thread-safe.
+    private final RemoteCallbackList<IPartnerAIDLServiceCallback> mCallbacks =
+        new RemoteCallbackList<IPartnerAIDLServiceCallback>();
+
+    // Handler to send data when callback is called.
+    private static class ServiceHandler extends Handler{
 
         private Context mContext;
         private RemoteCallbackList<IPartnerAIDLServiceCallback> mCallbacks;
@@ -62,56 +62,57 @@ public class PartnerAIDLService extends Service {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case REPORT_MSG: {
-                    if(mCallbacks == null){
-                        return;
-                    }
-                    // 通知を開始する
-                    // beginBroadcast()は、getBroadcastItem()で取得可能なコピーを作成している
-                    final int N = mCallbacks.beginBroadcast();
-                    for (int i = 0; i < N; i++) {
-                        IPartnerAIDLServiceCallback target = mCallbacks.getBroadcastItem(i);
-                        try {
-                            // ★ポイント5★ パートナーアプリに開示してよい情報に限り送信してよい
-                            target.valueChanged("パートナーアプリに開示してよい情報(callback from Service) No." + (++mValue));
-
-                        } catch (RemoteException e) {
-                            // RemoteCallbackListがコールバックを管理しているので、ここではunregeisterしない
-                            // RemoteCallbackList.kill()によって全て解除される
-                        }
-                    }
-                    // finishBroadcast()は、beginBroadcast()と対になる処理
-                    mCallbacks.finishBroadcast();
-
-                    // 10秒後に繰り返す
-                    sendEmptyMessageDelayed(REPORT_MSG, 10000);
-                    break;
+            case REPORT_MSG: {
+                if(mCallbacks == null){
+                    return;
                 }
-                case GETINFO_MSG: {
-                    if(mContext != null) {
-                        Toast.makeText(mContext,
-                                (String) msg.obj, Toast.LENGTH_LONG).show();
+                // Start broadcast
+                // To call back on to the registered clients, use beginBroadcast().
+                // beginBroadcast() makes a copy of the currently registered callback list.
+                final int N = mCallbacks.beginBroadcast();
+                for (int i = 0; i < N; i++) {
+                    IPartnerAIDLServiceCallback target = mCallbacks.getBroadcastItem(i);
+                    try {
+                        // *** POINT 5 *** Information that is granted to disclose to partner applications can be returned.
+                        target.valueChanged("Information disclosed to partner application (callback from Service) No." + (++mValue));
+
+                    } catch (RemoteException e) {
+                        // Callbacks are managed by RemoteCallbackList, do not unregister callbacks here.
+                        // RemoteCallbackList.kill() unregister all callbacks
                     }
-                    break;
                 }
-                default:
-                    super.handleMessage(msg);
-                    break;
+                // finishBroadcast() cleans up the state of a broadcast previously initiated by calling beginBroadcast().
+                mCallbacks.finishBroadcast();
+
+                // Repeat after 10 seconds
+                sendEmptyMessageDelayed(REPORT_MSG, 10000);
+                break;
+             }
+            case GETINFO_MSG: {
+                if(mContext != null) {
+                    Toast.makeText(mContext,
+                            (String) msg.obj, Toast.LENGTH_LONG).show();
+                }
+                break;
+              }
+            default:
+                super.handleMessage(msg);
+                break;
             } // switch
         }
     }
 
     protected final ServiceHandler mHandler = new ServiceHandler(this, mCallbacks, mValue);
 
-    // AIDLで定義したインターフェース
+    // Interfaces defined in AIDL
     private final IPartnerAIDLService.Stub mBinder = new IPartnerAIDLService.Stub() {
         private boolean checkPartner() {
             Context ctx = PartnerAIDLService.this;
             if (!PartnerAIDLService.checkPartner(ctx, Utils.getPackageNameFromUid(ctx, getCallingUid()))) {
-                mHandler.post(new Runnable() {
+                mHandler.post(new Runnable(){
                     @Override
-                    public void run() {
-                        Toast.makeText(PartnerAIDLService.this, "利用元アプリはパートナーアプリではない。", Toast.LENGTH_LONG).show();
+                    public void run(){
+                       Toast.makeText(PartnerAIDLService.this, "Requesting application is not partner application.", Toast.LENGTH_LONG).show();
                     }
                 });
                 return false;
@@ -119,64 +120,61 @@ public class PartnerAIDLService extends Service {
            return true;
         }
         public void registerCallback(IPartnerAIDLServiceCallback cb) {
-            // ★ポイント2★ 利用元アプリの証明書がホワイトリストに登録されていることを確認する
+            // *** POINT 2 *** Verify that the certificate of the requesting application has been registered in the own white list.
           if (!checkPartner()) {
                 return;
             }
           if (cb != null) mCallbacks.register(cb);
         }
         public String getInfo(String param) {
-
-            // ★ポイント2★ 利用元アプリの証明書がホワイトリストに登録されていることを確認する
-          if (!checkPartner()) {
+            // *** POINT 2 *** Verify that the certificate of the requesting application has been registered in the own white list.
+            if (!checkPartner()) {
                 return null;
             }
-            // ★ポイント4★ パートナーアプリからのIntentであっても、受信Intentの安全性を確認する
-            // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
-          Message msg = new Message();
-          msg.what = GETINFO_MSG;
-          msg.obj = String.format("パートナーアプリからのメソッド呼び出し。「%s」を受信した。", param);
-          PartnerAIDLService.this.mHandler.sendMessage(msg);
-            
-            // ★ポイント5★ パートナーアプリに開示してよい情報に限り返送してよい
-            return "パートナーアプリに開示してよい情報(method from Service)";
+            // *** POINT 4 *** Handle the received intent carefully and securely,
+            // even though the intent was sent from a partner application
+            // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
+            Message msg = new Message();
+            msg.what = GETINFO_MSG;
+            msg.obj = String.format("Method calling from partner application. Recieved \"%s\"", param);
+            PartnerAIDLService.this.mHandler.sendMessage(msg);
+
+            // *** POINT 5 *** Return only information that is granted to be disclosed to a partner application.
+            return "Information disclosed to partner application (method from Service)";
         }
-        
+
         public void unregisterCallback(IPartnerAIDLServiceCallback cb) {
-            // ★ポイント2★ 利用元アプリの証明書がホワイトリストに登録されていることを確認する
+            // *** POINT 2 *** Verify that the certificate of the requesting application has been registered in the own white list.
            if (!checkPartner()) {
                 return;
             }
- 
+
            if (cb != null) mCallbacks.unregister(cb);
         }
     };
-    
+
     @Override
     public IBinder onBind(Intent intent) {
-        // ★ポイント3★ onBindで呼び出し元がパートナーかどうか判別できない
-        // AIDL で定義したメソッドの呼び出し毎にチェックが必要になる。
-
+        // *** POINT 3 *** Verify that the certificate of the requesting application has been registered in the own white list.
+        // So requesting application must be validated in methods defined in AIDL every time.
         return mBinder;
     }
-    
+
     @Override
     public void onCreate() {
-        Toast.makeText(this, this.getClass().getSimpleName() + " - onCreate()", Toast.LENGTH_SHORT).show();       
+        Toast.makeText(this, this.getClass().getSimpleName() + " - onCreate()", Toast.LENGTH_SHORT).show();
 
-        // Serviceが実行中の間は、定期的にインクリメントした数字を通知する
+        // During service is running, inform the incremented number periodically.
         mHandler.sendEmptyMessage(REPORT_MSG);
-
     }
-    
+
     @Override
     public void onDestroy() {
         Toast.makeText(this, this.getClass().getSimpleName() + " - onDestroy()", Toast.LENGTH_SHORT).show();
-        
-        // コールバックを全て解除する
+
+        // Unregister all callbacks
         mCallbacks.kill();
-        
+
         mHandler.removeMessages(REPORT_MSG);
     }
-
 }

@@ -10,18 +10,18 @@ import android.widget.TextView;
 
 public class ProtectedActivity extends Activity {
 
-    // 自社のSignature Permission
+    // In-house Signature Permission
     private static final String MY_PERMISSION = "org.jssec.android.permission.protectedapp.MY_PERMISSION";
 
-    // 自社の証明書のハッシュ値
+    // Hash value of in-house certificate
     private static String sMyCertHash = null;
     private static String myCertHash(Context context) {
         if (sMyCertHash == null) {
             if (Utils.isDebuggable(context)) {
-                // debug.keystoreの"androiddebugkey"の証明書ハッシュ値
+                // Certificate hash value of "androiddebugkey" of debug.keystore
                 sMyCertHash = "0EFB7236 328348A9 89718BAD DF57F544 D5CCB4AE B9DB34BC 1E29DD26 F77C8255";
             } else {
-                // keystoreの"my company key"の証明書ハッシュ値
+                // Certificate hash value of "my company key" of keystore
                 sMyCertHash = "D397D343 A5CBC10F 4EDDEB7C A10062DE 5690984F 1FB9E88B D7B3A7C2 42E142CA";
             }
         }
@@ -36,13 +36,13 @@ public class ProtectedActivity extends Activity {
         setContentView(R.layout.main);
         mMessageView = (TextView) findViewById(R.id.messageView);
 
-        // ★ポイント4★ ソースコード上で、独自定義Signature Permissionが自社アプリにより定義されていることを確認する
+        // *** POINT 4 *** At run time, verify if the signature permission is defined by itself on the program code
         if (!SigPerm.test(this, MY_PERMISSION, myCertHash(this))) {
-            mMessageView.setText("独自定義Signature Permissionが自社アプリにより定義されていない。");
+            mMessageView.setText("In-house defined signature permission is not defined by in-house application.");
             return;
         }
 
-        // ★ポイント4★ 証明書が一致する場合にのみ、処理を続行する
-        mMessageView.setText("独自定義Signature Permissionが自社アプリにより定義されていることを確認できた。");
+        // *** POINT 4 *** Continue processing only when the certificate matches
+        mMessageView.setText("In-house-defined signature permission is defined by in-house application, was confirmed.");
     }
 }

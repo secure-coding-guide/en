@@ -19,8 +19,8 @@ public class UncopyableActivity extends Activity {
 
         copyableEdit = (EditText) findViewById(R.id.copyable_edit);
         uncopyableEdit = (EditText) findViewById(R.id.uncopyable_edit);
-        // setCustomSelectionActionModeCallbackメソッドにより、
-        // 文字列選択時のメニューをカスタマイズすることができる。
+        // By setCustomSelectionActionMODECallback method,
+        // Possible to customize menu of character string selection.
         uncopyableEdit.setCustomSelectionActionModeCallback(actionModeCallback);
     }
 
@@ -33,12 +33,12 @@ public class UncopyableActivity extends Activity {
         }
 
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            // ★ポイント1★ 文字列選択時のメニューからandroid.R.id.copyを削除する。
+            // *** POINT 1 *** Delete android.R.id.copy from the menu of character string selection.
             MenuItem itemCopy = menu.findItem(android.R.id.copy);
             if (itemCopy != null) {
                 menu.removeItem(android.R.id.copy);
             }
-            // ★ポイント2★ 文字列選択時のメニューからandroid.R.id.cut削除する。
+            // *** POINT 2 *** Delete android.R.id.cut from the menu of character string selection.
             MenuItem itemCut = menu.findItem(android.R.id.cut);
             if (itemCut != null) {
                 menu.removeItem(android.R.id.cut);

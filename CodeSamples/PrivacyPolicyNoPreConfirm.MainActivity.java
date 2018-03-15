@@ -69,7 +69,7 @@ public class MainActivity extends FragmentActivity implements DialogListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // ユーザー識別用IDをサーバーから取得する
+        // Fetch user ID from serverFetch user ID from server
         new GetDataAsyncTask().execute();
 
         findViewById(R.id.buttonStart).setEnabled(false);
@@ -84,8 +84,8 @@ public class MainActivity extends FragmentActivity implements DialogListener {
         int privacyPolicyAgreed = pref.getInt(PRIVACY_POLICY_AGREED_KEY, -1);
 
         if (privacyPolicyAgreed <= VERSION_TO_SHOW_COMPREHENSIVE_AGREEMENT_ANEW) {
-            // ★ポイント1★ 初回起動時(アップデート時)に、アプリが扱う利用者情報の送信について包括同意を得る
-            // アップデート時については、新しい利用者情報を扱うようになった場合にのみ、再度包括同意を得る必要がある。
+            // *** POINT 1 *** On first launch (or application update), obtain broad consent to transmit user data that will be handled by the application.
+            // When the application is updated, it is only necessary to renew the user's grant of broad consent if the updated application will handle new types of user data.
             ConfirmFragment dialog = ConfirmFragment.newInstance(R.string.privacyPolicy, R.string.agreePrivacyPolicy, DIALOG_TYPE_COMPREHENSIVE_AGREEMENT);
             dialog.setDialogListener(this);
             FragmentManager fragmentManager = getSupportFragmentManager();
@@ -103,7 +103,7 @@ public class MainActivity extends FragmentActivity implements DialogListener {
 
     public void onPositiveButtonClick(int type) {
         if (type == DIALOG_TYPE_COMPREHENSIVE_AGREEMENT) {
-            // ★ポイント1★ 初回起動時に、アプリが扱う利用者情報の送信について包括同意を得る
+            // *** POINT 1 *** On first launch (or application update), obtain broad consent to transmit user data that will be handled by the application.
             SharedPreferences.Editor pref = getSharedPreferences(PRIVACY_POLICY_PREF_NAME, MODE_PRIVATE).edit();
             pref.putInt(PRIVACY_POLICY_AGREED_KEY, getVersionCode());
             pref.apply();
@@ -112,8 +112,8 @@ public class MainActivity extends FragmentActivity implements DialogListener {
 
     public void onNegativeButtonClick(int type) {
         if (type == DIALOG_TYPE_COMPREHENSIVE_AGREEMENT) {
-            // ★ポイント2★ ユーザーの包括同意が得られていない場合は、利用者情報の送信はしない
-            // サンプルアプリではアプリケーションを終了する
+            // *** POINT 2 *** If the user does not grant general consent, do not transmit user data.
+            // In this sample application we terminate the application in this case.
             finish();
         }
     }
@@ -125,7 +125,7 @@ public class MainActivity extends FragmentActivity implements DialogListener {
             PackageInfo packageInfo = packageManager.getPackageInfo(this.getPackageName(), PackageManager.GET_ACTIVITIES);
             versionCode = packageInfo.versionCode;
         } catch (NameNotFoundException e) {
-            // 例外処理は割愛
+            // This is sample, so omit the exception process
         }
 
         return versionCode;
@@ -141,29 +141,29 @@ public class MainActivity extends FragmentActivity implements DialogListener {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.action_show_pp:
-            // ★ポイント3★ ユーザーがアプリ・プライバシーポリシーを確認できる手段を用意する
+            // *** POINT 3 *** Provide methods by which the user can review the application privacy policy.
             Intent intent = new Intent();
             intent.setClass(this, WebViewAssetsActivity.class);
             startActivity(intent);
             return true;
         case R.id.action_del_id:
-            // ★ポイント4★ 送信した情報をユーザー操作により削除する手段を用意する
+            // *** POINT 4 *** Provide methods by which transmitted data can be deleted by user operations.
             new SendDataAsyncTack().execute(DEL_ID_URI, UserId);
             return true;
         case R.id.action_donot_send_id:
-            // ★ポイント5★ ユーザー操作により利用者情報の送信を停止する手段を用意する
+            // *** POINT 5 *** Provide methods by which transmitting data can be stopped by user operations.
 
-            // 利用者情報の送信を停止した場合、包括同意に関する同意は破棄されたものとする
+            // If the user stop sending data, user consent is deemed to have been revoked.
             SharedPreferences.Editor pref = getSharedPreferences(PRIVACY_POLICY_PREF_NAME, MODE_PRIVATE).edit();
             pref.putInt(PRIVACY_POLICY_AGREED_KEY, 0);
             pref.apply();
-            
-            // 本サンプルでは利用者情報を送信しない場合、ユーザーに提供する機能が無くなるため
-            // この段階でアプリを終了する。この処理はアプリ毎の都合に合わせて変更すること。
+
+            // In this sample application if the user data cannot be sent by user operations,
+            // finish the application because we do nothing.
             String message  = getString(R.string.stopSendUserData);
             Toast.makeText(MainActivity.this, this.getClass().getSimpleName() + " - " + message, Toast.LENGTH_SHORT).show();
             finish();
-            
+
             return true;        }
         return false;
     }
@@ -173,20 +173,20 @@ public class MainActivity extends FragmentActivity implements DialogListener {
 
         @Override
         protected String doInBackground(String... params) {
-            // ★ポイント6★ 利用者情報の紐づけにはUUID/cookieを利用する
-            // 本サンプルではサーバー側で生成したIDを利用する
+            // *** POINT 6 *** Use UUIDs or cookies to keep track of user data
+            // In this sample we use an ID generated on the server side
             SharedPreferences sp = getSharedPreferences(PRIVACY_POLICY_PREF_NAME, MODE_PRIVATE);
             UserId = sp.getString(ID_KEY, null);
             if (UserId == null) {
-                // SharedPreferences内にトークンが存在しなため、サーバーからIDを取り寄せる。
+                // No token in SharedPreferences; fetch ID from server
                 try {
                     UserId = NetworkUtil.getCookie(GET_ID_URI, "", "id");
                 } catch (IOException e) {
-                    // 証明書エラーなどの例外をキャッチする
+                    // Catch exceptions such as certification errors
                     extMessage = e.toString();
                 }
 
-                // 取り寄せたIDをSharedPreferencesに保存する。
+                // Store the fetched ID in SharedPreferences
                 sp.edit().putString(ID_KEY, UserId).commit();
             }
             return UserId;
@@ -224,7 +224,7 @@ public class MainActivity extends FragmentActivity implements DialogListener {
 
                 result = true;
             } catch (IOException e) {
-                // 証明書エラーなどの例外をキャッチする
+                // Catch exceptions such as certification errors
                 extMessage = e.toString();
             } catch (JSONException e) {
                 extMessage = e.toString();

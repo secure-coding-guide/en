@@ -28,32 +28,32 @@ public class ExternalFileActivity extends Activity {
     }
 
     /**
-     * ファイルの作成処理
+     * Create file process
      * 
      * @param view
      */
     public void onCreateFileClick(View view) {
         FileOutputStream fos = null;
         try {
-            // ★ポイント1★ センシティブな情報は格納しない
-            // ★ポイント2★ アプリ毎にユニークなディレクトリにファイルを配置する
+            // *** POINT 1 *** Sensitive information must not be stored.
+            // *** POINT 2 *** Files must be stored in the unique directory per application.
             File file = new File(getExternalFilesDir(TARGET_TYPE), FILE_NAME);
             fos = new FileOutputStream(file, false);
 
-            // ★ポイント3★ ファイルに格納する情報に対しては、その入手先に関わらず内容の安全性を確認する
-            // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
-            fos.write(new String("センシティブでない情報(External File Activity)\n")
+            // *** POINT 3 *** Regarding the information to be stored in files, handle file data carefully and securely.
+            // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
+            fos.write(new String("Non-Sensitive Information(ExternalFileActivity)\n")
                     .getBytes());
         } catch (FileNotFoundException e) {
             mFileView.setText(R.string.file_view);
         } catch (IOException e) {
-            android.util.Log.e("ExternalFileActivity", "ファイルの読込に失敗しました");
+            android.util.Log.e("ExternalFileActivity", "failed to read file");
         } finally {
             if (fos != null) {
                 try {
                     fos.close();
                 } catch (IOException e) {
-                    android.util.Log.e("ExternalUserActivity", "ファイルの終了に失敗しました");
+                    android.util.Log.e("ExternalFileActivity", "failed to close file");
                 }
             }
         }
@@ -62,7 +62,7 @@ public class ExternalFileActivity extends Activity {
     }
 
     /**
-     * ファイルの読み込み処理
+     * Read file process
      * 
      * @param view
      */
@@ -76,28 +76,28 @@ public class ExternalFileActivity extends Activity {
 
             fis.read(data);
 
-            // ★ポイント3★ ファイルに格納された情報に対しては、その入手先に関わらず内容の安全性を確認する
-            // サンプルにつき割愛。「3.2 入力データの安全性を確認する」を参照。
+            // *** POINT 3 *** Regarding the information to be stored in files, handle file data carefully and securely.
+            // Omitted, since this is a sample. Please refer to "3.2 Handling Input Data Carefully and Securely."
             String str = new String(data);
 
             mFileView.setText(str);
         } catch (FileNotFoundException e) {
             mFileView.setText(R.string.file_view);
         } catch (IOException e) {
-            android.util.Log.e("ExternalFileActivity", "ファイルの読込に失敗しました");
+            android.util.Log.e("ExternalFileActivity", "failed to read file");
         } finally {
             if (fis != null) {
                 try {
                     fis.close();
                 } catch (IOException e) {
-                    android.util.Log.e("ExternalFileActivity", "ファイルの終了に失敗しました");
+                    android.util.Log.e("ExternalFileActivity", "failed to close file");
                 }
             }
         }
     }
 
     /**
-     * ファイルの削除処理
+     * Delete file process
      * 
      * @param view
      */

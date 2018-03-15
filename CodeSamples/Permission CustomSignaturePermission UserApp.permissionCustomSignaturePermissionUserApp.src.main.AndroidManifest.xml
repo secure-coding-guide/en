@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.jssec.android.permission.userapp">
+    package="org.jssec.android.permission.userapp" >
 
-    <!-- ★ポイント6★ 独自定義Signature Permissionは定義しない -->
+    <!-- *** POINT 6 *** The same signature permission that the application uses must not be defined -->
 
-    <!-- ★ポイント7★ uses-permissionにより独自Permissionを利用宣言する -->
+    <!-- *** POINT 7 *** Declare the in-house permission with uses-permission tag -->
     <uses-permission
         android:name="org.jssec.android.permission.protectedapp.MY_PERMISSION" />
 

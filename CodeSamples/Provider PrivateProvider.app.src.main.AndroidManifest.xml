@@ -15,7 +15,7 @@
             </intent-filter>
         </activity>
         
-        <!-- ★ポイント1★ exported="false"により、明示的に非公開設定する -->
+        <!-- *** POINT 1 *** Explicitly set the exported attribute to false. -->
         <provider
             android:name=".PrivateProvider"
             android:authorities="org.jssec.android.provider.privateprovider"

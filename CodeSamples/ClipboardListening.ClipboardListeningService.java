@@ -26,7 +26,7 @@ public class ClipboardListeningService extends Service {
         if (mClipboardManager != null) {
             mClipboardManager.addPrimaryClipChangedListener(clipListener);
         } else {
-            Log.e(TAG, "ClipboardServiceの取得に失敗しました。サービスを終了します。");
+            Log.e(TAG, "Failed to get ClipboardService . Service is closed.");
             this.stopSelf();
         }
     }
@@ -47,7 +47,7 @@ public class ClipboardListeningService extends Service {
                 Toast
                     .makeText(
                         getApplicationContext(),
-                        "コピーあるいはカットされた文字列:\n"
+                        "Character stirng that is copied or cut:\n"
                             + item.coerceToText(getApplicationContext()),
                         Toast.LENGTH_SHORT)
                     .show();

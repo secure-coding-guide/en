@@ -21,7 +21,7 @@ public class PrivateCertificateHttpsActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
+
         mUrlBox = (EditText)findViewById(R.id.urlbox);
         mMsgBox = (TextView)findViewById(R.id.msgbox);
         mImgBox = (ImageView)findViewById(R.id.imageview);
@@ -29,7 +29,7 @@ public class PrivateCertificateHttpsActivity extends Activity {
     
     @Override
     protected void onPause() {
-        // このあとActivityが破棄される可能性があるので非同期処理をキャンセルしておく
+        // After this, Activity may be discarded, so cancel asynchronous process in advance.
         if (mAsyncTask != null) mAsyncTask.cancel(true);
         super.onPause();
     }
@@ -39,23 +39,23 @@ public class PrivateCertificateHttpsActivity extends Activity {
         mMsgBox.setText(url);
         mImgBox.setImageBitmap(null);
         
-        // 直前の非同期処理が終わってないこともあるのでキャンセルしておく
+        // Cancel, since the last asynchronous process might have not been finished yet.
         if (mAsyncTask != null) mAsyncTask.cancel(true);
         
-        // UIスレッドで通信してはならないので、AsyncTaskによりワーカースレッドで通信する
+        // Since cannot communicate through UI thread, communicate by worker thread by AsynchTask.
         mAsyncTask = new PrivateCertificateHttpsGet(this) {
             @Override
             protected void onPostExecute(Object result) {
-                // UIスレッドで通信結果を処理する
+                // Process the communication result through UI thread.
                 if (result instanceof Exception) {
                     Exception e = (Exception)result;
-                    mMsgBox.append("\n例外発生\n" + e.toString());
+                    mMsgBox.append("\nException occurs\n" + e.toString());
                 } else {
                     byte[] data = (byte[])result;
                     Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
                     mImgBox.setImageBitmap(bmp);
                 }
             }
-        }.execute(url); // URLを渡して非同期処理を開始
+        }.execute(url); // Pass URL and start asynchronization process
     }
 }

@@ -5,7 +5,7 @@
     android:orientation="vertical" 
     >
 
-    <!-- 画面タイトル -->
+    <!-- Screen title -->
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
@@ -16,7 +16,7 @@
             android:text="@string/Title_MainActivity" />
     </LinearLayout>
 
-    <!-- 明細行領域 -->
+    <!-- Detail row section -->
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >

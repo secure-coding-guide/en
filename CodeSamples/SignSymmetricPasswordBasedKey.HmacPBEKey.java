@@ -13,24 +13,24 @@ import javax.crypto.spec.PBEKeySpec;
 
 public final class HmacPBEKey {
 
-    // ★ポイント1★ 明示的に暗号モードとパディングを設定する
-    // ★ポイント2★ 脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
-    // Mac クラスの getInstance に渡すパラメータ （認証モード)
+    // *** POINT 1 *** Explicitly specify the encryption mode and the padding.
+    // *** POINT 2 *** Use strong encryption methods (specifically, technologies that meet the relevant criteria), including algorithms, block cipher modes, and padding modes.
+    // Parameters passed to the getInstance method of the Mac class: Authentication mode
     private static final String TRANSFORMATION = "PBEWITHHMACSHA1";
 
-    // 鍵を生成するクラスのインスタンスを取得するための文字列
+    // A string used to fetch an instance of the class that generates the key
     private static final String KEY_GENERATOR_MODE = "PBEWITHHMACSHA1";
 
-    // ★ポイント3★ パスワードから鍵を生成する場合は、Saltを使用する
-    // Saltのバイト長
+    // *** POINT 3 *** When generating a key from a password, use Salt.
+    // Salt length in bytes 
     public static final int SALT_LENGTH_BYTES = 20;
 
-    // ★ポイント4★ パスワードから鍵を生成する場合は、適正なハッシュの繰り返し回数を指定する
-    // PBE で鍵を生成する際の攪拌の繰り返し回数
+    // *** POINT 4 *** When generating a key from a password, specify an appropriate hash iteration count.
+    // Set the number of mixing repetitions used when generating keys via PBE
     private static final int KEY_GEN_ITERATION_COUNT = 1024;
 
-    // ★ポイント5★ 十分安全な長さを持つ鍵を利用する
-    // 鍵のビット長
+    // *** POINT 5 *** Use a key of length sufficient to guarantee the MAC strength.
+    // Key length in bits
     private static final int KEY_LENGTH_BITS = 160;
 
     private byte[] mSalt = null;
@@ -61,11 +61,11 @@ public final class HmacPBEKey {
         byte[] hmac = null;
 
         try {
-            // ★ポイント1★ 明示的に暗号モードとパディングを設定する
-            // ★ポイント2★ 脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
+            // *** POINT 1 *** Explicitly specify the encryption mode and the padding.
+            // *** POINT 2 *** Use strong encryption methods (specifically, technologies that meet the relevant criteria), including algorithms, block cipher modes, and padding modes.
             Mac mac = Mac.getInstance(TRANSFORMATION);
 
-            // ★ポイント3★ パスワードから鍵を生成する場合は、Saltを使用する
+            // *** POINT 3 *** When generating a key from a password, use Salt.
             SecretKey secretKey = generateKey(password, mSalt);
             mac.init(secretKey);
 
@@ -93,18 +93,18 @@ public final class HmacPBEKey {
         PBEKeySpec keySpec = null;
 
         try {
-            // ★ポイント2★ 脆弱でない(基準を満たす)アルゴリズム・モード・パディングを使用する
-            // 鍵を生成するクラスのインスタンスを取得する
-            // 例では、AES-CBC 128 ビット用の鍵を SHA1 を利用して生成する KeyFactory を使用。
+            // *** POINT 2 *** Use strong encryption methods (specifically, technologies that meet the relevant criteria), including algorithms, block cipher modes, and padding modes.
+            // Fetch an instance of the class that generates the key 
+            // In this example, we use a KeyFactory that uses SHA1 to generate AES-CBC 128-bit keys.
             SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance(KEY_GENERATOR_MODE);
 
-            // ★ポイント3★ パスワードから鍵を生成する場合は、Saltを使用する
-            // ★ポイント4★ パスワードから鍵を生成する場合は、適正なハッシュの繰り返し回数を指定する
-            // ★ポイント5★ 十分安全な長さを持つ鍵を利用する
+            // *** POINT 3 *** When generating a key from a password, use Salt.
+            // *** POINT 4 *** When generating a key from a password, specify an appropriate hash iteration count.
+            // *** POINT 5 *** Use a key of length sufficient to guarantee the MAC strength.
             keySpec = new PBEKeySpec(password, salt, KEY_GEN_ITERATION_COUNT, KEY_LENGTH_BITS);
-            // passwordのクリア
+            // Clear password
             Arrays.fill(password, '?');
-            // 鍵を生成する
+            // Generate the key
             secretKey = secretKeyFactory.generateSecret(keySpec);
         } catch (NoSuchAlgorithmException e) {
         } catch (InvalidKeySpecException e) {

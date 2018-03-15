@@ -91,10 +91,7 @@ public class MainActivity extends Activity {
         } else {
             String memo = new String(data.mData);
             
-            textViewMemo.setText(memo);//　こっちだとエミュレータでIMMが動き出してしまう。
-//          Editable editable = (Editable)textViewMemo.getText();
-//          editable.clear();
-//          editable.append(memo);
+            textViewMemo.setText(memo);
         }
     }
     

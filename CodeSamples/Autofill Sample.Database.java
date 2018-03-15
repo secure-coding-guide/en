@@ -55,14 +55,14 @@ public class Database {
     }
 
     public boolean add(String username, String pass) {
-        //本来、情報の機密度に応じて適切に保存するべきである。
+        //Below is just sample. Each data is supposed to be stored properly based on its sensitivity.
         SharedPreferences pref = mContext.getSharedPreferences(PREF_FILENAME,MODE_PRIVATE);
         String credString = pref.getString(CREDENTIAL_LIST, DEFAULT_CREDLIST_STRING);
 
         Gson gson = new Gson();
         CredentialList credList = createCredentialListFromString(gson, credString);
 
-        //追加
+        // Add data
         boolean ret = credList.add(new Credential(username, pass));
         Log.d(TAG, "Database::add() num=" + credList.getSize());
         credString = gson.toJson(credList);
@@ -90,7 +90,7 @@ public class Database {
         Gson gson = new Gson();
         CredentialList credList = createCredentialListFromString(gson, credString);
 
-        //クリア
+        // Clear all data up
         credList.clearAll();
         Log.d(TAG, "Database::clearAll() num=" + credList.getSize());
         credString = gson.toJson(credList);
@@ -103,7 +103,7 @@ public class Database {
     private CredentialList createCredentialListFromString(Gson gson, String credString) {
         CredentialList credList = null;
         if (credString == null || credString.length() == 0) {
-            //CredentialListはDBに最初にアクセスしたときに作成される
+            //CredentialList is created at the first access to DB
             credList = new CredentialList();
         } else {
             credList = gson.fromJson(credString, CredentialList.class);
