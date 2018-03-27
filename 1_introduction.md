@@ -185,14 +185,14 @@ appreciated.
 <td>For Android 8.0 (API Level 26) and later, added a discussion of cases in which it is possible to obtain account information for Authenticators with non-matching signatures, and how to handle such cases.</td>
 </tr>
 <tr>
-<td>5.4 HTTPSで通信する</td>
-<td>5.4 HTTPSで通信する</td>
-<td>Android 8.0以降のSSLv3のサポート打ち切りに関して追記しました。</td>
+<td>5.4 Communicating via HTTPS</td>
+<td>5.4 Communicating via HTTPS</td>
+<td>Added a discussion of the removal of support for SSLv3 in Android 8.0 and later.</td>
 </tr>
 <tr>
-<td>5.4.3.1 プライベート証明書の作成方法とサーバー設定</td>
-<td>5.4.3.1 プライベート証明書の作成方法とサーバー設定</td>
-<td>プライベート証明書にSubjectAltNameを含むように作成スクリプトを修正しました。</td>
+<td>5.4.3.1 How to Create Private Certificate and Configure Server Settings</td>
+<td>5.4.3.1 How to Create Private Certificate and Configure Server Settings</td>
+<td>Revised the creation script to include the SubjectAltName in the private certificate.</td>
 </tr>
 <tr>
 <td> (該当なし)</td>
@@ -200,9 +200,9 @@ appreciated.
 <td>HTTPS(SSL/TLS)通信のTLS 1.2への移行を推奨する記事を追加しました。</td>
 </tr>
 <tr>
-<td> (該当なし)</td>
-<td>5.5.3.3 Android IDのバージョンによる違いについて</td>
-<td>Android IDのバージョンによる値や生成規則の違いについて記載しました。</td>
+<td>(not applicable)</td>
+<td>5.5.3.3 Version-dependent differences in handling of Android IDs</td>
+<td>Added a discussion of version-dependent differences in values and generation rules for Android IDs.</td>
 </tr>
 </tbody>
 </table>
