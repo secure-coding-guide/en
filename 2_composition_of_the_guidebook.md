@@ -285,7 +285,7 @@ Figure 2.5‑4
 
 After launching, import project from the dialog that appears.
 
-![](media/image10.png)
+![](media/image12.png)
 ```eval_rst
 .. {width="4.145574146981628in"
 .. height="3.2916666666666665in"}
@@ -308,19 +308,19 @@ Figure 2.5‑6
 Click \"Import project (Eclipse ADT, Gradle, etc.)\" from the dialog
 that is displayed.
 
-![](media/image10.png)
+![](media/image12.png)
 ```eval_rst
 .. {width="3.9375in" height="3.1264501312335957in"}
 ```
 
-Figure 2.5‑7 ***!!!!!REPLACE THIS PICTURE AND BELOW!!!!!***
+Figure 2.5‑7
 
 #### Select the project
 
 Expand the project folder you wish to import and select
 \"gradle\\build.gradle\" within that folder.
 
-![](media/image12.png)
+![](media/image13.png)
 ```eval_rst
 .. {width="3.15625in" height="3.6427154418197727in"}
 ```
@@ -331,7 +331,7 @@ If the version of Gradle in the Android Studio you are using differs
 from the version assumed by the sample code projects in this
 guidebook, Gradle will be optimized.
 
-![](media/image13.png)
+![](media/image14.png)
 ```eval_rst
 .. {width="4.46875in" height="0.859686132983377in"}
 ```
@@ -341,7 +341,7 @@ Figure 2.5‑9
 Following the on-screen instructions, click \"Update\" to initiate the
 update of the Android Gradle Plugin.
 
-![](media/image14.png)
+![](media/image15.png)
 ```eval_rst
 .. {width="4.645833333333333in"
 .. height="2.2020713035870516in"}
@@ -352,7 +352,7 @@ Figure 2.5‑10
 The message shown below is displayed. Click \"Fix Gradle wrapper and
 re-import project Gradle setting\" to update the Gradle wrapper.
 
-![](media/image15.png)
+![](media/image16.png)
 ```eval_rst
 .. {width="6.1375in" height="1.4638888888888888in"}
 ```
@@ -363,7 +363,7 @@ Figure 2.5‑11
 
 Automatically the project is imported.
 
-![](media/image16.png)
+![](media/image17.png)
 ```eval_rst
 .. {width="4.928546587926509in"
 .. height="2.9895833333333335in"}
@@ -375,7 +375,7 @@ Android Studio, unlike Eclipse, will display a single project in a
 window. If you want to open and import a different project, click
 \"File -\> Import Project \...\".
 
-![](media/image17.png)
+![](media/image18.png)
 ```eval_rst
 .. {width="2.1770833333333335in"
 .. height="3.3672222222222223in"}
@@ -392,7 +392,7 @@ Android Studio.
 
 #### Click on File -\>Project Structure\...
 
-![](media/image18.png)
+![](media/image19.png)
 ```eval_rst
 .. {width="2.1875in" height="3.401966316710411in"}
 ```
@@ -404,7 +404,7 @@ Figure 2.5‑14
 Select a project from Module list in left pane, selecting "Signing"
 tab, and then click "+" button.
 
-![](media/image19.png)
+![](media/image20.png)
 ```eval_rst
 .. {width="4.572916666666667in"
 .. height="3.7520034995625546in"}
@@ -417,7 +417,7 @@ Figure 2.5‑15
 Debug.keystore is contained in the sample code (underneath the
 android\_securecoding folder)
 
-![](media/image20.png)
+![](media/image21.png)
 ```eval_rst
 .. {width="3.0132010061242345in"
 .. height="3.4583333333333335in"}
@@ -427,7 +427,7 @@ Figure 2.5‑16
 
 #### Type Signing name
 
-![](media/image21.png)
+![](media/image22.png)
 ```eval_rst
 .. {width="5.177083333333333in"
 .. height="4.247711067366579in"}
@@ -440,7 +440,7 @@ Figure 2.5‑17
 Select the Build Types tab, select signing name typed in the previous
 step, and then click "OK".
 
-![](media/image22.png)
+![](media/image23.png)
 ```eval_rst
 .. {width="5.4375in" height="4.461379046369204in"}
 ```
@@ -453,7 +453,7 @@ The path of debug.keystore file you selected is displayed in
 signingConfigs, signingConfig appears in debug section of buildTypes.
 
 
-![](media/image23.png)
+![](media/image24.png)
 ```eval_rst
 .. {width="5.5in" height="4.7354538495188105in"}
 ```
