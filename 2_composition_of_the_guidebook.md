@@ -1,106 +1,212 @@
-ガイド文書の構成
-================
+Composition of the Guidebook
+============================
 
-開発者コンテキスト <!-- Developer's Context -->
-------------------
-
-セキュアコーディング系のガイド文書は「こういうコーディングは危ない、だからこのようにコーディングすべき」といった内容で構成されることが多いのですが、このような構成はすでにコーディングされたソースコードをレビューするときには役立つ反面、これから開発者がコーディングしようというときには、どの記事を読んだらよいのか分かりにくいという問題があります。
-
-このガイド文書では、開発者がいま何をしようとしているか？という開発者コンテキストに着目し、開発者コンテキストに合わせた切り口の記事を用意する方針をとっています。たとえば「Activityを作る・利用する」や「SQLiteを使う」という開発者が行うであろう作業単位ごとに記事を用意しています。
-
-開発者コンテキストに合わせて記事を用意することにより、開発者は必要な記事を見つけやすく、業務にすぐ役立つようになると考えています。
-
-サンプルコード、ルールブック、アドバンスト <!-- Sample Code, Rule Book, Advanced Topics -->
-------------------------------------------
-
-それぞれの記事はサンプルコード、ルールブック、アドバンストの3つのセクションで構成されています。お急ぎの方はサンプルコードとルールブックをご覧ください。ある程度再利用可能なパターンに落とし込んだ内容にしてあります。サンプルコードセクションとルールブックセクションに収まらない課題をお持ちの方はアドバンストをご覧ください。個別課題の解決方法を検討するための考慮材料を記載してあります。
-
-なお、サンプルコードおよび記事の内容は特別な記述がない限りAndroid
-4.0.3(API Level 15)以降を対象にしています。Android 4.0.3(API Level
-15)より前のバージョンにおいては動作確認をしておらず、対策として効果がない場合もありますのでご注意ください。また、対象範囲内のバージョンであっても、組み込んだ端末で動作をご確認の上、ご自身の責任のもとでご利用ください。
-
-### サンプルコード
-
-サンプルコードセクションでは、その記事がテーマとする開発者コンテキストにおいて基本的なお手本となるサンプルコードを掲載しています。複数のパターンがある場合はその分類方法とそれぞれのパターンのサンプルコードを用意しています。解説においては簡潔さを心がけており、セキュリティ上考慮すべきポイントを本文中で「**ポイント：**」部分に番号付き箇条書きで記載し、その箇条書き番号Nに対応するサンプルコードにも「**★ポイントN★**」と記載しコメントで解説しています。一つのポイントがサンプルコード上では複数個所に対応する場合があることにご注意ください。このようにセキュリティを考慮すべき個所はソースコード全体に対して僅かな量ですが、それらの個所は点在します。セキュリティの考慮が必要な個所を見渡すことができるように、サンプルコードはクラス単位でまるごと掲載するようにしています。
-
-このガイド文書で掲載しているサンプルコードは一部です。すべてのサンプルコードをまとめた圧縮ファイルも下記のURLに公開しています。Apache
-License, Version
-2.0で公開していますので、自由にサンプルコードをコピー&ペーストしてご利用いただけます。ただしエラー処理についてはサンプルコードが長くなり過ぎないように最小限にしていますのでご注意ください。
-
--   [http://www.jssec.org/dl/android\_securecoding.pdf](http://www.jssec.org/dl/android_securecoding.pdf)
-    ガイド文書
-
--   [http://www.jssec.org/dl/android\_securecoding.zip](http://www.jssec.org/dl/android_securecoding.zip)
-    サンプルコード一式
-
-サンプルコードに添付するProjects/keystoreファイルはAPK署名用の開発者鍵を含んだキーストアファイルです。パスワードは「android」です。自社限定系のサンプルコードをAPK署名する際にご利用ください。
-
-デバッグ用にキーストアファイルdebug.keystoreを用意しているので、Android
-Studioで開発する場合は、Android
-Studioの個別のプロジェクトで設定しておくと、自社限定系のサンプルコードの動作確認に便利です。また、複数のAPKから成るサンプルコードにおいて、各APK間の連携動作を確認するためには、各々のAndroidManifest.xml内のandroid:debuggableの設定を合わせる必要があります。Android
-StudioからAPKをインストールする場合は、明示的に設定が無ければ自動的にandroid:debuggable="true"になります。
-
-サンプルコードおよびキーストアファイルをAndroid
-Studioに取り込む方法については「2.5 サンプルコードのAndroid
-Studioへの取り込み手順」をご参照ください。
-
-### ルールブック
-
-ルールブックセクションでは、その記事がテーマとする開発者コンテキストにおいて、セキュリティ観点から守るべきルールや考慮事項を掲載しています。ルールブックセクションの冒頭にはそのセクションで扱っているルールを表形式で一覧表示し、「必須」または「推奨」のレベル分けをしています。ルールには肯定文または否定文の2種類がありますので、必須の肯定文は「やらなきゃだめ」、推奨の肯定文は「やったほうがよい」、必須の否定文は「やったらだめ」、推奨の否定文は「やらないほうがよい」といったレベル感で表現しています。もちろんこのレベル分けは執筆者の主観に基づくものですので、参考程度としてお取扱いください。
-
-サンプルコードセクションに掲載されているサンプルコードはこれらのルールや考慮事項が反映されたものとなっていますが、その詳しい説明はルールブックセクションに記載されています。また、サンプルコードセクションでは扱っていないルールや考慮事項についてもルールブックセクションでは扱っています。
-
-### アドバンスト
-
-アドバンストセクションでは、その記事がテーマとする開発者コンテキストにおいて、サンプルコードセクションやルールブックセクションで説明できなかった、しかし注意を要する事項について記載しています。その記事がテーマとする開発者コンテキストにまつわる、コラム的な話題やAndroid
-OSの限界に関する話題など、サンプルコードセクションやルールブックセクションの内容で解決できなかった個別課題の解決方法を検討するための考慮材料として役立てることができます。
-
-開発者のみなさんは常に多忙です。開発者の多くは、Androidの深遠なるセキュリティの構造について深く理解することよりも、ある程度のAndroidセキュリティの知識を持って、迅速にかつ安全なAndroidアプリケーションをどんどん生産することが求められます。一方、セキュリティ設計が重要なアプリケーションもあります。このようなアプリケーションの開発者はAndroidのセキュリティについて深く理解している必要があります。
-
-このようにスピード重視の開発者とセキュリティ重視の開発者の両方を支援するために、このガイド文書のすべての記事はサンプルコード、ルールブック、アドバンストの3つのセクションに分けて記述しています。サンプルコードとルールブックセクションは「そういうことがしたければ、これをしておけば安全ですよ」といった一般化できる内容が書いてあり、可能な限りソースコードのコピー&ペーストで自動的に安全なコーディングができることを狙っています。アドバンストセクションは「こんなときはこういう問題があって、こういう考え方をするとよい」といった考えるための材料が書いてあり、開発者が取り組んでいる個別のアプリケーションで最適なセキュア設計、セキュアコーディングを検討できることを狙っています。
-
-ガイド文書のスコープ
+Developer's Context
 --------------------
 
-このガイド文書は一般のAndroidアプリケーション開発者に必要なセキュリティTipsを集めることを目的としています。そのため主にマーケットで配布されるAndroidアプリケーションの開発におけるセキュリティTips（下図の「アプリのセキュリティ」）が主なスコープとなっています。
+Many guidebooks that have been written on secure coding include
+warnings about harmful coding practices and their suggested revisions.
+Although this approach can be useful at the time of reviewing the
+source code that has already been coded, it can be confusing for
+developers that are about to start coding, as they do not know which
+article to refer to.
+
+The Guidebook has focused on the developer's context of "What is a
+developer trying to do at this moment?" Equally, we have taken steps
+to prepare articles that are aligned with the developer's context.
+For example, we have divided articles into project units by presuming
+that a developer will be involved in operations such as
+[Creating/Using Activities], [Using SQLite], etc.
+
+We believe that by publishing articles that support the developer's
+context, developers will be able to easily locate necessary articles
+that will be instantly useful in their projects.
+
+Sample Code, Rule Book, Advanced Topics
+---------------------------------------
+
+Each article is comprised of three sections: Sample Code, Rule Book,
+and Advanced Topics. If you are in a hurry, please look up the Sample
+Code and Rule Book sections. The content is provided in a way where it
+can be reused to a certain degree. For those who have issues that go
+beyond these, please refer the Advanced Topics section. We have given
+descriptions that will be helpful in finding solutions for individual
+cases.
+
+Unless it is specifically noted, our focus of development will be
+targeted to platforms concerning Android 4.0.3 (API Level 15) and
+later. Since we have not verified the operational capability of any
+versions pertaining to Android versions under 4.0.3 (API Level 15),
+the measures described may prove ineffective on these older systems.
+In addition, even for versions that are covered under the scope of
+focus, it is important to verify their operational capability by
+testing them on your own environment before releasing them publically.
+
+### Sample Code
+
+Sample code that serves as the basic model within the developer\'s
+context and functions as the theme of an article is published in the
+Sample Code section. If there are multiple patterns, we have provided
+source code for the different patterns and classified them
+accordingly. We have strived to make our commentaries as simple as
+possible. For example, when we want to direct the reader\'s attention
+to a security issue that requires attention, a bullet-point number
+will appear next to \"**Point**\" in the article. We will also comment
+on the sample code that corresponds to the bullet-point number by
+writing \"**\*\*\* Point (Number) \*\*\***.\" Please note that a
+single point may correspond to multiple pieces of sample code. There
+are sections throughout the entire source code, albeit very little
+compared to the entire code, which requires our attention for
+security. In order to be able to survey the sections that call for
+scrutiny, we try to post the entire class unit of sample code.
+
+Please note that only a portion of sample code is posted in the
+Guidebook. A compressed file, which contains the entire sample code,
+is made public in the URL listed below. It is made public by the
+Apache License, Version 2.0; therefore, please feel free to copy and
+paste it. Please note that we have minimized the code for error
+processing in the sample code to prevent it from becoming too long.
+
+-   [http://www.jssec.org/dl/android_securecoding_en.zip](http://www.jssec.org/dl/android_securecoding_en.zip)
+    Sample Codes Archive
+
+The projects/keystore file that is attached in the sample code is the
+keystore file that contains the developer key for the signature of the
+APK. The password is \"android.\" Please use it when singing the APK
+in the In-house sample code.
+
+We have provided the keystore file, debug.keystore, for debugging
+purposes. When using Android Studio for development, it is convenient
+for verifying the operational capability of the In-house sample code
+if the keystore is set for each project. In addition, for sample code
+that is comprised of multiple APKs, it is necessary to match the
+android:debuggable setting contained inside each AndroidManifest.xml
+in order to verify the cooperation between each APK. If the
+android:debuggable setting is not explicit set when installing the APK
+from Android Studio, it will automatically become android:debuggable=
+\"true.\"
+
+For embedding the sample code as well as keystore file into Android
+Studio, please refer to \"2.5 Steps to Install Sample Codes into
+Android Studio\"
+
+### Rule Book
+
+Rules and matters that need to be considered regarding security within
+the developer\'s context will be published in the Rule Book section.
+Rules to be handled in that section will be listed in a table format
+at the beginning and will be divided into two levels: \"Required\" and
+\"Recommended.\" The rules will consist of two types of affirmative
+and negative statements. For example, an affirmative statement that
+expresses that a rule is required will say \"Required.\" An
+affirmative statement that expresses a recommendation will say
+\"Recommended.\" For a negative statement that expresses the requisite
+nature of the rule would say, \"Definitely not do.\" For a negative
+sentence that expresses a recommendation would say, \"Not
+recommended.\" Since these differentiations of levels are based on the
+subjective viewpoint of the author, it should only be used as a point
+of reference.
+
+Sample code that is posted in the Sample Code section reflect these
+rules and matters that need to be considered, and a detailed
+explanation on them is available in the Rule Book section.
+Furthermore, rules and matters that need to be considered that are not
+dealt with in the Sample Code section are handled in the Rule Book
+section.
+
+### Advanced Topics
+
+Items that require our attention, but that could not be covered in the
+Sample Code and Rule Book sections within the developer\'s context
+will be published in the Advanced Topics section. The Advanced Topics
+section can be utilized to explore ways to solve separate issues that
+could not be solved in the Sample Code or Rule Book sections. For
+example, subject matters that contain personal opinions as well as
+topics on the limitations of Android OS in relation the developer\'s
+context will be covered in the Advanced Topics section.
+
+Developers are always busy. Many developers are expected to have basic
+knowledge of security and produce many Android applications as quickly
+as possible in a somewhat safe manner rather than to really understand
+the deep security matters. However, there are certain applications out
+there that require a high level of security design and implementation
+from the beginning. For developers of such applications, it is
+necessary for them to have a deep understanding concerning the
+security of Android OS.
+
+In order to benefit both developers who emphasize development speed
+and also those who emphasize security, all articles of the Guidebook
+are divided into the three sections of Sample Code, Rule Book, and
+Advanced Topics. The aim of the Sample Code and Rule Book sections is
+to provide generalizations about security that anyone can benefit from
+and source code that will work with a minimal amount of customization
+and hopefully by just copying and pasting. In the Advanced Topics
+section, we offer materials that will help developers think in a
+certain way when they are facing specific problems. It is the aim of
+the Advanced Topics section to help developers examine optimal secure
+design and coding when they are involved in building individual
+applications.
+
+The Scope of the Guidebook
+--------------------------
+
+The purpose of the Guidebook is to collect security best practices
+that are necessary for general Android application developers.
+Consequently, our scope is focused mainly on security tips (The
+\"Application Security\" section in figure below) for the development
+of Android applications that are distributed primarily in a public
+market.
 
 ![](media/image5.png)
 ```eval_rst
 .. {width="6.889763779527559in" height="3.6992125984251967in"}
 ```
 
-図 2.3‑1
+Figure 2.3‑1
 
-Android
-OS層以下のAndroid端末実装に関するセキュリティ（上図の「端末のセキュリティ」）はスコープ外です。またAndroid端末にユーザーがインストールする一般のAndroidアプリケーションと、Android端末メーカーがプレインストールするAndroidアプリケーションでは気を付けるべきセキュリティの観点で異なるところがありますが、特に現行版においては前者のみを扱っており、後者については扱っていません。現行版ではJavaにより実装するTipsだけを記載しておりますが、JNI実装についても今後の版で記載していく予定です。
+Security regarding the implementation of components in the Device
+Security of the above figure is outside the scope of this guidebook.
+There are differences in the viewpoint of security between general
+applications that are installed by users and pre-installed
+applications by device manufacturers. The Guidebook only handles the
+former and does not deal with the latter. In the current version, tips
+only on the implementation by Java are posted, but in future versions,
+we plan on posting tips on JNI implementations as well.
 
-root権限が奪取される脅威についても今のところ扱っていません。基本的にはroot権限が奪われていないセキュアなAndroid端末を前提とし、Android
-OSのセキュリティモデルを活用したセキュリティTipsをまとめています。なお、資産と脅威の扱いについては「3.1.3
-資産分類と保護施策」にて詳しく説明しておりますので、合わせてご確認ください。
+Also as of now we do not handle threats that results from an attacker
+obtaining root privileges. We will assume the premise of a secure
+Android device in which it is not possible to obtain root privileges
+and base our security advice on utilizing the Android OS security
+model. For handling of assets and threats, we have provided a detailed
+description on \"3.1.3 Asset Classification and Protective
+Countermeasures.\"
 
-Androidセキュアコーディング関連書籍の紹介
------------------------------------------
+Literature on Android Secure Coding
+-----------------------------------
 
-このガイド文書ではAndroidセキュアコーディングのすべてを扱うことはとてもできないので、下記で紹介する書籍を併用することをお勧めします。
+Since we are not able to discuss all of Android\'s secure coding in
+the Guidebook, we recommend that you read the literature mentioned
+below in conjunction with the Guidebook.
 
--   Android Security 安全なアプリケーションを作成するために<br/>
-    著者：タオソフトウェア株式会社　ISBN978-4-8443-3134-6<br/>
+-   Android Security: Anzenna Application Wo Sakusei Surutameni (Secured Programming in Android)<br/>
+    Author: Tao Software Co., Ltd. ISBN: 978-4-8443-3134-6<br/>
     [http://www.amazon.co.jp/dp/4844331345/](http://www.amazon.co.jp/dp/4844331345/)
 
--   Javaセキュアコーディングスタンダード CERT/ Oracle版<br/>
-    著者：Fred Long, Dhruv Mohindra, Robert C. Seacord, Dean F.
+-   The CERT Oracle Secure Coding Standard for Java<br/>
+    Authors: Fred Long, Dhruv Mohindra, Robert C. Seacord, Dean F.
     Sutherland, David Svoboda<br/>
-    監修：歌代和正　翻訳：久保正樹, 戸田洋三　ISBN978-4-04-886070-3<br/>
-    [http://www.amazon.co.jp/dp/4048860704/](http://www.amazon.co.jp/dp/4048860704/)
+    [http://www.amazon.com/dp/0321803957](http://www.amazon.com/dp/0321803957)
 
-サンプルコードのAndroid Studioへの取り込み手順
-----------------------------------------------
+Steps to Install Sample Codes into Android Studio
+-------------------------------------------------
 
-サンプルコードのAndroid
-Studioへの取り込み手順を説明します。サンプルコードは目的ごとに複数のプロジェクトにわかれています。これらのプロジェクトをまとめて取り込む方法を「2.5.1
-サンプルプロジェクトを取り込む」に、選択して取り込む方法を「2.5.2サンプルの各プロジェクトを選択して取り込む」に示します。プロジェクトの取り込みが終わったら「2.5.3
-サンプルコード動作確認用debug.keystoreを設定する」を参照してdebug.keystoreファイルをAndroid
-Studioに設定してください。なお、確認は下記の環境で行っております。
+This section explains how to install sample code into Android Studio.
+Sample code is divided into multiple projects depending on the
+purpose. Installing the sample code is described in, \"2.5.1
+Installing the Sample Project.\" After the installation is completed,
+please refer to \"2.5.2 Setup the debug.keystore\" and install the
+debug.keystore file into Android Studio. We have verified the
+following steps in the following environment:
 
 -   OS
     -   Windows 7 Ultimate SP1
@@ -108,30 +214,31 @@ Studioに設定してください。なお、確認は下記の環境で行っ�
     -   2.1.2
 -   Android SDK
     -   Android 6.0(API 23)
-        -   特に注意のないサンプルプロジェクトはAndroid 6.0(API
-            23)でビルドできます。
+        -   Sample projects can be built through Android 6.0 (API 23)
+            unless otherwise stated.
 
-### サンプルプロジェクトを取り込む
+### Installing the Sample Project
 
-#### サンプルコードをダウンロードする
+#### Download the sample code.
 
-「2.2.1 サンプルコード」で紹介したURLよりサンプルコードを取得します。
+Acquire the sample code from the URL shown in \"2.2.1 Sample Code\"
 
-#### サンプルコードを展開する
+#### Extract the sample code.
 
-Zipで圧縮されたサンプルコードを右クリックし、表示されたメニューの"すべて展開"をクリックします。
+Right click on the sample code that has been compressed into zip file,
+and click on \"Extract All\" as shown below.
 
 ![](media/image6.png)
 ```eval_rst
 .. {width="4.6875in" height="1.6666666666666667in"}
 ```
 
-図 2.5‑1
+Figure 2.5‑1
 
-#### 展開先を指定する
+#### Designate where to deploy.
 
-ここでは"C:\\android\_securecoding"という名前でワークスペースを作成します。そのため、"C:\\
-"を指定し"展開"ボタンをクリックします。
+Create a workspace under the name \"C:\\android\_securecoding\" by
+designating \"C:\\\" and clicking on the \"Extract\" button.
 
 ![](media/image7.png)
 ```eval_rst
@@ -139,9 +246,10 @@ Zipで圧縮されたサンプルコードを右クリックし、表示され�
 .. height="3.1354166666666665in"}
 ```
 
-図 2.5‑2
+Figure 2.5‑2
 
-\"展開\"ボタンをクリックすると"C:\\"直下に"android\_securecoding"というフォルダが作成されます。
+After clicking on the \"Extract\" button, right underneath \"C:\\\" a
+folder called \"android\_securecoding\" will be created.
 
 ![](media/image8.png)
 ```eval_rst
@@ -149,23 +257,23 @@ Zipで圧縮されたサンプルコードを右クリックし、表示され�
 .. height="3.0104166666666665in"}
 ```
 
-図 2.5‑3
+Figure 2.5‑3
 
-"android\_securecoding"フォルダの中にはサンプルコードが含まれています。
+The sample code is contained in the "android\_securecoding\" folder.
+For example, when you want to refer to the sample code within
+\"4.1.1.3 Creating/Using Partner Activities\" of \"4.1 Creating/Using
+Activities\" please look below.
 
-例えば、「4.1 Activityを作る・利用する」の「4.1.1.3
-パートナー限定Activityを作る・利用する」においてサンプルコードを参照したい場合は以下をご覧ください。
+    android_securecoding
+        ┗ Create Use Activity
+            ┗ Activity PartnerActivity
 
-    android_securecoding/
-        Create Use Activity/
-            Activity PartnerActivity/
+In this way, the sample code project will be located under the chapter
+title in the \"android\_securecoding\" folder.
 
-以上のように、"android\_securecoding"フォルダ配下は、節ごとに「サンプルコードのプロジェクト」が配置された構成となります。
+#### Designate workspace by starting up Android Studio
 
-#### Android Studioを起動しワークスペースを指定する
-
-スタートメニューやデスクトップアイコンなどからAndroid
-Studioを起動します。
+Launch Android Studio from the start menu or from a desktop icon.
 
 ![](media/image9.png)
 ```eval_rst
@@ -173,9 +281,9 @@ Studioを起動します。
 .. height="3.125436351706037in"}
 ```
 
-図 2.5‑4
+Figure 2.5‑4
 
-起動後、表示されたダイアログからインポートを行います。
+After launching, import project from the dialog that appears.
 
 ![](media/image10.png)
 ```eval_rst
@@ -183,10 +291,9 @@ Studioを起動します。
 .. height="3.2916666666666665in"}
 ```
 
-図 2.5‑5
+Figure 2.5‑5
 
-また、既にプロジェクトを読み込んでいる場合は、そのWindowが表示されるため、メニューより\"File
--\> Close Project\"で表示しているプロジェクトをクローズします。
+If you have already opened a project, close the project window.
 
 ![](media/image11.png)
 ```eval_rst
@@ -194,44 +301,45 @@ Studioを起動します。
 .. height="3.888246937882765in"}
 ```
 
-図 2.5‑6
+Figure 2.5‑6
 
-#### インポートを開始する
+#### Start importing
 
-表示されているダイアログの\"Import project (Eclipse ADT, Gradle,
-etc.)\"をクリックします。
+Click \"Import project (Eclipse ADT, Gradle, etc.)\" from the dialog
+that is displayed.
 
 ![](media/image10.png)
 ```eval_rst
 .. {width="3.9375in" height="3.1264501312335957in"}
 ```
 
-図 2.5‑7
+Figure 2.5‑7 ***!!!!!REPLACE THIS PICTURE AND BELOW!!!!!***
 
-#### プロジェクトを選択する
+#### Select the project
 
-インポートするプロジェクトフォルダを展開し、同フォルダ内の
-\"gradle\\build.gradle\" を選択します。
+Expand the project folder you wish to import and select
+\"gradle\\build.gradle\" within that folder.
 
 ![](media/image12.png)
 ```eval_rst
 .. {width="3.15625in" height="3.6427154418197727in"}
 ```
 
-図 2.5‑8
+Figure 2.5‑8
 
-本ガイドのサンプルコードプロジェクトと使用しているAndroid
-StudioのGradleバージョンが異なる場合、Gradleが最適化されます。
+If the version of Gradle in the Android Studio you are using differs
+from the version assumed by the sample code projects in this
+guidebook, Gradle will be optimized.
 
 ![](media/image13.png)
 ```eval_rst
 .. {width="4.46875in" height="0.859686132983377in"}
 ```
 
-図 2.5‑9
+Figure 2.5‑9
 
-画面に従い、\"Update\"をクリックし、Android Gradle
-Pluginのアップデートを開始してください。
+Following the on-screen instructions, click \"Update\" to initiate the
+update of the Android Gradle Plugin.
 
 ![](media/image14.png)
 ```eval_rst
@@ -239,22 +347,21 @@ Pluginのアップデートを開始してください。
 .. height="2.2020713035870516in"}
 ```
 
-図 2.5‑10
+Figure 2.5‑10
 
-以下のメッセージが表示されるので\"Fix Gradle wapper and re-import
-project Gradle setting\"をクリックし、Gradle
-Wrapperの更新を行ってください。
+The message shown below is displayed. Click \"Fix Gradle wrapper and
+re-import project Gradle setting\" to update the Gradle wrapper.
 
 ![](media/image15.png)
 ```eval_rst
 .. {width="6.1375in" height="1.4638888888888888in"}
 ```
 
-図 2.5‑11
+Figure 2.5‑11
 
-#### インポートの完了
+#### Finish importing
 
-プロジェクトがインポートされ完了します。
+Automatically the project is imported.
 
 ![](media/image16.png)
 ```eval_rst
@@ -262,11 +369,11 @@ Wrapperの更新を行ってください。
 .. height="2.9895833333333335in"}
 ```
 
-図 2.5‑12
+Figure 2.5‑12
 
-Android
-Studioは、Eclipseとは違い、１つのプロジェクトに対して１つのWindowで表示されます。違うプロジェクトをインポートし開く場合は、\"File
--\> Import Project\...\"をクリックしインポートします。
+Android Studio, unlike Eclipse, will display a single project in a
+window. If you want to open and import a different project, click
+\"File -\> Import Project \...\".
 
 ![](media/image17.png)
 ```eval_rst
@@ -274,25 +381,28 @@ Studioは、Eclipseとは違い、１つのプロジェクトに対して１つ�
 .. height="3.3672222222222223in"}
 ```
 
-図 2.5‑13
+Figure 2.5‑13
 
-### サンプルコード動作確認用debug.keystoreを設定する <!-- Setup the debug.keystore to run and test the Sample Code -->
+### Setup the debug.keystore to run and test the Sample Code
 
-サンプルコードから作成したアプリをAndroid端末やエミュレーターで動作させるためには署名が必要です。この署名に使うデバッグ用の鍵ファイル"debug.keystore"をAndroid
-Studioのプロジェクトに設定します。
+A signature is needed in order to activate a sample-code-generated
+application onto an Android device or emulator. Install the debugging
+key file \"debug.keystore\" that will be used for the signature into
+Android Studio.
 
-#### File -\>Project Structure\...をクリックする
+#### Click on File -\>Project Structure\...
 
 ![](media/image18.png)
 ```eval_rst
 .. {width="2.1875in" height="3.401966316710411in"}
 ```
 
-図 2.5‑14
+Figure 2.5‑14
 
-#### Signingを追加する
+#### Add Signing
 
-左欄のModulesからプロジェクト名を選択し、Signingタブを選択後、「＋」ボタンをクリックします。
+Select a project from Module list in left pane, selecting "Signing"
+tab, and then click "+" button.
 
 ![](media/image19.png)
 ```eval_rst
@@ -300,11 +410,12 @@ Studioのプロジェクトに設定します。
 .. height="3.7520034995625546in"}
 ```
 
-図 2.5‑15
+Figure 2.5‑15
 
-#### "debug.keystore"を選択する
+#### Select \"debug.keystore\"
 
-debug.keystoreはサンプルコードに含まれています。(android\_securecodingフォルダ直下)
+Debug.keystore is contained in the sample code (underneath the
+android\_securecoding folder)
 
 ![](media/image20.png)
 ```eval_rst
@@ -312,9 +423,9 @@ debug.keystoreはサンプルコードに含まれています。(android\_secur
 .. height="3.4583333333333335in"}
 ```
 
-図 2.5‑16
+Figure 2.5‑16
 
-#### Signingの名前を入力
+#### Type Signing name
 
 ![](media/image21.png)
 ```eval_rst
@@ -322,27 +433,29 @@ debug.keystoreはサンプルコードに含まれています。(android\_secur
 .. height="4.247711067366579in"}
 ```
 
-図 2.5‑17
+Figure 2.5‑17
 
-#### Build TypesでSigning Configを設定
+#### Set Signing Config
 
-Build Typesタブを選択し、debugビルド用のSigning
-ConfigをSingningで追加した\"debug\"を選択し、OKをクリックします。
+Select the Build Types tab, select signing name typed in the previous
+step, and then click "OK".
 
 ![](media/image22.png)
 ```eval_rst
 .. {width="5.4375in" height="4.461379046369204in"}
 ```
 
-図 2.5‑18
+Figure 2.5‑18
 
-#### build.gradleファイルで確認
+#### Confirm build.gradle file
 
-signingConfigsに選択したdebug.keystoreのパスが表示され、buildTypesのdebugにsigningConfigが表示されます。
+The path of debug.keystore file you selected is displayed in
+signingConfigs, signingConfig appears in debug section of buildTypes.
+
 
 ![](media/image23.png)
 ```eval_rst
 .. {width="5.5in" height="4.7354538495188105in"}
 ```
 
-図 2.5‑19
+Figure 2.5‑19
