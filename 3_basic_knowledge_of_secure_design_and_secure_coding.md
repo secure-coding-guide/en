@@ -1,327 +1,536 @@
-セキュア設計・セキュアコーディングの基礎知識
-============================================
+Basic Knowledge of Secure Design and Secure Coding
+==================================================
 
-このガイド文書はAndroidアプリ開発におけるセキュリティTipsをまとめるものであるが、この章ではAndroidスマートフォン／タブレットを例に一般的なセキュア設計・セキュアコーディングの基礎知識を扱う。後続の章において一般的なセキュア設計・セキュアコーディングの解説が必要なときに、本章の記事を参照するため、後続の章を読み進める前に本章の内容に一通り目を通しておくことをお勧めする。
+Although the Guidebook is a collection of security advice concerning
+Android application development, this chapter will deal with the basic
+knowledge on general secure design and secure coding of Android
+smartphones and tablets. Since we will be referring to secure design
+and coding concepts in the later chapters we recommend that you
+familiarize yourself with the content contained in this chapter first.
 
-Androidアプリのセキュリティ
----------------------------
+Android Application Security
+----------------------------
 
-システムやアプリのセキュリティについて検討するとき、定番の考え方のフレームワークがある。まずそのシステムやアプリにおいて守るべき対象を把握する。これを「資産」と呼ぶ。次にその資産を脅かす攻撃を把握する。これを「脅威」と呼ぶ。最後に「資産」を「脅威」から守るための施策を検討・実施する。この施策を「対策」と呼ぶ。
+There is a commonly accepted way of thinking when examining security
+issues concerning systems or applications. First, we need to have a
+grasp over the objects we want to protect. We will call these assets.
+Next, we want to gain an understanding over the possible attacks that
+can take place on an asset. We will call these threats. Finally, we
+will examine and implement measures to protect assets from the various
+threats. We will call these countermeasures.
 
-ここで「対策」とは、システムやアプリに適切なセキュア設計・セキュアコーディングを施すことであり、このガイド文書では4章以降でこれを扱っている。本節では「資産」および「脅威」について焦点を当てる。
+What we mean by countermeasures here is secure design and secure
+coding, and will deal with these subjects after Chapter 4. In this
+section, we will focus on explaining assets and threats.
 
-### 「資産」　守るべき対象
+### Asset: Object of Protection
 
-システムやアプリにおける「守るべき対象」には「情報」と「機能」の2つがある。これらをそれぞれ「情報資産」と「機能資産」と呼ぶ。「情報資産」とは、許可された人だけが参照や変更ができる情報のことであり、それ以外の人には一切参照や変更ができてはならない情報のことである。「機能資産」とは許可された人だけが利用できる機能のことであり、それ以外の人には一切利用できてはならない機能のことである。
+There are two types of objects of protection within a system or an
+application: information and functions. We will call these information
+assets and function assets. An information asset refers to the type of
+information that can be referred to or changed only by people who have
+permission. It is a type of information that cannot be referred to or
+changed by anyone who does not have the permission. A function asset
+refers to a function that can be used only by people who have
+permission and no one else.
 
-以下、Androidスマートフォン／タブレットにおける情報資産と機能資産にどのようなものがあるかを紹介する。AndroidアプリやAndroidスマートフォン／タブレットを活用したシステムを開発するときの資産の洗い出しの参考にしてほしい。以降では、Androidスマートフォン／タブレットを総称してAndroidスマートフォンと呼ぶ。
+Below, we will introduce types of information assets and functional
+assets that exist in Android smartphones and tablets. We would like
+you to use the following as a point of reference to deliberate on
+matters with regard to assets when developing a system that utilizes
+Android applications or Android smartphones/tablets. For the sake of
+simplicity, we will collectively call Android smartphones/tablets as
+Android smartphones.
 
-#### Androidスマートフォンにおける情報資産
+#### Information Asset of an Android Smartphone
 
-表 3.1‑1および表
-3.1‑2はAndroidスマートフォンに入っている情報の一例である。これらの情報はスマートフォンユーザーに関する個人情報、プライバシー情報またはそれらに類する情報に該当するため適切な保護が必要である。
+Table 3.1‑1 and Table 3.1‑2 represent examples of information
+contained on an Android smartphone. Appropriate protection is
+necessary since this information is equivalent to personal
+information, confidential information or information that belongs to
+both.
 
-表 3.1‑1
-Androidスマートフォンが管理する情報の例
+Table 3.1‑1 Examples of Information Managed by an Android Smartphone
 
 ```eval_rst
-================ =================================
-情報             備考
-================ =================================
-電話番号         スマートフォン自身の電話番号
-通話履歴         受発信の日時や相手番号
-IMEI             スマートフォンの端末ID
-IMSI             回線契約者ID
-センサー情報     GPS、地磁気、加速度...
-各種設定情報     WiFi設定値...
-アカウント情報   各種アカウント情報、認証情報...
-メディアデータ   写真、動画、音楽、録音...
-...
-================ =================================
+=========================== =====================================================================
+Information                 Remarks
+=========================== =====================================================================
+Phone number                Telephone number of the smartphone itself
+Call history                Time and date of incoming and outgoing calls as well as phone numbers
+IMEI                        Device ID of the smartphone
+IMSI                        Subscriber ID
+Sensor information          GPS, geomagnetic, rate of acceleration, etc.
+Various setup information   Wi-Fi setting value, etc\...
+Account information         Various account information, authentication information, etc.
+Media data                  Pictures, videos, music, recording, etc...
+...                        
+=========================== =====================================================================
 ```
 
-表 3.1‑2 アプリが管理する情報の例
+Table 3.1‑2 Examples of Information Managed by an Application
 ```eval_rst
-======================= ===========================
-情報                    備考
-======================= ===========================
-電話帳                  知人の連絡先
-Eメールアドレス         ユーザーのメールアドレス
-Eメールメールボックス   送受信メール本文、添付...
-Webブックマーク         ブックマーク
-Web閲覧履歴             閲覧履歴
-カレンダー              予定、ToDo、イベント...
-Facebook                SNSコンテンツ...
-Twitter                 SNSコンテンツ...
-...
-======================= ===========================
+====================== ==========================================================
+Information            Remarks
+====================== ==========================================================
+Contacts               Contacts of acquaintances
+E-mail address         User\'s e-mail address
+E-mail mail box        Content of incoming and outgoing e-mail, attachments, etc.
+Web bookmarks          Bookmarks
+Web browsing history   Browsing history
+Calendar               Plans, to-do list, events, etc.
+Facebook               SNS content, etc.
+Twitter                SNS content, etc.
+...                   
+====================== ==========================================================
 ```
-表
-3.1‑1の情報は主にAndroidスマートフォン本体またはSDカードに含まれる情報であり、表
-3.1‑2の情報は主にアプリが管理する情報である。特に表
-3.1‑2の情報については、アプリがインストールされればされるほど、どんどん本体の中に増えていくことになるのである。
+The type of information seen in Table 3.1‑1 is mainly the type of
+information that is stored on the Android smartphone itself or on an
+SD card. Similarly, the type of information seen in Table 3.1‑2 is
+primarily managed by an application. In particular, the type of
+information seen in Table 3.1‑2 grows in proportion to the number of
+applications installed on the device.
+>
+Table 3.1‑3 is the amount of information contained in one entry case
+of contacts. The information here is not of the smartphone user\'s,
+but of the smartphone user\'s friends. In other words, we must be
+aware that a smartphone not only contains information on the user, but
+of other people too.
 
-表
-3.1‑3は電話帳の1件のエントリに含まれる情報である。この情報はスマートフォンユーザーに関する情報ではなく、スマートフォンユーザーの知人、友人等に関する情報である。つまりスマートフォンにはその利用者であるユーザーのみならず、ほかの人々の情報も含まれていることに注意が必要だ。
-
-表 3.1‑3
-電話帳（Contacts）の1件のエントリに含まれる情報の例
+Table 3.1‑3 Examples of Information Contained in One Contact Entry
 ```eval_rst
-=========================== ======================================================================
-情報                        内容
-=========================== ======================================================================
-電話番号                    自宅、携帯電話、仕事、FAX、MMS...
-Eメールアドレス             自宅、仕事、携帯電話...
-プロフィール画像            サムネール画像、大きな画像...
-インスタントメッセンジャー  AIM、MSN、Yahoo、Skype、QQ、Google Talk、
-
-                            ICQ、Jabber、Netmeeting...
-
-ニックネーム                略称、イニシャル、旧姓、別名...
-住所                        国、郵便番号、地域、地方、町、通り...
-グループ                    お気に入り、家族、友達、同僚...
-ウェブサイト                ブログ、プロフィールサイト、ホームページ、
-
-                            FTPサーバー、自宅、会社...
-
-イベント                    誕生日、記念日、その他...
-関係する人物                配偶者、子供、父、母、マネージャー、助手、
-
-                            同棲関係、パートナー...
-
-SIPアドレス                 自宅、仕事、その他...
-...                         ...
-=========================== ======================================================================
+================== ========================================================================================
+Information        Content
+================== ========================================================================================
+Phone number       Home phone number, mobile phone number, FAX, MMS, etc.
+E-mail address     Home e-mail, work e-mail, mobile phone e-mail, etc.
+Photo              Thumbnail image, large image, etc.
+IM address         AIM, MSN, Yahoo, Skype, QQ, Google Talk, ICQ, Jabber, Net meeting, etc.
+Nicknames          Acronyms, initials, maiden names, nicknames, etc.
+Address            Country, postal code, region, area, town, street name, etc.
+Group membership   Favorites, family, friends, coworkers, etc.
+Website            Blogs, profile site, homepage, FTP server, home, office, etc.
+Events             Birthdays, anniversaries, others, etc.
+Relation           Spouse, children, father, mother, manager, assistants, domestic partner, partners, etc.
+SIP address        Home, work, other, etc.
+...                ...
+================== ========================================================================================
 ```
-これまでの説明では主にスマートフォンユーザーの情報を紹介してきたが、アプリはユーザー以外の情報も扱っている。図
-3.1‑1は1つのアプリが管理している情報を表しており、大きく分けるとプログラム部分とデータ部分に分かれる。プログラム部分は主にアプリメーカーの情報であり、データ部分は主にユーザーの情報である。アプリメーカーの情報の中には、勝手にユーザーに利用されたくない情報もあり得るため、そうした情報についてはユーザーが参照・変更できないような保護が必要である。
+Until now, we have primarily focused on information about smartphone
+users, however, application possesses other important information as
+well. Figure 3.1‑1 displays a typical view of the information inside
+an application divided into the program portion and data portion. The
+program portion mainly consists of information about the application
+developer, and the data portion mostly pertains to user information.
+Since there could be information that an application developer may not
+want a user to have access to, it is important to provide protective
+countermeasures to prohibit a user from referring to or making changes
+to such information.
 
-![](media/image24.png)
+![](media/image25.png)
 ```eval_rst
 .. {width="7.26875in" height="3.3047561242344705in"}
 ```
-図 3.1‑1 アプリが抱えている情報
+Figure 3.1‑1 Information Contained in an Application
 
-Androidアプリを作る場合には図
-3.1‑1のようなアプリ自身が管理する情報のみならず、表 3.1‑1、表 3.1‑2、表
-3.1‑3のようなAndroidスマートフォン本体や他のアプリから取得した情報に関しても適切に保護する必要があることにも注意が必要だ。
+When creating an Android application, it is important to employ
+appropriate protective countermeasures for information that an
+application manages itself, such as shown in Figure 3.1‑1. However, it
+is equally important to have robust security measure in place for
+information contained in the Android smartphone itself as well as for
+information that has been gained from other applications such as shown
+in Table 3.1‑1, Table 3.1‑2, and Table 3.1‑3.
 
-#### Androidスマートフォンにおける機能資産
+#### Function Assets of an Android Smartphone
 
-表 3.1‑4はAndroid
-OSがアプリに提供する機能の一例である。これらの機能がマルウェア等に勝手に利用されてしまうとユーザーの意図しない課金が生じたり、プライバシーが損なわれるなどの被害が生じたりする。そのため情報資産と同様にこうした機能資産も適切に保護されなければならない。
+Table 3.1‑4 shows examples of features that an Android OS provides to
+an application. When these features are exploited by a malware, etc.,
+damages in the form of unexpected charges or loss of privacy may be
+incurred by a user. Therefore, appropriate protective counter-measures
+that are equal the one extended to information asset should be set in
+place.
 
-表 3.1‑4 Android OSがアプリに提供する機能
-の一例
+Table 3.1‑4 Examples of Features an Android OS Provides to an
+Application
+
 ```eval_rst
-=============================== ================================
-機能                            機能
-=============================== ================================
-SMSメッセージを送受する機能     カメラ撮影機能
-電話を掛ける機能                音量変更機能
-ネットワーク通信機能            電話番号、携帯状態の読み取り機能
-GPS等で現在位置を得る機能       SDカード書き込み機能
-Bluetooth通信機能               システム設定変更機能
-NFC通信機能                     ログデータの読み取り機能
-インターネット通話（SIP）機能   実行中アプリ情報の取得機能
-...                             ...
-=============================== ================================
+======================================= =========================================================
+Function                                Function
+======================================= =========================================================
+Sending and receiving SMS messages      Camera
+Calling                                 Volume
+Network communication                   Reading the Contract List and Status of the Mobile Phone
+GPS                                     SD card
+Bluetooth communication                 Change system setup
+NFC communication                       Reading Log Data
+Internet communication (SIP)            Obtaining Information of a Running Application
+...                                     ...
+======================================= =========================================================
 ```
-Android
-OSがアプリに提供する機能に加え、Androidアプリのアプリ間連携機能も機能資産に含まれる。Androidアプリはそのアプリ内で実現している機能を他のアプリから利用できるように提供することができ、このような仕組みをアプリ間連携と呼んでいる。この機能は便利である反面、Android
-アプリの開発者がセキュアコーディングの知識がないために、アプリ内部だけで利用する機能を誤って他のアプリから利用できるようにしてしまっているケースもある。他のアプリから利用できる機能の内容によっては、マルウェアから利用されては困ることもあるため、意図したアプリだけから利用できるように適切な保護が必要となることがある。
+In addition to the functions that the Android OS provides to an
+application, the inter-application communication components of Android
+applications are included as part of the function assets as well.
+Android applications can allow other applications to utilize features
+by accessing their internal components. We call this inter-application
+communication. This is a convenient feature, however, there have been
+instances where access to functions that should only be used inside a
+particular application are mistakenly given to other applications due
+the lack of knowledge regarding secure coding on the part of the
+developer. There are functions provided by the application that could
+be exploited by malware that resides locally on the device. Therefore,
+it is necessary to have appropriate protective countermeasures to only
+allow legitimate applications to access these functions.
 
-### 「脅威」　資産を脅かす攻撃
+### Threats: Attacks that Threaten Assets
 
-前節ではAndroidスマートフォンにおける資産について解説した。ここではそれらの脅威、つまり資産を脅かす攻撃について解説する。資産が脅かされるとは簡単に言えば、情報資産が他人に勝手に参照・変更・削除・作成されることを言い、機能資産が他人に勝手に利用されることを言う、といった具合だ。こうした資産を直接的および間接的に操作する攻撃行為を「脅威」と呼ぶ。また攻撃行為を行う人や物のことを「脅威源」と呼ぶ。攻撃者やマルウェアは脅威源であって脅威ではない。攻撃者やマルウェアが行う攻撃行為のことを脅威と呼ぶのである。これら用語間の関係を図
-3.1‑2 資産、脅威、脅威源、脆弱性、被害の関係に示す。
+In the previous section, we talked about the assets of an Android
+smartphone. In this section, we will explain about attacks that can
+threaten an asset. Put simply, a threat to an asset is when a third
+party who should not have permission, accesses, changes, deletes or
+creates an information asset or illicitly uses a function asset. The
+act of directly or indirectly attacking such assets is called a
+\"threat.\" Furthermore, the malicious person or applications that
+commit these acts are referred to as the source of the threats.
+Malicious attackers and malware are the sources of threats but are not
+the threats themselves. The relationship between our definitions of
+assets, threats, threat sources, vulnerabilities, and damage are shown
+below in Figure 3.1‑2.
 
-![](media/image25.png)
+![](media/image26.png)
 ```eval_rst
 .. {width="5.854166666666667in"
 .. height="3.1041666666666665in"}
 ```
 
-図 3.1‑2
-資産、脅威、脅威源、脆弱性、被害の関係
+Figure 3.1‑2 Relation between Asset, Threat, Threat Source,
+Vulnerability, and Damage
 
-図
-3.1‑3はAndroidアプリが動作する一般的な環境を表現したものだ。以降ではこの図をベースにしてAndroidアプリにおける脅威の説明を展開するため、初めにこの図の見方を解説する。
-
-![](media/image26.png)
-```eval_rst
-.. {width="7.020833333333333in" height="3.46875in"}
-```
-
-図 3.1‑3 Androidアプリが動作する一般的な環境
-
-図の左右にスマートフォンとサーバーを配置している。スマートフォンやサーバーは3G/4G/Wi-Fiおよびインターネットを経由して通信している。スマートフォンの中には複数のアプリが存在するが、以降の説明で1つのアプリに関する脅威を説明するため、この図では1つのアプリに絞って説明している。スマートフォン上のアプリはそのユーザーの情報を主に扱うが、サーバー上のWebサービスは全ユーザーの情報を集中管理することを表現している。そのため従来同様にサーバーセキュリティの重要性は変わらない。サーバーセキュリティについては、このガイド文書ではスコープ外であるため言及しない。
-
-以降ではこの図を使ってAndroidアプリにおける脅威を説明していく。
-
-#### ネットワーク上の第三者による脅威
+Figure 3.1‑3 shows a typical environment that an Android application
+behaves in. From now on, in order to expand on the explanation
+concerning the type of threats an Android application faces by using
+this figure as a base, we will first learn how to view this figure.
 
 ![](media/image27.png)
 ```eval_rst
 .. {width="7.020833333333333in" height="3.46875in"}
 ```
 
-図 3.1‑4
-ネットワーク上の悪意ある第三者がアプリを攻撃する
+Figure 3.1‑3 Typical Environment an Android Application Behaves in
 
-スマートフォンアプリはユーザーの情報をサーバーで管理する形態が一般的である。そのため情報資産がネットワーク上を移動することになる。図
-3.1‑4に示すように、ネットワーク上の悪意ある第三者は通信中の情報を参照（盗聴）したり、情報を変更（改ざん）したりしようとする。また本物のサーバーになりすまして、アプリの通信相手になろうとする。もちろん従来同様、ネットワーク上の悪意ある第三者はサーバーも攻撃する。
+The figure above depicts the smartphone on the left and server on the
+right. The smartphone and server communicate through the Internet over
+3G/4G/Wi-Fi. Although multiple applications exist within a smartphone,
+we are only showing a single application in the figure in order to
+explain the threats clearly. Smartphone-based applications mainly
+handle user information, but the server-based web services
+collectively manage information of all of its users. Consequently,
+there is no change the importance of server security as usual. We will
+not touch upon issues relating to server security as it falls outside
+of the scope of the Guidebook.
 
-#### ユーザーがインストールしたマルウェアによる脅威
+We will use the following figure to describe the type of threats that
+exist towards Android applications.
+
+#### Network-based Third-Party
 
 ![](media/image28.png)
 ```eval_rst
 .. {width="7.020833333333333in" height="3.46875in"}
 ```
 
-図 3.1‑5
-ユーザーがインストールしてしまったマルウェアがアプリを攻撃する
+Figure 3.1‑4 Network-Based Malicious Third Party Attacking an
+Application
 
-スマートフォンは多種多様なアプリをマーケットから入手しインストールすることで機能拡張できることがその最大の特徴である。ユーザーがうっかりマルウェアアプリをインストールしてしまうこともある。図
-3.1‑5が示すように、マルウェアはアプリ間連携機能やアプリの脆弱性を悪用してアプリの情報資産や機能資産にアクセスしようとする。
+Generally, a smartphone application manages user information on a
+server so the information assets will move between the networks
+connecting them. As indicated in Figure 3.1‑4, a network-based
+malicious third party may access (sniff) any information during this
+communication or try to change information (data manipulation). The
+malicious attacker in the middle (also referred to as \"Man in The
+Middle\") can also pretend to be the real server tricking the
+application. Without saying, network-based malicious third parties
+will usually try to attack the server as well.
 
-#### アプリの脆弱性を悪用する攻撃ファイルによる脅威
+####  Threat Due to User-Installed Malware
 
 ![](media/image29.png)
 ```eval_rst
 .. {width="7.020833333333333in" height="3.46875in"}
 ```
 
-図 3.1‑6
-アプリの脆弱性を悪用する攻撃ファイルがアプリを攻撃する
+Figure 3.1‑5 Malware Installed by a User Attacks an Application
 
-インターネット上には音楽や写真、動画、文書など、様々なタイプのファイルが大量に公開されており、ユーザーがそれらのファイルをSDカードにダウンロードし、スマートフォンで利用する形態が一般的である。またスマートフォンで受信したメールに添付されるファイルを利用する形態も一般的である。これらのファイルは閲覧用や編集用のアプリでオープンされ利用される。
+The biggest selling point of a smartphone is in its ability to acquire
+numerous applications from the market in order to expand on its
+features. The downside to users being able to freely install many
+applications is that they will sometimes mistakenly install malware.
+As shown in Figure 3.1‑5, malware may exploit the inter-application
+communication functions or a vulnerability in the application in order
+to gain access to information or function assets.
 
-こうしたファイルを処理するアプリの機能に脆弱性があると、攻撃ファイルにより、そのアプリの情報資産や機能資産が悪用されてしまう。特に複雑なデータ構造を持ったファイル形式の処理においては脆弱性が入り込みやすい。攻撃ファイルは巧みに脆弱性を悪用してアプリを操作し、攻撃ファイルの作成者の目的を達成する。
-
-図
-3.1‑6に示すように、攻撃ファイルは脆弱なアプリによってオープンされるまでは何もせず、いったんオープンされるとアプリの脆弱性を悪用した攻撃を始める。攻撃者が能動的に行う攻撃行為と比較して、このような攻撃手法を受動的攻撃（Passive
-Attack）と呼ぶ。
-
-#### 悪意あるスマートフォンユーザーによる脅威
+#### Threat of an Malicious File that Exploits a Vulnerability in an Application
 
 ![](media/image30.png)
 ```eval_rst
 .. {width="7.020833333333333in" height="3.46875in"}
 ```
 
-図 3.1‑7
-悪意あるスマートフォンユーザーがアプリを攻撃する
+Figure 3.1‑6 Attack from Malicious Files that Exploit a Vulnerability in
+an Application
 
-Androidスマートフォンのアプリ開発においては、一般ユーザーに対してアプリを開発、解析する環境や機能が公式に提供されている。提供されている機能の中でも、特にADBと呼ばれる充実したデバッグ機能は、誰でも何の登録・審査もなく利用可能であり、この機能によりAndroidスマートフォンユーザーはOS解析行為やアプリ解析行為を容易に行うことができる。
+Various types of files such as music, images, videos and documents are
+widely available on the Internet and typically users will download
+many files to their SD card in order to use them on their smartphone.
+Furthermore, it is also common to download attached files sent in an
+e-mail. These files are later opened by a viewing or editing
+application.
 
-図
-3.1‑7に示すように、悪意あるスマートフォンユーザーはADB等のデバッグ機能を利用してアプリを解析し、アプリが抱える情報資産や機能資産にアクセスしようとする。アプリが抱える資産がユーザー自身のものである場合には問題とならないが、アプリメーカー等ユーザー以外のステークホルダーの資産である場合に問題となる。このようにスマートフォンのユーザー自身が悪意を持ってアプリ内の資産を狙うことがあることにも注意が必要だ。
+If there is any vulnerability in the function of an application that
+processes these files, an attacker can use a malicious file to exploit
+it and gain access to information or function assets of the
+application. In particular, vulnerabilities are often present in
+processing a file format with a complex data structure. The attacker
+can fulfill many different goals when exploiting an application in
+this way.
 
-#### スマートフォンの近くにいる第三者による脅威
+As shown in Figure 3.1‑6, an attack file stays dormant until it is
+opened by a vulnerable application. Once it is opened, it will start
+causing havoc by taking advantage of an application\'s vulnerability.
+In comparison to an active attack, we call this attack method a
+\"Passive Attack.\"
+
+#### Threats from a Malicious Smartphone User
 
 ![](media/image31.png)
 ```eval_rst
 .. {width="7.020833333333333in" height="3.46875in"}
 ```
 
-図 3.1‑8
-スマートフォンの近くにいる悪意ある第三者がアプリを攻撃する
+Figure 3.1‑7 Attacks from a Malicious Smartphone User
 
-スマートフォンはその携帯性の良さや、Bluetooth等の近距離無線通信機能を標準搭載していることから、物理的にスマートフォンの近くにいる悪意ある第三者から攻撃され得ることも忘れてはならない。攻撃者はユーザーが入力中のパスワードを肩越しに覗き見したり、図
-3.1‑8に示すように、Bluetooth通信機能を持つアプリに対してBluetoothでアクセスしたり、スマートフォン自体を盗んだり破壊したりする。特にスマートフォン自体の窃盗や破壊については、機密度の高さからスマートフォン内から一切外に出さない運用としている情報資産が失われてしまう脅威であり、アプリ設計の段階で見過ごされてしまうこともあるので注意が必要だ。
+With regard to application development for an Android smartphone, the
+environment as well as features that help to develop and analyze an
+application are openly provided to the general user. Among the
+features that are provided, the useful ADB debugging feature can be
+accessed by anyone without registration or screening. This feature
+allows an Android smartphone user to easily perform OS or application
+analysis.
 
-#### 様々な脅威
+As it is shown in Figure 3.1‑7, a smartphone user with malicious
+intent can analyze an application by taking advantage of the debugging
+feature of ADB and try to gain access to information or function
+assets of an application. If the actual asset contained in the
+application belongs to the user, it poses no problem, but if the asset
+belongs to someone other than the user, such as the application
+developer, then it will become a concern. Accordingly, we need to be
+aware that the legitimate smartphone user can maliciously target the
+assets within an application.
+
+#### Threats from Third Party in the Proximity of a Smartphone
 
 ![](media/image32.png)
 ```eval_rst
 .. {width="7.020833333333333in" height="3.46875in"}
 ```
 
-図 3.1‑9
-スマートフォンアプリは様々な攻撃にさらされている
+Figure 3.1‑8 Attacks from a Malicious Third Party in the Proximity of a
+Smartphone
 
-図
-3.1‑9はこれまで説明した脅威をひとまとめにした図である。このようにスマートフォンアプリを取り巻く脅威には様々なものがあり、この図はそのすべてを書き出しているものではない。日々の情報収集により、Androidアプリを取り巻く脅威について認識を広め、アプリのセキュア設計・セキュアコーディングに活かしていく努力が必要である。一般社団法人日本スマートフォンセキュリティ協会が作成した次の文書もスマートフォンの脅威について役立つ情報を提供しているので参考にしていただきたい。
+Due to face that most smartphones possess a variety of near-field
+communication mechanisms, such as NFC, Bluetooth and Wi-Fi, we must
+not forget that attacks can occur from a malicious attacker who is in
+physical proximity of a smartphone. An attacker can shoulder surf a
+password while peeping over a user who is inputting it in. Or, as
+indicated in Figure 3.1‑8, an attacker can be more sophisticated and
+attack the Bluetooth functionality of an application from a remote
+distance. There is also the threat that a malicious person could steal
+the smartphone creating a risk of data leakage or even destroy the
+smartphone causing a loss of critical information. Developers need to
+take these risks into consideration as well as early as the design
+stage.
 
--   『スマートフォン＆タブレットの業務利用に関するセキュリティガイドライン』【第二版】<br/>
-    [http://www.jssec.org/dl/guidelines\_v2.pdf](http://www.jssec.org/dl/guidelines_v2.pdf)<br/>
-    [http://www.jssec.org/dl/guidelines2012enew\_v1.0.pdf](http://www.jssec.org/dl/guidelines2012enew_v1.0.pdf)
-    (English)
+#### Summary of Threats
 
--   『スマートフォンネットワークセキュリティ実装ガイド』 【第一版】<br/>
-    [http://www.jssec.org/dl/NetworkSecurityGuide1.pdf](http://www.jssec.org/dl/NetworkSecurityGuide1.pdf)
-
--   『スマートフォンの業務利用におけるクラウド活用ガイド』 【ベータ版】<br/>
-    [http://www.jssec.org/dl/cloudguide2012\_beta.pdf](http://www.jssec.org/dl/cloudguide2012_beta.pdf)
-
--   『MDM導入・運用検討ガイド』【第一版】<br/>
-    [http://www.jssec.org/dl/MDMGuideV1.pdf](http://www.jssec.org/dl/MDMGuideV1.pdf)
-
-### 資産分類と保護施策
-
-前節までで解説した通りAndroidスマートフォンには様々な脅威が存在する。それら脅威から、アプリが扱うすべての資産を保護することは、開発にかかる時間や技術的限界などから困難な場合がある。そのため、Androidアプリ開発者は、アプリが扱う資産の重要度や容認される被害レベルを判断基準とした優先度に応じて、資産に対する妥当な対策を検討することが必要になる。
-
-資産毎の保護施策を決めるため、アプリが扱うそれぞれの資産について、その重要度・保護に関する法的根拠・被害発生時の影響・開発者（または組織）の社会的責任などを検討した上で、資産を分類し、分類毎に保護施策のレベルを定める。これが、それぞれの資産をどのように扱い、どのような対策を施すかを決める判断基準となる。この分類はアプリ開発者（または組織）として資産をどのように扱い保護するかを定める基準そのものであるため、アプリ開発者（または組織）がそれぞれの事情に合わせて、分類方法や対策内容を定める必要がある。
-
-参考までに、本ガイドにおける資産分類と保護施策のレベルを以下に示す。
-
-表 3.1‑5　資産分類と保護施策のレベル
+![](media/image33.png)
 ```eval_rst
-========= ================================ ===================================== 
-資産分類  資産のレベル                          保護施策のレベル
-========= ================================ ===================================== 
-高位 [*]_ | 資産が被害にあった場合、組織   | Android OSのセキュリティモデルを
-          | または個人の活動に致命的または | 破る、root権限を奪取した状態から
-          | 壊滅的な影響をあたえるもの。   | の攻撃やAPKのdex部分を改造すると
-          |                                | いった、高度な攻撃に対しても保護
-          | 例）資産が被害にあった場合、   | する。
-          | 当該組織が事業を継続できなく   | UX等の他要素よりもセキュリティ確
-          | なるレベル。                   | 保を優先する。
-中位      | 資産が被害にあった場合、組織   | Android OSのセキュリティモデルを
-          | または個人の活動に重大な影響   | 活用し、その範囲内で保護する。
-          | をあたえるもの。               |
-          |
-          | 例）資産が被害にあった場合、   | UX等の他要素よりもセキュリティ
-          | 当該組織の利益が悪化し、事業   | 確保を優先する。
-          | に影響を及ぼすレベル。
-低位      | 資産が被害にあった場合、組織   | Android OSのセキュリティモデルを
-          | または個人の活動に限定的な影   | 活用し、その範囲内で保護する。
-          | 響をあたえるもの。             |
-          |
-          | 例）資産が被害にあった場合、   | UX等の他要素とセキュリティを比
-          | 当該組織の利益に影響を与え     | 較し、他要素を優先しても良い。
-          | 得るが、他の要素により利益の
-          | 補てんが可能なレベル。
-========= ================================ ===================================== 
-
-本ガイドにおける資産分類と保護施策は、基本的にはroot権限が奪われていないセキュアなAndroid端末を前提とし、Android OSのセキュリティモデルを活用したセキュリティ施策を基準にしている。具体的には、資産分類で中位レベル以下の資産に対してAndroid OSのセキュリティモデルが機能していることを前提に、Android OSのセキュリティモデルを活用した保護施策を想定している。
-
-.. [*] 高位レベルの資産は、root権限が奪取された状態からの攻撃や、APK解析・改造による攻撃といった、Android OSのセキュリティモデルが破られた状態での攻撃からも、保護が必要な資産であると想定している。このような資産を守るためには、Android OSのセキュリティモデルが活用できないため、暗号化、難読化、ハードウェア支援、サーバー支援など複数の手段を組み合わせて高度な防御設計をする。これはガイド文書に簡潔に書けるようなノウハウではないし、個別の状況に応じて適切な防御設計は異なるため本ガイドの対象外としている。root権限奪取からの攻撃やAPK解析・改造などの高度な攻撃に対する保護が必要な場合は、Androidの耐タンパ設計に詳しいセキュリティ専門家に相談することをお勧めする。
+.. {width="7.020833333333333in" height="3.46875in"}
 ```
 
-### センシティブな情報
+Figure 3.1‑9 Summary of the Various Attacks on Smartphone Applications
 
-本ガイドのこれ以降の文章において情報資産を「センシティブな情報」と表現している。前節で述べたようにアプリが扱う個々の情報資産ごとに資産のレベルや保護施策のレベルを判断しなければならない。
+Figure 3.1‑9 summarizes the main types of threats explained in the
+previous sections. Smartphones are surrounded by a wide variety of
+threats and the figure above does not include all of them. Through our
+daily information gathering, we need to spread the awareness
+concerning the various threats that surround an Android application
+and be aware of them during the application\'s secure design and
+coding. The following literature that was created by Japan\'s
+Smartphone Security Association (JSSEC) contains other valuable
+information on the threats to smartphone security.
 
-入力データの安全性を確認する
-----------------------------
+-   Security Guidebook for Using Smartphones and Tablets<br/>
+    [http://www.jssec.org/dl/guidelines_v2.pdf [Version 2]](http://www.jssec.org/dl/guidelines_v2.pdf) (Japanese)<br/>
+    [http://www.jssec.org/dl/guidelines2012Enew_v1.0.pdf [Version 1]](http://www.jssec.org/dl/guidelines2012Enew_v1.0.pdf) (English)
 
-入力データの安全性確認はもっとも基礎的で効果の高いセキュアコーディング作法である。プログラムに入力されるデータのうち、攻撃者が直接的、間接的にそのデータの値を操作可能であるものはすべて、入力データの安全性確認が必要である。以下、Activityをプログラムに見立て、Intentを入力データに見立てた場合を例にして、入力データの安全性確認の在り方について解説する。
+-   Implementation Guidebook for Smartphone Network Security [Version 1]<br/>
+    [http://www.jssec.org/dl/NetworkSecurityGuide1.pdf](http://www.jssec.org/dl/NetworkSecurityGuide1.pdf) (Japanese)
 
-Activityが受け取ったIntentには攻撃者が細工した​データが含まれている可能性がある。攻撃者はプログラマが想定していない形式・値のデータを送り付けることで、アプリの誤動作を誘発し、結果として何らかのセキュリティ被害を生じさせるのである。ユーザーも攻撃者の一人となり得ることも忘れてはならない。
+-   Cloud Usage Guidebook for Business Purposes of Smartphones [Beta Version]<br/>
+    [http://www.jssec.org/dl/cloudguide2012_beta.pdf](http://www.jssec.org/dl/cloudguide2012_beta.pdf) (Japanese)
 
-Intentはactionやdata、extrasなどのデータで構成されるが、攻撃者が制御可能なデータはすべて気を付けなければならない。攻撃者が制御可能なデータを扱うコードでは、必ず次の事項を確認しなければならない。
+-   Guidebook for Reviewing the Implementation/Operation of MDM [Version 1]<br/>
+    [http://www.jssec.org/dl/MDMGuideV1.pdf](http://www.jssec.org/dl/MDMGuideV1.pdf) (Japanese)
 
-(a) 受け取ったデータは、プログラマが想定した形式であって、値は想定の範囲内に収まっているか？
+### Asset Classification and Protective Countermeasures
 
-(b) 想定している形式、値のあらゆるデータを受け取っても、そのデータを扱うコードが想定外の動作をしないと保証できるか？
+As was discussed in the previous sections, Android smartphones are
+surrounded by a variety of threats. Protecting every asset in an
+application from such threats could prove to be very difficult given
+the time it takes for development and due to technical limitations.
+Consequently, Android application developers should examine feasible
+countermeasures for their assets. This should be done according to
+priority level based on the developer\'s judgement criteria. This is a
+subjective matter that is based on how the importance of an asset is
+viewed and what the accepted level of damage is.
 
-次の例は指定URL のInternet 上のWeb ページのHTML
-を取得し、画面上のTextView に表示するだけの簡単なサンプルである。
-しかしこれには不具合がある。
+In order to help decide on the protective countermeasures for each
+asset, we will classify them and stipulate the level of protective
+countermeasures for each group. This will be achieved by examining the
+legal basis, pertaining to the level of importance regarding the
+impact of any damages that can occur and the social responsibility of
+the developer (or organization). These will prove to be the judgement
+criteria when deciding on how to handle each asset and the
+implementation of the type of countermeasures. Since this will become
+a standard for application developers and organizations on determining
+how to handle an asset and provide protective countermeasures, it is
+necessary to specify the classification methods and pertaining
+countermeasures in accordance the application developer\'s (or
+organization\'s) circumstances.
 
-Internet上のWebページのHTMLをTextViewに表示するサンプルコード
+Asset classification and protective countermeasure levels that are
+adopted in the Guidebook are shown below for reference:
+
+Table ‑5 Asset Classification and Protective Countermeasure Levels
+```eval_rst
+===================== ======================= =========================
+Asset Classification  | Asset Level           | Level of Protective   
+                      |                       | Counter-Measures      
+===================== ======================= =========================
+High                  | The amount of damage  | Provide protection
+                      | the asset causes is   | against sophisticated
+                      | fatal and             | attacks that break
+                      | catastrophic to the   | through the Android OS
+                      | organization or an    | security model and
+                      | individual\'s         | prevent root privilege
+                      | activity.             | compromises and attacks
+                      |                       | that alter the dex
+                      | i.e.) When an asset   | portion of an APK.
+                      | at this level is      |          
+                      | damaged, the          | Ensure security takes
+                      | organization will not | priority over other
+                      | be able to continue   | elements such as user
+                      | its business.         | experience, etc.
+Medium                | The amount of damage  | Utilize the Android OS
+                      | the asset causes has  | security model. It will
+                      | a substantial impact  | provide protection
+                      | the organization or   | covered under its scope.
+                      | an individual\'s      |
+                      | activity.             | Ensure security takes
+                      |                       | priority over other
+                      | i.e.) When an asset   | elements such as user
+                      | at this level is      | experience, etc.
+                      | damaged, the          | 
+                      | organization\'s       |         
+                      | profit level          | 
+                      | deteriorates,         | 
+                      | adversely affecting   |               
+                      | its business.         | 
+Low                   | The amount of damage  | Utilize the Android OS
+                      | the asset causes has  | security model. It will
+                      | a limited impact on   | provide protection
+                      | the organization or   | covered under its scope.
+                      | an individual\'s      |         
+                      | activity.             | Compare security
+                      |                       | countermeasures with
+                      | I.e.) When an asset   | other elements such as
+                      | at this level is      | user experience, etc.
+                      | damaged, the          | At this level, it is
+                      | organization\'s       | possible for
+                      | profit level will be  | non-security issues
+                      | affected but is able  | to take precedence
+                      | to compensate its     | over security issues.
+                      | losses from other     |
+                      | resources.            |
+===================== ======================= =========================
+
+Asset classification and protective countermeasures described in the
+Guidebook are proposed under the premise of a secure Android device
+where root privilege has not been compromised. Furthermore, it is
+based on the security measures that utilize the security model of
+Android OS. Specifically, we are hypothetically devising protective
+countermeasures by utilizing the Android OS security model on the
+premise of a functioning Android OS security model against assets that
+are classified lower than or equal to the medium level asset. On the
+other hand, we also believe in the necessity of protecting high level
+assets from attacks that are caused due the breaching of the Android
+OS security model. Such attacks include the compromise of root
+privileges and attacks that analyze or alter the APK binary. To
+protect these types of assets, we need to design sophisticated
+defensive countermeasures against such threats through the combination
+of multiple methods such as encryption, obfuscation, hardware support
+and server support. As the collection of know-how regarding these
+defenses cannot be easily written in this guidebook, and since
+appropriate defensive design differ in accordance to individual
+circumstances, we have deemed them to be outside of the Guidebook\'s
+scope. We recommend that you consult with a security specialist who is
+well versed in tamper resistant designs of Android if your device
+requires protection from sophisticated attacks that include attacks
+resulting from the compromise of root privileges or attacks caused by
+the analysis or alteration of an APK file.
+```
+
+### Sensitive Information 
+
+The term \"sensitive information\", instead of information asset, will
+be used from now on in the Guidebook. As it has been aforementioned in
+the previous section, we have to determine the asset level and the
+level of protective countermeasures for each information asset that an
+application handles.
+
+Handling Input Data Carefully and Securely
+------------------------------------------
+
+Validating input data is the easiest and yet most effective secure
+coding method. All data that is inputted into the application either
+directly or indirectly by an outside source needs to be properly
+validated. To illustrate best practices of input data validation, the
+following is an example of an Activity as used in a program that
+receives data from Intent.
+
+It is possible that an Activity can receive data from an Intent that
+was tampered by an attacker. By sending data with a format or a value
+that a programmer is not expecting, the attacker can induce a
+malfunction in the application that leads to some sort of security
+incident. We must not forget that a user can become an attacker as
+well.
+
+Intents are configured by action, data and extras, and we must be
+careful when accepting all forms of data that can be controlled by an
+attacker. We always need to validate the following items in any code
+that handles data from an untrusted source.
+
+(a) Does the received data match the format that was expected by the
+programmer and does the value fall in the expected scope?
+
+(b) Even if you have received the expected format and value, can you
+guarantee that the code which handles that data will not behave
+unexpectedly?
+
+The next example is a simple sample where HTML is acquired from a
+remote web page in a designated URL and the code is displayed in
+TextView. However, there is a bug.
+
+Sample Code that Displays HTML of a Remote Web page in TextView
 ```java
 TextView tv = (TextView) findViewById(R.id.textview);
 InputStreamReader isr = null;
@@ -337,12 +546,23 @@ try {
 } catch (MalformedURLException e) { //...
 ```
 
-(a)の観点で「urlstrが正しいURLである」ことをnew
-URL()でMalformedURLExceptionが発生しないことに​より確認している。しかしこれは不十分であり、urlstrに「file://～」形式のURLが指定されるとInternet上のWebページではなく、内部ファイルシステム上のファイルを開いてTextViewに表示してしまう。プログラマが想定した動作を保証していないため、(b)の観点を満たしていない。
+From the viewpoint of (a), \"urlstr is the correct URL\", verified
+through the non-occurrence of a MalformedURLException by a new URL().
+However, this is not sufficient. Furthermore, when a \"file://\...\"
+formatted URL is designated by urlstr, the file of the internal file
+system is opened and is displayed in TextView rather than the remote
+web page. This does not fulfill the viewpoint of (b), since it does
+not guarantee the behavior which was expected by the programmer.
 
-次は改善例である。(a)の観点で「urlstrは正規のURLであって、protocolはhttpまたはhttpsに限定される」ことを確認している。これにより(b)の観点でもurl.openConnection().getInputStream()でInternet経由のInputStreamを取得することが保証される。
+The next example shows a revision to fix the security bugs. Through
+the viewpoint of (a), the input data is validated by checking that
+\"urlstr is a legitimate URL and the protocol is limited to http or
+https.\" As a result, even by the viewpoint of (b), the acquisition of
+an Internet-routed InputStream is guaranteed through
+url.openConnection().getInputStream().
 
-Internet上のWebページのHTMLをTextViewに表示するサンプルコードの修正版
+Revised sample code that displays HTML of Internet-based Web page in
+TextView
 ```java
 TextView tv = (TextView) findViewById(R.id.textview);
 InputStreamReader isr = null;
@@ -362,15 +582,23 @@ try {
 } catch (MalformedURLException e) { //...
 ```
 
-入力データの安全性確認はInput
-Validationと呼ばれる基礎的なセキュアコーディング作法である。Input
-Validationという言葉の語感から(a)の観点のみ気を付けて(b)の観点を忘れてしまいがちである。データはプログラムに入ってきたときではなく、プログラムがそのデータを「使う」ときに被害が発生することに気を付けていただきたい。下記URLもぜひ参考にしていただきたい。
+Validating the safety of input data is called \"Input Validation\" and
+it is a fundamental secure coding method. Surmising from the sense of
+the word of Input Validation, it is quite often the case where the
+viewpoint of (a) is heeded but the viewpoint of (b) is forgotten. It
+is important to remember that damage does not take place when data
+enters the program but when the program uses that data in an incorrect
+way. We hope that you will refer the URLs listed below.
 
--   IPA 「セキュアプログラミング講座」\
-    [http://www.ipa.go.jp/security/awareness/vendor/programmingv2/clanguage.html](http://www.ipa.go.jp/security/awareness/vendor/programmingv2/clanguage.html)
+-   The CERT Oracle Secure Coding Standard for Java
+    [https://www.securecoding.cert.org/confluence/x/Ux](https://www.securecoding.cert.org/confluence/x/Ux) (English)
 
--   JPCERT CC 「Java セキュアコーディングスタンダード CERT/Oracle 版」\
-    [http://www.jpcert.or.jp/java-rules/](http://www.jpcert.or.jp/java-rules/)
+-   Application of CERT Oracle Secure Coding Standard for Android
+    Application Development
+    [https://www.securecoding.cert.org/confluence/x/C4AiBw](https://www.securecoding.cert.org/confluence/x/C4AiBw) (English)
 
--   JPCERT CC 「Java Androidアプリケーション開発へのルールの適用」\
-    [http://www.jpcert.or.jp/java-rules/android-j.html](http://www.jpcert.or.jp/java-rules/android-j.html)
+-   Rules Applicable Only to the Android Platform (DRD)
+    [https://www.securecoding.cert.org/confluence/x/H4ClBg](https://www.securecoding.cert.org/confluence/x/H4ClBg) (English)
+
+-   IPA \"Secure Programming Course\"
+    [http://www.ipa.go.jp/security/awareness/vendor/programmingv2/clanguage.html](http://www.ipa.go.jp/security/awareness/vendor/programmingv2/clanguage.html) (Japanese)
