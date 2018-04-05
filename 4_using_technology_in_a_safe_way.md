@@ -1,40 +1,73 @@
-安全にテクノロジーを活用する
-============================
+Using Technology in a Safe Way
+==============================
 
-Androidで言えばActivityやSQLiteなど、テクノロジーごとにセキュリティ観点の癖というものがある。そうしたセキュリティの癖を知らずに設計、コーディングしていると思わぬ脆弱性をつくりこんでしまうことがある。この章では開発者がAndroidのテクノロジーを活用するシーンを想定した記事を扱う。
+In Android, there are many specific security related issues that
+pertain only to certain technologies such as Activities or SQLite. If
+a developer does not have enough knowledge about each of the different
+security issues regarding each technology when designing and coding,
+then unexpected vulnerabilities may arise. This chapter will explain
+about the different scenarios that developers will need to know when
+using their application components.
 
-Activityを作る・利用する
-------------------------
+Creating/Using Activities
+-------------------------
 
-### サンプルコード<!-- 6207eabf -->
+### Sample Code<!-- 6207eabf -->
 
-Activityがどのように利用されるかによって、Activityが抱えるリスクや適切な防御手段が異なる。ここでは、Activityがどのように利用されるかという観点で、Activityを4つのタイプに分類した。次の判定フローによって作成するActivityがどのタイプであるかを判断できる。なお、どのような相手を利用するかによって適切な防御手段が決まるため、Activityの利用側の実装についても合わせて説明する。
+The risks and countermeasures of using Activities differ depending on
+how that Activity is being used. In this section, we have classified 4
+types of Activities based on how the Activity is being used. You can
+find out which type of activity you are supposed to create through the
+following chart shown below. Since the secure coding best practice
+varies according to how the activity is used, we will also explain
+about the implementation of the Activity as well.
 
-![](media/image33.png)
+Table 4.1‑1 Definition of Activity Types
+
+  Type                Definition
+  ------------------- --------------------------------------------------------------------------------------------------
+  Private Activity    An activity that cannot be launched by another application, and therefore is the safest activity
+  Public Activity     An activity that is supposed to be used by an unspecified large number of applications.
+  Partner Activity    An activity that can only be used by specific applications made by a trusted partner company.
+  In-house Activity   An activity that can only be used by other in-house applications.
+
+![](media/image34.png)
 ```eval_rst
 .. {width="6.889763779527559in"
 .. height="3.0074803149606297in"}
 ```
 
-図 4.1‑1
+Figure 4.1‑1
 
-#### 非公開Activityを作る・利用する
+#### Creating/Using Private Activities
 
-非公開Activityは、同一アプリ内でのみ利用されるActivityであり、もっとも安全性の高いActivityである。
+Private Activities are Activities which cannot be launched by the
+other applications and therefore it is the safest Activity.
 
-同一アプリ内だけで利用されるActivity（非公開Activity）を利用する際は、クラスを指定する明示的Intentを使えば誤って外部アプリにIntentを送信してしまうことがない。ただし、Activityを呼び出す際に使用するIntentは第三者によって読み取られる恐れがある。そのため、Activityに送信するIntentにセンシティブな情報を格納する場合には、その情報が悪意のある第三者に読み取られることのないように、適切な対応を実施する必要がある。
+When using Activities that are only used within the application
+(Private Activity), as long as you use explicit Intents to the class
+then you do not have to worry about accidently sending it to any other
+application. However, there is a risk that a third party application
+can read an Intent that is used to start the Activity. Therefore it is
+necessary to make sure that if you are putting sensitive information
+inside an Intent used to start an Activity that you take
+countermeasures to make sure that it cannot be read by a malicious
+third party.
 
-以下に非公開Activityを作る側のサンプルコードを示す。
+Sample code of how to create a Private Activity is shown below.
 
-ポイント(Activityを作る)：
+Points (Creating an Activity):
 
-1.  taskAffinityを指定しない
-2.  launchModeを指定しない
-3.  exported=\"false\"により、明示的に非公開設定する
-4.  同一アプリからのIntentであっても、受信Intentの安全性を確認する
-5.  利用元アプリは同一アプリであるから、センシティブな情報を返送してよい
+1.  Do not specify taskAffinity.
+2.  Do not specify launchMode.
+3.  Explicitly set the exported attribute to false.
+4.  Handle the received intent carefully and securely, even though the
+    intent was sent from the same application.
+5.  Sensitive information can be sent since it is sending and receiving
+    all within the same application.
 
-Activityを非公開設定するには、AndroidManifest.xmlのactivity要素のexported属性をfalseと指定する。
+To make the Activity private, set the \"exported\" attribute of the
+Activity element in the AndroidManifest.xml to false.
 
 AndroidManifest.xml
 ```eval_rst
@@ -49,17 +82,21 @@ PrivateActivity.java
    :encoding: shift-jis
 ```
 
-次に非公開Activityを利用する側のサンプルコードを示す。
+Next, we show the sample code for how to use the Private Activity.
 
 ```eval_rst
-ポイント(Activityを利用する)：
+Point (Using an Activity):
 
-6.  Activityに送信するIntentには、フラグFLAG\_ACTIVITY\_NEW\_TASKを設定しない
-7.  同一アプリ内Activityはクラス指定の明示的Intentで呼び出す
-8.  利用先アプリは同一アプリであるから、センシティブな情報をputExtra()を使う場合に限り送信してもよい [1]_
-9.  同一アプリ内Activityからの結果情報であっても、受信データの安全性を確認する
+6.  Do not set the FLAG\_ACTIVITY\_NEW\_TASK flag for intents to start
+    an activity.
+7.  Use the explicit Intents with the class specified to call an
+    activity in the same application.
+8.  Sensitive information can be sent only by putExtra() since the
+    destination activity is in the same application.[^1]
+9.  Handle the received result data carefully and securely, even though
+    the data comes from an activity within the same application.
 
-.. [1] ただし、ポイント1, 2, 6を遵守している場合を除いてはIntentが第三者に読み取られるおそれがあることに注意する必要がある。詳細はルールブックセクションの4.1.2.2、4.1.2.3を参照すること。
+
 ```
 
 PrivateUserActivity.java
