@@ -153,24 +153,38 @@ PublicUserActivity.java
    :encoding: shift-jis
 ```
 
-#### パートナー限定Activityを作る・利用する
+#### Creating/Using Partner Activities
 
-パートナー限定Activityは、特定のアプリだけから利用できるActivityである。パートナー企業のアプリと自社アプリが連携してシステムを構成し、パートナーアプリとの間で扱う情報や機能を守るために利用される。
+Partner activities are Activities that can only be used by specific
+applications. They are used between cooperating partner companies that
+want to securely share information and functionality.
 
-Activityを呼び出す際に使用するIntentは第三者によって読み取られる恐れがある。そのため、Activityに送信するIntentにセンシティブな情報を格納する場合には、その情報が悪意のある第三者に読み取られることのないように、適切な対応を実施する必要がある。
+There is a risk that a third party application can read an Intent that
+is used to start the Activity. Therefore it is necessary to make sure
+that if you are putting sensitive information inside an Intent used to
+start an Activity that you take countermeasures to make sure that it
+cannot be read by a malicious third party
 
-以下にパートナー限定Activityを作る側のサンプルコードを示す。
+Sample code for creating a Partner Activity is shown below.
 
-ポイント(Activityを作る)：
+Points (Creating an Activity):
 
-1.  taskAffinityを指定しない
-2.  launchModeを指定しない
-3.  Intent Filterを定義せず、exported=\"true\"を明示的に設定する
-4.  利用元アプリの証明書がホワイトリストに登録されていることを確認する
-5.  パートナーアプリからのIntentであっても、受信Intentの安全性を確認する
-6.  パートナーアプリに開示してよい情報に限り返送してよい
+1. Do not specify taskAffinity.
+2. Do not specify launchMode.
+3. Do not define the intent filter and explicitly set the exported
+   attribute to true.
+4. Verify the requesting application\'s certificate through a
+   predefined whitelist.
+5. Handle the received intent carefully and securely, even though the
+   intent was sent from a partner application.
+6. Only return Information that is granted to be disclosed to a partner
+   application.
 
-ホワイトリストを用いたアプリの確認方法については、「4.1.3.2 利用元アプリを確認する」を参照すること。また、ホワイトリストに指定する利用先アプリの証明書ハッシュ値の確認方法は「5.2.1.3 アプリの証明書のハッシュ値を確認する方法」を参照すること。
+Please refer to \"4.1.3.2 Validating the Requesting Application\" for
+how to validate an application by a white list. Also, please refer to
+\"5.2.1.3 How to Verify the Hash Value of an Application\'s
+Certificate\" for how to verify the certificate hash value of a
+destination application which is specified in the whitelist.
 
 AndroidManifest.xml
 ```eval_rst
@@ -200,21 +214,24 @@ PkgCert.java
    :encoding: shift-jis
 ```
 
+Sample code for using a Partner Activity is described below.
 
-次にパートナー限定Activityを利用する側のサンプルコードを示す。ここではパートナー限定Activityを呼び出す方法を説明する。
+```eval_rst
+Points (Using an Activity):
 
-ポイント(Activityを利用する)：
+7. Verify if the certificate of the target application has been registered in a whitelist.
+8. Do not set the FLAG\_ACTIVITY\_NEW\_TASK flag for the intent that start an activity.
+9. Only send information that is granted to be disclosed to a Partner Activity only by putExtra().
+10. Use explicit intent to call a Partner Activity.
+11. Use startActivityForResult() to call a Partner Activity.
+12. Handle the received result data carefully and securely, even though the data comes from a partner application.
+```
 
-7.  利用先パートナー限定Activityアプリの証明書がホワイトリストに登録されていることを確認する
-8.  Activityに送信するIntentには、フラグFLAG\_ACTIVITY\_NEW\_TASKを設定しない
-9.  利用先パートナー限定アプリに開示してよい情報はputExtra()を使う場合に限り送信してよい
-10.  明示的Intentによりパートナー限定Activityを呼び出す
-11.  startActivityForResult()によりパートナー限定Activityを呼び出す
-12.  パートナー限定アプリからの結果情報であっても、受信Intentの安全性を確認する
-
-ホワイトリストを用いたアプリの確認方法については、「4.1.3.2
-利用元アプリを確認する」を参照すること。また、ホワイトリストに指定する利用先アプリの証明書ハッシュ値の確認方法は「5.2.1.3
-アプリの証明書のハッシュ値を確認する方法」を参照すること。
+Refer to \"4.1.3.2 Validating the Requesting Application\" for how to
+validate applications by white list. Also please refer to \"5.2.1.3
+How to Verify the Hash Value of an Application\'s Certificate\" for
+how to verify the certificate hash value of a destination application
+which is to be specified in a white list.
 
 AndroidManifest.xml
 ```eval_rst
@@ -230,14 +247,12 @@ PartnerUserActivity.java
    :encoding: shift-jis
 ```
 
-
 PkgCertWhitelists.java
 ```eval_rst
 .. literalinclude:: CodeSamples/JSSEC Shared.PkgCertWhitelists.java
    :language: java
    :encoding: shift-jis
 ```
-
 
 PkgCert.java
 ```eval_rst
@@ -247,25 +262,32 @@ PkgCert.java
 ```
 
 
-#### 自社限定Activityを作る・利用する
+#### Creating/Using In-house Activities
 
-自社限定Activityは、自社以外のアプリから利用されることを禁止するActivityである。複数の自社製アプリでシステムを構成し、自社アプリが扱う情報や機能を守るために利用される。
+> In-house activities are the Activities which are prohibited to be used
+> by applications other than other in-house applications. They are used
+> in applications developed internally that want to securely share
+> information and functionality.
+>
+> There is a risk that a third party application can read an Intent that
+> is used to start the Activity. Therefore it is necessary to make sure
+> that if you are putting sensitive information inside an Intent used to
+> start an Activity that you take countermeasures to make sure that it
+> cannot be read by a malicious third party.
+>
+> Sample code for creating an In-house Activity is shown below.
+>
+> Points (Creating an Activity):
 
-Activityを呼び出す際に使用するIntentは第三者によって読み取られる恐れがある。そのため、Activityに送信するIntentにセンシティブな情報を格納する場合には、その情報が悪意のある第三者に読み取られることのないように、適切な対応を実施する必要がある。
-
-以下に自社限定Activityを作る側のサンプルコードを示す。
-
-ポイント(Activityを作る)：
-
-1.  独自定義Signature Permissionを定義する
-2.  taskAffinityを指定しない
-3.  launchModeを指定しない
-4.  独自定義Signature Permissionを要求宣言する
-5.  Intent Filterを定義せず、exported=\"true\"を明示的に設定する
-6.  独自定義Signature Permissionが自社アプリにより定義されていることを確認する
-7.  自社アプリからのIntentであっても、受信Intentの安全性を確認する
-8.  利用元アプリは自社アプリであるから、センシティブな情報を返送してよい
-9.  利用元アプリと同じ開発者鍵でAPKを署名する
+1.  Define an in-house signature permission.
+2.  Do not specify taskAffinity.
+3.  Do not specify launchMode.
+4.  Require the in-house signature permission.
+5.  Do not define an intent filter and explicitly set the exported attribute to true.
+6.  Verify that the in-house signature permission is defined by an in-house application.
+7.  Handle the received intent carefully and securely, even though the intent was sent from an in-house application.
+8.  Sensitive information can be returned since the requesting application is in-house.
+9.  When exporting an APK, sign the APK with the same developer key as the destination application.
 
 AndroidManifest.xml
 ```eval_rst
@@ -274,7 +296,6 @@ AndroidManifest.xml
    :encoding: shift-jis
 ```
 
-
 InhouseActivity.java
 ```eval_rst
 .. literalinclude:: CodeSamples/Activity InhouseActivity.InhouseActivity.java
@@ -282,14 +303,12 @@ InhouseActivity.java
    :encoding: shift-jis
 ```
 
-
 SigPerm.java
 ```eval_rst
 .. literalinclude:: CodeSamples/JSSEC Shared.SigPerm.java
    :language: java
    :encoding: shift-jis
 ```
-
 
 PkgCert.java
 ```eval_rst
@@ -299,27 +318,29 @@ PkgCert.java
 ```
 
 
-★ポイント9★APKをExportするときに、利用元アプリと同じ開発者鍵でAPKを署名する。
+\*\*\* Point9 \*\*\* When exporting an APK, sign the APK with the same developer key as the destination application.
 
-![](media/image34.png)
+![](media/image35.png)
 ```eval_rst
 .. {width="4.647222222222222in"
 .. height="3.2743055555555554in"}
 ```
 
-図 4.1‑2
+Figure 4.1‑2
 
-次に自社限定Activityを利用する側のサンプルコードを示す。ここでは自社限定Activityを呼び出す方法を説明する。
+Sample code for using an In-house Activity is described below.
 
-ポイント(Activityを利用する)：
+```eval_rst
+Points (Using an activity):
 
-10.  独自定義Signature Permissionを利用宣言する
-11.  独自定義Signature Permissionが自社アプリにより定義されていることを確認する
-12.  利用先アプリの証明書が自社の証明書であることを確認する
-13.  利用先アプリは自社アプリであるから、センシティブな情報をputExtra()を使う場合に限り送信してもよい
-14.  明示的Intentにより自社限定Activityを呼び出す
-15.  自社アプリからの結果情報であっても、受信Intentの安全性を確認する
-16.  利用先アプリと同じ開発者鍵でAPKを署名する
+10.  Declare that you want to use the in-house signature permission.
+11.  Verify that the in-house signature permission is defined by an in-house application.
+12.  Verify that the destination application is signed with the in-house certificate.
+13.  Sensitive information can be sent only by putExtra() since the destination application is in-house.
+14.  Use explicit intents to call an In-house Activity.
+15.  Handle the received data carefully and securely, even though the data came from an in-house application.
+16.  When exporting an APK, sign the APK with the same developer key as the destination application.
+```
 
 AndroidManifest.xml
 ```eval_rst
@@ -328,7 +349,6 @@ AndroidManifest.xml
    :encoding: shift-jis
 ```
 
-
 InhouseUserActivity.java
 ```eval_rst
 .. literalinclude:: CodeSamples/Activity InhouseUser.InhouseUserActivity.java
@@ -336,14 +356,12 @@ InhouseUserActivity.java
    :encoding: shift-jis
 ```
 
-
 SigPerm.java
 ```eval_rst
 .. literalinclude:: CodeSamples/JSSEC Shared.SigPerm.java
    :language: java
    :encoding: shift-jis
 ```
-
 
 PkgCert.java
 ```eval_rst
@@ -353,32 +371,53 @@ PkgCert.java
 ```
 
 
-★ポイント16★APKをExportするときに、利用先アプリと同じ開発者鍵でAPKを署名する。
+\*\*\* Point 16 \*\*\* When exporting an APK, sign the APK with the same developer key as the destination application.
 
-![](media/image34.png)
+![](media/image35.png)
 ```eval_rst
 .. {width="4.647222222222222in"
 .. height="3.2743055555555554in"}
 ```
 
-図 4.1‑3
+Figure 4.1‑3
 
 ### Rule Book<!-- 28ac098a -->
 
-Activityを作る際、またはActivityにIntentを送信する際には以下のルールを守ること。
+Be sure to follow the rules below when creating or sending an Intent to an activity.
 
-1.  アプリ内でのみ使用するActivityは非公開設定する （必須）
-2.  taskAffinityを指定しない （必須）
-3.  launchModeを指定しない （必須）
-4.  Activityに送信するIntentにはFLAG\_ACTIVITY\_NEW\_TASKを設定しない （必須）
-5.  受信Intentの安全性を確認する （必須）
-6.  独自定義Signature Permissionは、自社アプリが定義したことを確認して利用する （必須）
-7.  結果情報を返す場合には、返送先アプリからの結果情報漏洩に注意する （必須）
-8.  利用先Activityが固定できる場合は明示的IntentでActivityを利用する （必須）
-9.  利用先Activityからの戻りIntentの安全性を確認する （必須）
-10. 他社の特定アプリと連携する場合は利用先Activityを確認する （必須）
-11. 資産を二次的に提供する場合には、その資産の従来の保護水準を維持する （必須）
-12. センシティブな情報はできる限り送らない （推奨）
+1.  Activities that are Used Only Internally to the Application Must be
+    Set Private (Required)
+
+2.  Do Not Specify taskAffinity (Required)
+
+3.  Do Not Specify launchMode (Required)
+
+4.  Do Not Set the FLAG\_ACTIVITY\_NEW\_TASK Flag for Intents that Start
+    an Activity (Required)
+
+5.  Handling the Received Intent Carefully and Securely (Required)
+
+6.  Use an In-house Defined Signature Permission after Verifying that it
+    is Defined by an In-House Application (Required)
+
+7.  When Returning a Result, Pay Attention to the Possibility of
+    Information Leakage of that Result from the Destination Application
+    (Required)
+
+8.  Use the explicit Intents if the destination Activity is
+    predetermined. (Required)
+
+9.  Handle the Returned Data from a Requested Activity Carefully and
+    Securely (Required)
+
+10. Verify the Destination Activity if Linking with Another Company\'s
+    Application (Required)
+
+11. When Providing an Asset Secondhand, the Asset should be Protected
+    with the Same Level of Protection (Required)
+
+12. Sending Sensitive Information Should Be Limited as much as possible
+    (Recommended)
 
 #### アプリ内でのみ使用するActivityは非公開設定する （必須）
 
