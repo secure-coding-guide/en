@@ -120,9 +120,9 @@ The sample code to create a Public Activity is shown below.
 
 Points (Creating an Activity):
 
-1.  exported=\"true\"により、明示的に公開設定する
-2.  受信Intentの安全性を確認する
-3.  結果を返す場合、センシティブな情報を含めない
+1. Explicitly set the exported attribute to true.
+2. Handle the received intent carefully and securely.
+3. When returning a result, do not include sensitive information.
 
 AndroidManifest.xml
 ```eval_rst
