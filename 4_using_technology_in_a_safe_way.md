@@ -139,10 +139,12 @@ PublicActivity.java
 
 Next, Herein after sample code of Public Activity user side.
 
+```eval_rst
 Points (Using an Activity):
 
 4. Do not send sensitive information.
 5. When receiving a result, handle the data carefully and securely.
+```
 
 PublicUserActivity.java
 ```eval_rst
