@@ -92,11 +92,11 @@ Point (Using an Activity):
 7.  Use the explicit Intents with the class specified to call an
     activity in the same application.
 8.  Sensitive information can be sent only by putExtra() since the
-    destination activity is in the same application.[^1]
+    destination activity is in the same application. [1]_
 9.  Handle the received result data carefully and securely, even though
     the data comes from an activity within the same application.
 
-
+.. [1] Caution: Unless points 1, 2 and 6 are abided by, there is a risk that Intents may be read by a third party. Please refer to sections 4.1.2.2 and 4.1.2.3 for more details.
 ```
 
 PrivateUserActivity.java
