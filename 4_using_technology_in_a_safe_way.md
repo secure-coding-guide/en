@@ -264,20 +264,20 @@ PkgCert.java
 
 #### Creating/Using In-house Activities
 
-> In-house activities are the Activities which are prohibited to be used
-> by applications other than other in-house applications. They are used
-> in applications developed internally that want to securely share
-> information and functionality.
->
-> There is a risk that a third party application can read an Intent that
-> is used to start the Activity. Therefore it is necessary to make sure
-> that if you are putting sensitive information inside an Intent used to
-> start an Activity that you take countermeasures to make sure that it
-> cannot be read by a malicious third party.
->
-> Sample code for creating an In-house Activity is shown below.
->
-> Points (Creating an Activity):
+In-house activities are the Activities which are prohibited to be used
+by applications other than other in-house applications. They are used
+in applications developed internally that want to securely share
+information and functionality.
+
+There is a risk that a third party application can read an Intent that
+is used to start the Activity. Therefore it is necessary to make sure
+that if you are putting sensitive information inside an Intent used to
+start an Activity that you take countermeasures to make sure that it
+cannot be read by a malicious third party.
+
+Sample code for creating an In-house Activity is shown below.
+
+Points (Creating an Activity):
 
 1.  Define an in-house signature permission.
 2.  Do not specify taskAffinity.
@@ -419,28 +419,40 @@ Be sure to follow the rules below when creating or sending an Intent to an activ
 12. Sending Sensitive Information Should Be Limited as much as possible
     (Recommended)
 
-#### アプリ内でのみ使用するActivityは非公開設定する （必須）
+#### Activities that are Used Only Internally to the Application Must be Set Private (Required)
 
-同一アプリ内からのみ利用されるActivityは他のアプリからIntentを受け取る必要がない。またこのようなActivityでは開発者もActivityを攻撃するIntentを想定しないことが多い。このようなActivityは明示的に非公開設定し、非公開Activityとする。
+Activities which are only used in a single application are not
+required to be able to receive any Intents from other applications.
+Developers often assume that Activities intended to be private will
+not be attacked but it is necessary to explicitly make these
+Activities private in order to stop malicious Intents from being
+received.
 
 AndroidManifest.xml
 
 ``` xml
-        <!-- 非公開Activity -->
-        <!-- ★ポイント3★ exported="false"により、明示的に非公開設定する -->
+        <!-- Private activity -->
+        <!-- \*\*\* POINT 3 \*\*\* Explicitly set the exported attribute to false. -->
         <activity
             android:name=".PrivateActivity"
             android:label="@string/app_name"
             android:exported="false" />
 ```
 
-同一アプリ内からのみ利用されるActivityではIntent Filterを設置するような設計はしてはならない。Intent Filterの性質上、同一アプリ内の非公開Activityを呼び出すつもりでも、Intent Filter経由で呼び出したときに意図せず他アプリのActivityを呼び出してしまう可能性もある。詳細は、アドバンスト「4.1.3.1 exported 設定とintent-filter設定の組み合わせ(Activityの場合)」を参照すること。
+Intent filters should not be set on activities that are only used in a
+single application. Due to the characteristics of Intent filters, Due
+to the characteristics of how Intent filters work, even if you intend
+to send an Intent to a Private Activity internally, if you send the
+Intent through an Intent filter than you may unintentionally start
+another Activity. Please see Advanced Topics \"4.1.3.1Combining
+Exported Attributes and Intent Filter Settings (For Activities)\" for
+more details.
 
-AndroidManifest.xml(非推奨)
+AndroidManifest.xml(Not recommended)
 
 ``` xml
-        <!-- 非公開Activity -->
-        <!-- ★ポイント3★ exported="false"により、明示的に非公開設定する -->
+        <!-- Private activity -->
+        <!-- \*\*\* POINT 3 \*\*\* Explicitly set the exported attribute to false. -->
         <activity
             android:name=".PictureActivity"
             android:label="@string/picture_name"
@@ -450,26 +462,41 @@ AndroidManifest.xml(非推奨)
             </intent-filter>
         </activity>
 ```
-#### taskAffinityを指定しない （必須）
+#### Do Not Specify taskAffinity (Required)
 
-Androidでは、Activityはタスクによって管理される。タスクの名前は、ルートActivityの持つアフィニティによって決定される。一方でルート以外のActivityに関しては、所属するタスクがアフィニティだけでは決定されず、Activityの起動モードにも依存する。詳細は「4.1.3.4
-ルートActivityについて」を参照すること。
+In Android OS, Activities are managed by tasks. Task names are
+determined by the affinity that the root Activity has. On the other
+hand, for Activities other than root Activities, the task to which the
+Activity belongs is not determined by the Affinity only, but also
+depends on the Activity\'s launch mode. Please refer to \"4.1.3.4 Root
+Activity\" for more details.
 
-デフォルト設定では各Activityはパッケージ名をアフィニティとして持つ。その結果、タスクはアプリごとに割り当てられるので、同一アプリ内の全てのActivityは同一タスクに所属する。タスクの割り当てを変更するには、AndroidManifest.xmlへの明示的なアフィニティ記述や、Activityに送信するIntentへのフラグ設定をすればよい。ただし、タスクの割り当てを変更した場合は、異なるタスクに属するActivityに送信したIntentを別アプリによって読み出せる可能性がある。
+In the default setting, each Activity uses its package name as its
+affinity. As a result, tasks are allocated according to application,
+so all Activities in a single application will belong to the same
+task. To change the task allocation, you can make an explicit
+declaration for the affinity in the AndroidManifest.xml file or you
+can set a flag in an Intent sent to an Activity. However, if you
+change task allocations, there is a risk that another application
+could read the Intents sent to Activities belonging to another task.
 
-センシティブな情報を含む送信Intentおよび受信Intentの内容を読み取られないようにするには、AndroidManifest.xml内のapplication要素およびactivity要素でandroid:taskAffinityを指定せず、デフォルト(パッケージ名と同一)のままにすべきである。
+Be sure not to specify android:taskAffinity in the AndroidManifest.xml
+file and use the default setting keeping the affinity as the package
+name in order to prevent sensitive information inside sent or received
+Intents from being read by another application.
 
-以下に非公開Activityの作成側と利用側におけるAndroidManifest.xmlを示す。
+Below is an example AndroidManifest.xml file for creating and using
+Private Activities.
 
 AndroidManifest.xml
 
 ``` xml
-    <!-- ★ポイント1★ taskAffinityを指定しない -->
+    <!-- \*\*\* POINT 1 \*\*\* Do not specify taskAffinity -->
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
 
-        <!-- ★ポイント1★ taskAffinityを指定しない -->
+        <!-- \*\*\* POINT 1 \*\*\* Do not specify taskAffinity -->
         <activity
             android:name=".PrivateUserActivity"
             android:label="@string/app_name" >
@@ -479,8 +506,8 @@ AndroidManifest.xml
             </intent-filter>
         </activity>
 
-        <!-- 非公開Activity -->
-        <!-- ★ポイント1★ taskAffinityを指定しない -->
+        <!-- Private activity -->
+        <!-- \*\*\* POINT 1 \*\*\* Do not specify taskAffinity -->
         <activity
             android:name=".PrivateActivity"
             android:label="@string/app_name"
@@ -488,23 +515,39 @@ AndroidManifest.xml
     </application>
 ```
 ```eval_rst
-タスクとアフィニティの詳細な解説は、「Google Android プログラミング入門」 [2]_、あるいは、Google Developers API Guide "Tasks and Back Stack" [3]_ の解説および「4.1.3.3 Activityに送信されるIntentの読み取り」、「4.1.3.4 ルートActivityについて」を参照すること。
+Please refer to the \"Google Android Programming guide\"[2]_, the
+Google Developer's API Guide \"Tasks and Back Stack\"[3]_, \"4.1.3.3
+Reading Intents Sent to an Activity\" and \"4.1.3.4 Root Activity\"
+for more details about tasks and affinities.
 
-.. [2] 江川、藤井、麻野、藤田、山田、山岡、佐野、竹端著「Google Android
-    プログラミング入門」 (アスキー・メディアワークス、2009年7月)
+.. [2] Author Egawa, Fujii, Asano, Fujita, Yamada, Yamaoka, Sano,
+    Takebata, "Google Android Programming Guide", ASCII Media Works,
+    July 2009
 .. [3] http://developer.android.com/guide/components/tasks-and-back-stack.html
 ```
 
-#### launchModeを指定しない （必須）
+#### Do Not Specify launchMode (Required)
 
-Activityの起動モードとは、Activityを呼び出す際に、Activityのインスタンスの新規生成や、タスクの新規生成を制御するための設定である。デフォルト設定は"standard"である。"standard"設定では、Intentを使ってActivityを呼び出すときには常に新規インスタンスを生成し、タスクは呼び出し側Activityが属するタスクに従い、新規にタスクが生成されることはない。タスクが新規に生成されると、呼び出しに使ったIntentが別のアプリから読み取り可能になる。そのため、センシティブな情報をIntentに含む場合には、Activityの起動モードには"standard"を用いるべきである。
+The Activity launch mode is used to control the settings for creating
+new tasks and Activity instances when starting an Activity. By default
+it is set to \"standard\". In the \"standard\" setting, new instances
+are always created when starting an Activity, tasks follow the tasks
+belonging to the calling Activity, and it is not possible to create a
+new task. When a new task is created, it is possible for other
+applications to read the contents of the calling Intent so it is
+required to use the \"standard\" Activity launch mode setting when
+sensitive information is included in an Intent.
 
-Activityの起動モードはAndroidManifest.xml内にてandroid:launchModeで明示的に設定可能であるが、上記の理由により、各Activityに対してandroid:launchModeを指定せず、値をデフォルトのまま"standard"とするべきである。
+The Activity launch mode can be explicitly set in the
+android:launchMode attribute in the AndroidManifest.xml file, but
+because of the reason explained above, this should not be set in the
+Activity declaration and the value should be kept as the default
+\"standard\".
 
 AndroidManifest.xml
 
 ``` xml
-        <!-- ★ポイント2★ ActivityにはlaunchModeを指定せず、値をデフォルトのまま”standard”とする -->
+        <!-- \*\*\* POINT 2 \*\*\* Do not specify launchMode -->
         <activity
             android:name=".PrivateUserActivity"
             android:label="@string/app_name" >
@@ -514,15 +557,16 @@ AndroidManifest.xml
             </intent-filter>
         </activity>
 
-        <!-- 非公開Activity -->
-        <!-- ★ポイント2★ ActivityにはlaunchModeを指定せず、値をデフォルトのまま”standard”とする -->
+        <!-- Private activity -->
+        <!-- \*\*\* POINT 2 \*\*\* Do not specify launchMode -->
         <activity
             android:name=".PrivateActivity"
             android:label="@string/app_name"
             android:exported="false" />
     </application>
 ```
-「4.1.3.3 Activityに送信されるIntentの読み取り」、「4.1.3.4 ルートActivityについて」を参照すること。
+Please refer to \"4.1.3.3 Reading Intents Sent to an Activity\" and
+\"4.1.3.4 Root Activity.\"
 
 #### Activityに送信するIntentにはFLAG\_ACTIVITY\_NEW\_TASKを設定しない （必須）
 
