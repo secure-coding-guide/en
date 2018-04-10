@@ -137,12 +137,12 @@ PublicActivity.java
    :encoding: shift-jis
 ```
 
-次に公開Activityを利用する側のサンプルコードを示す。
+Next, Herein after sample code of Public Activity user side.
 
-ポイント(Activityを利用する)：
+Points (Using an Activity):
 
-4.  センシティブな情報を送信してはならない
-5.  結果を受け取る場合、結果データの安全性を確認する
+4. Do not send sensitive information.
+5. When receiving a result, handle the data carefully and securely.
 
 PublicUserActivity.java
 ```eval_rst
