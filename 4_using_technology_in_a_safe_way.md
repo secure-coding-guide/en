@@ -106,13 +106,19 @@ PrivateUserActivity.java
    :encoding: shift-jis
 ```
 
-#### 公開Activityを作る・利用する
+#### Creating/Using Public Activities
 
-公開Activityは、不特定多数のアプリに利用されることを想定したActivityである。マルウェアが送信したIntentを受信することがあることに注意が必要である。また、公開Activityを利用する場合には、送信するIntentがマルウェアに受信される、あるいは読み取られることがあることに注意が必要である。
+Public Activities are Activities which are supposed to be used by an
+unspecified large number of applications. It is necessary to be aware
+that Public Activities may receive Intents sent from malware.
 
-以下に公開Activityを作る側のサンプルコードを示す。
+In addition, when using Public Activities, it is necessary to be aware
+of the fact that malware can also receive or read the Intents sent to
+them.
 
-ポイント(Activityを作る)：
+The sample code to create a Public Activity is shown below.
+
+Points (Creating an Activity):
 
 1.  exported=\"true\"により、明示的に公開設定する
 2.  受信Intentの安全性を確認する
@@ -355,7 +361,7 @@ PkgCert.java
 
 図 4.1‑3
 
-### ルールブック<!-- 28ac098a -->
+### Rule Book<!-- 28ac098a -->
 
 Activityを作る際、またはActivityにIntentを送信する際には以下のルールを守ること。
 
