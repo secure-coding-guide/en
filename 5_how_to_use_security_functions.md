@@ -740,7 +740,7 @@ certificate hash value by using JSSEC Certificate Hash Value Checker.
 
 ![C:\\Users\\0025110063\\AppData\\Local\\Microsoft\\Windows\\Temporary
 Internet
-Files\\Content.Word\\Screenshot\_2012-04-24-13-01-57.png](media/image69.png)
+Files\\Content.Word\\Screenshot\_2012-04-24-13-01-57.png](media/image63.png)
 ```eval_rst
 .. {width="3.93125in"
 .. height="2.2180555555555554in"}
@@ -777,7 +777,7 @@ whether or not to grant the Permission in question. If the user allows
 the use of the Permission, the app may execute whatever operations
 require that Permission.
 
-![](media/image70.png)
+![](media/image64.png)
 ```eval_rst
 .. {width="2.0072648731408576in"
 .. height="3.571259842519685in"}
@@ -1171,7 +1171,7 @@ ProtectedApp.
 3.  The AttackerApp has installed on the device prior to the
     ProtectedApp.
 
-![](media/image72.png)
+![](media/image65.png)
 ```eval_rst
 .. {width="6.5in" height="4.270833333333333in"}
 ```
@@ -1296,7 +1296,7 @@ public class CheckPermissionActivity extends Activity {
 }
 ```
 
-#### APKの改ざんを検出する
+#### Detection of APK Falsification
 
 We explained about detecting the falsification of permissions by a
 user in \"5.2.3.2 Falsification of AndroidManifest.xml by a User\".
