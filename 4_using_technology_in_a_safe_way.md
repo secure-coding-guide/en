@@ -719,97 +719,179 @@ these Activities as well.
 Please refer to \"3.2 Handling Input Data Carefully and Securely\" for
 more information.
 
-#### 他社の特定アプリと連携する場合は利用先Activityを確認する （必須）
+####  Verify the Destination Activity if Linking with Another Company\'s Application (Required)
 
-他社の特定アプリと連携する場合にはホワイトリストによる確認方法がある。自アプリ内に利用先アプリの証明書ハッシュを予め保持しておく。利用先の証明書ハッシュと保持している証明書ハッシュが一致するかを確認することで、なりすましアプリにIntentを発行することを防ぐことができる。具体的な実装方法についてはサンプルコードセクション「4.1.1.3
-パートナー限定Activityを作る・利用する」を参照すること。また、技術的な詳細に関しては「4.1.3.2
-利用元アプリを確認する」を参照すること。
+Be sure to sure a whitelist when linking with another company\'s
+application. You can do this by saving a copy of the company\'s
+certificate hash inside your application and checking it with the
+certificate hash of the destination application. This will prevent a
+malicious application from being able to spoof Intents. Please refer
+to sample code section \"4.1.1.3 Creating/Using Partner Activities\"
+for the concrete implementation method. For technical details, please
+refer to \"4.1.3.2 Validating the Requesting Application.\"
 
-#### 資産を二次的に提供する場合には、その資産の従来の保護水準を維持する （必須）<!-- 9bfe7d86 -->
+#### When Providing an Asset Secondhand, the Asset should be Protected with the Same Level of Protection (Required)
 
-Permissionにより保護されている情報資産および機能資産を他のアプリに二次的に提供する場合には、提供先アプリに対して同一のPermissionを要求するなどして、その保護水準を維持しなければならない。AndroidのPermissionセキュリティモデルでは、保護された資産に対するアプリからの直接アクセスについてのみ権限管理を行う。この仕様上の特性により、アプリに取得された資産がさらに他のアプリに、保護のために必要なPermissionを要求することなく提供される可能性がある。このことはPermissionを再委譲(Redelegation)していることと実質的に等価なので、Permissionの再委譲問題と呼ばれる。「5.2.3.4　Permissionの再委譲問題」を参照すること。
+When an information or function asset, which is protected by a
+permission, is provided to another application secondhand, you need to
+make sure that it has the same required permissions needed to access
+the asset. In the Android OS permission security model, only an
+application that has been granted proper permissions can directly
+access a protected asset. However, there is a loophole because an
+application with permissions to an asset can act as a proxy and allow
+access to an unprivileged application. Substantially this is the same
+as re-delegating a permission so it is referred to as the \"Permission
+Re-delegation\" problem. Please refer to \"5.2.3.4 Permission
+Re-delegation Problem.\"
 
-#### センシティブな情報はできる限り送らない （推奨）<!-- 7f40888a -->
+#### Sending Sensitive Information Should Be Limited as much as possible (Recommended)<!-- 7f40888a -->
 
-不特定多数のアプリと連携する場合にはセンシティブな情報を送ってはならない。特定のアプリと連携する場合においても、意図しないアプリにIntentを発行してしまった場合や第三者によるIntentの盗聴などで情報が漏洩してしまうリスクがある。「4.1.3.5
-Activity利用時のログ出力について」を参照すること。
+You should not send sensitive information to untrusted parties. Even
+when you are linking with a specific application, there is still a
+chance that you unintentionally send an Intent to a different
+application or that a malicious third party can steal your Intents.
+Please refer to \"4.1.3.5 Log Output When using Activities.\"
 
-センシティブな情報をActivityに送付する場合、その情報の漏洩リスクを検討しなければならない。公開Activityに送付した情報は必ず漏洩すると考えなければならない。またパートナー限定Activityや自社限定Activityに送付した情報もそれらActivityの実装に依存して情報漏洩リスクの大小がある。非公開Activityに送付する情報に至っても、Intentのdataに含めた情報はLogCat経由で漏洩するリスクがある。IntentのextrasはLogCatに出力されないので、センシティブな情報はextrasで送付するとよい。
+You need to consider the risk of information leakage when sending
+sensitive information to an Activity. You must assume that all data in
+Intents sent to a Public Activity can be obtained by a malicious third
+party. In addition, there is a variety of risks of information leakage
+when sending Intents to Partner or In-house Activities as well
+depending on the implementation. Even when sending data to Private
+Activities, there is a risk that the data in the Intent could be
+leaked through LogCat. Information in the extras part of the Intent is
+not output to LogCat so it is best to store sensitive information
+there.
 
-センシティブな情報はできるだけ送付しないように工夫すべきである。送付する場合も、利用先Activityは信頼できるActivityに限定し、Intentの情報がLogCatへ漏洩しないように配慮しなければならない。
+However, not sending sensitive data in the first place is the only
+perfect solution to prevent information leakage therefore you should
+limit the amount of sensitive information being sent as much as
+possible. When it is necessary to send sensitive information, the best
+practice is to only send to a trusted Activity and to make sure the
+information cannot be leaked through LogCat.
 
-また、ルートActivityにはセンシティブな情報を送ってはならない。ルートActivityとは、タスクが生成された時に最初に呼び出されたActivityのことである。例えば、ランチャーから起動されたActivityは常にルートActivityである。
+In addition, sensitive information should never be sent to the root
+Activity. Root Activities are Activities that are called first when a
+task is created. For example, the Activity which is launched from
+launcher is always the root Activity.
 
-ルートActivityに関しての詳細は、「4.1.3.3
-Activityに送信されるIntentの読み取り」、「4.1.3.4
-ルートActivityについて」も参照すること。
+Please refer to \"4.1.3.3 Reading Intents Sent to an Activity\" and
+\"4.1.3.4 Root Activity\" for more details on root Activities.
 
-### アドバンスト<!-- 41b17f42 -->
+### Advanced Topics<!-- 41b17f42 -->
 
-#### exported 設定とintent-filter設定の組み合わせ(Activityの場合)
+#### Combining Exported Attributes and Intent Filter Settings (For Activities) 
 
+We have explained how to implement the four types of Activities in
+this guidebook: Private Activities, Public Activities, Partner
+Activities, and In-house Activities. The various combinations of
+permitted settings for each type of exported attribute defined in the
+AndroidManifest.xml file and the intent-filter elements are defined in
+the table below. Please verify the compatibility of the exported
+attribute and intent-filter element with the Activity you are trying
+to create.
 
-
-このガイド文書では、Activityの用途から非公開Activity、公開Activity、パートナー限定Activity、自社限定Activityの4タイプのActivityについて実装方法を述べている。各タイプに許されているAndroidManifest.xmlのexported属性とintent-filter要素の組み合わせを次の表にまとめた。作ろうとしているActivityのタイプとexported属性およびintent-filter要素の対応が正しいことを確認すること。
-
-表 4.1‑1
+Table 4.1‑2
 ```eval_rst
-+-------------------------+--------------------------------------------------------------+
-|                         | exported属性の値                                             |
-+                         +--------------------------------+--------------+--------------+
-|                         | true                           | false        | 無指定       |
-+=========================+================================+==============+==============+
-| intent-filter定義がある | 公開                           | （使用禁止） | （使用禁止） |
-+-------------------------+--------------------------------+--------------+--------------+
-| intent-filter定義がない | 公開、パートナー限定、自社限定 | 非公開       | （使用禁止） |
-+-------------------------+--------------------------------+--------------+--------------+
++---------------------------+---------------------------------------------------------+
+|                           | Value of exported attribute                             |
++                           +--------------------------+--------------+---------------+
+|                           | true                     | false        | Not specified |
++===========================+==========================+==============+===============+
+| Intent Filter defined     | Public                   | (Do not Use) | (Do not Use)  |
++---------------------------+--------------------------+--------------+---------------+
+| Intent Filter Not Defined | Public, Partner,In-house | Private      | (Do not Use)  |
++---------------------------+--------------------------+--------------+---------------+
 
-Activityのexported属性が無指定である場合にそのActivityが公開されるか非公開となるかは、intent-filterの定義の有無により決まるが [4]_、本ガイドではActivityのexported属性を「無指定」にすることを禁止している。前述のようなAPIのデフォルトの挙動に頼る実装をすることは避けるべきであり、exported属性のようなセキュリティ上重要な設定を明示的に有効化する手段があるのであればそれを利用すべきであると考えられるためである。
+When the exported attribute of an Activity is left unspecified, the
+question of whether or not the Activity is public is determined by the
+presence or absence of intent filters for that Activity. [4]_ However,
+in this guidebook it is forbidden to set the exported attribute to
+unspecified. In general, as mentioned previously, it is best to avoid
+implementations that rely on the default behavior of any given API;
+moreover, in cases where explicit methods --- such as the exported
+attribute --- exist for enabling important security-related settings,
+it is always a good idea to make use of those methods.
 
-.. [4] intent-filterが定義されていれば公開Activity、定義されていなければ非公開Activityとなる。
-   https://developer.android.com/guide/topics/manifest/activity-element.html#exported を参照のこと。
+.. [4] If any intent filters are defined, the Activity is public;
+    otherwise it is private. For more information, see
+    https://developer.android.com/guide/topics/manifest/activity-element.html\#exported.
 ```
 
-exported属性の値で「intent-filter定義がある」&「exported="false"」を使用禁止にしているのは、Androidの振る舞いに抜け穴があり、Intent
-Filterの性質上、意図せず他アプリのActivityを呼び出してしまう場合が存在するためである。以下の2つの図は、その説明のためのものである。図
-4.1‑4は、同一アプリ内からしか非公開Activity(アプリA）を暗黙的Intentで呼び出せない正常な動作の例である。Intent-filter(図中action=\"X\")を定義しているのが、アプリAしかいないので意図通りの動きとなっている。
+The reason why an undefined intent filter and an exported attribute of
+false should not be used is that there is a loophole in Android\'s
+behavior, and because of how Intent filters work, other application\'s
+Activities can be called unexpectedly. The following two figures below
+show this explanation. Figure 4.1‑4 is an example of normal behavior
+in which a Private Activity (Application A) can be called by an
+implicit Intent only from the same application. The Intent filter
+(action = \"X\") is defined to work only inside Application A, so this
+is the expected behavior.
 
-![](media/image35.png)
+![](media/image36.png)
 ```eval_rst
 .. {width="4.739583333333333in" height="2.9375in"}
 ```
 
-図 4.1‑4
+Figure 4.1‑4
 
-図
-4.1‑5は、アプリAに加えてアプリBでも同じintent-filter(図中action=\"X\")を定義している場合である。図
-4.1‑5では、アプリAが暗黙的Intentを送信して同一アプリ内の非公開Activityを呼び出そうとするが、「アプリケーションの選択」ダイアログが表示され、ユーザーの選択によって公開Activity(B-1)が呼び出されてしまう例を示している。これにより他アプリに対してセンシティブな情報を送信したり、意図せぬ戻り値を受け取る可能性が生じてしまう。
+Figure 4.1‑5 below shows a scenario in which the same Intent filter
+(action=\"X\") is defined in Application B as well as Application A.
+Application A is trying to call a Private Activity in the same
+application by sending an implicit Intent, but this time a dialogue
+box asking the user which application to select is displayed, and the
+Public Activity B-1 in Application B called by mistake due to the user
+selection. Due to this loophole, it is possible that sensitive
+information can be sent to other applications or application may
+receive an unexpected retuned value.
 
-![](media/image36.png)
+![](media/image37.png)
 ```eval_rst
 .. {width="4.739583333333333in"
 .. height="3.8020833333333335in"}
 ```
 
-図 4.1‑5
+Figure 4.1‑5
 
-このように、Intent
-Filterを用いた非公開Activityの暗黙的Intent呼び出しは、意図せぬアプリとの情報のやり取りを許してしまうので行うべきではない。なお、この挙動はアプリA、アプリBのインストール順序には依存しないことを確認している。
+As shown above, using Intent filters to send implicit Intents to
+Private Activities may result in unexpected behavior so it is best to
+avoid this setting. In addition, we have verified that this behavior
+does not depend on the installation order of Application A and
+Application B.
 
-#### 利用元アプリを確認する
+#### Validating the Requesting Application
 
-ここではパートナー限定Activityの実装に関する技術情報を解説する。パートナー限定Activityはホワイトリストに登録された特定のアプリからのアクセスを許可し、それ以外のアプリからはアクセスを拒否するActivityである。自社以外のアプリもアクセス許可対象となるため、Signature
-Permissionによる防御手法は利用できない。
+Here we explain the technical information about how to implement a
+Partner Activity. Partner applications permit that only particular
+applications which are registered in a whitelist are allowed access
+and all other applications are denied. Because applications other than
+in-house applications also need access permission, we cannot use
+signature permissions for access control.
 
-基本的な考え方は、パートナー限定Activityの利用元アプリの身元を確認し、ホワイトリストに登録されたアプリであればサービスを提供する、登録されていないアプリであればサービスを提供しないというものである。利用元アプリの身元確認は、利用元アプリが持つ証明書を取得し、その証明書のハッシュ値をホワイトリストのハッシュ値と比較することで行う。
+Simply speaking, we want to validate the application trying to use the
+Partner Activity by checking if it is registered in a predefined
+whitelist and allow access if it is and deny access if it is not.
+Application validation is done by obtaining the certificate from the
+application requesting access and comparing its hash with the one in
+the whitelist.
 
-ここでわざわざ利用元アプリの「証明書」を取得せずとも、利用元アプリの「パッケージ名」との比較で十分ではないか？と疑問を持たれた方もいるかと思う。しかしパッケージ名は任意に指定できるため他のアプリへの成りすましが簡単である。成りすまし可能なパラメータは身元確認用には使えない。一方、アプリの持つ証明書であれば身元確認に使うことができる。証明書に対応する署名用の開発者鍵は本物のアプリ開発者しか持っていないため、第三者が同じ証明書を持ち、尚且つ署名検証が成功するアプリを作成することはできないからだ。ホワイトリストはアクセスを許可したいアプリの証明書データを丸ごと保持してもよいが、サンプルコードではホワイトリストのデータサイズを小さくするために証明書データのSHA-256ハッシュ値を保持することにしている。
+Some developers may think that it is sufficient to just compare the
+package name without obtaining the certificate, however, it is easy to
+spoof the package name of a legitimate application so this is not a
+good method to check for authenticity. Arbitrarily assignable values
+should not be used for authentication. On the other hand, because only
+the application developer has the developer key for signing its
+certificate, this is a better method for identification. Since the
+certificate cannot be easily spoofed, unless a malicious third party
+can steal the developer key, there is a very small chance that
+malicious application will be trusted. While it is possible to store
+the entire certificate in the whitelist, it is sufficient to only
+store the SHA-256 hash value in order to minimize the file size.
 
-この方法には次の二つの制約条件がある。
+There are two restrictions for using this method.
 
--   利用元アプリにおいてstartActivity()ではなくstartActivityForResult()を使用しなければならない
-
--   利用元アプリにおいてActivity以外から呼び出すことはできない
+-   The requesting application has to use startActivityForResult() instead of startActivity().
+-   The requesting application can only call from an Activity.
 
 2つ目の制約事項はいわば1つ目の制約事項の結果として課される制約であるので、厳密には1つの同じ制約と言える。この制約は呼び出し元アプリのパッケージ名を取得するActivity.getCallingPackage()の制約により生じている。Activity.getCallingPackage()はstartActivityForResult()で呼び出された場合にのみ利用元アプリのパッケージ名を返すが、残念ながらstartActivity()で呼び出された場合にはnullを返す仕様となっている。そのためここで紹介する方法は必ず利用元アプリが、たとえ戻り値が不要であったとしても、startActivityForResult()を使わなければならないという制約がある。さらにstartActivityForResult()はActivityクラスでしか使えないため、利用元はActivityに限定されるという制約もある。
 
