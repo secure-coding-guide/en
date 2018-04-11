@@ -1,34 +1,55 @@
-セキュリティ機能の使い方
-========================
+How to use Security Functions
+=============================
 
-暗号や電子署名、Permissionなど、Androidにはさまざまなセキュリティ機能が用意されている。これらのセキュリティ機能は取り扱いを間違えるとセキュリティ機能が十分に発揮されず抜け道ができてしまう。この章では開発者がセキュリティ機能を活用するシーンを想定した記事を扱う。
+There are various security functions prepared in Android, like
+encryption, digital signature and permission etc. If these security
+functions are not used correctly, security functions don\'t work
+efficiently and loophole will be prepared. This chapter will explain
+how to use the security functions properly.
 
-パスワード入力画面を作る
-------------------------
 
-### サンプルコード<!-- fac12c7b -->
+Creating Password Input Screens
+-------------------------------
 
-パスワード入力画面を作る際、セキュリティ上考慮すべきポイントについて述べる。ここではパスワードの入力に関する内容のみとする。パスワードの保存方法については今後の版にて別途記事を設ける予定である。
+### Sample Code<!-- fac12c7b -->
 
-![スクリーンショット2](media/image56.png)
+When creating password input screen, some points to be considered in
+terms of security, are described here. Only what is related to
+password input is mentioned, here. Regarding how to save password,
+another articles is planned to be published is future edition.
+
+![](media/image57.png)
 ```eval_rst
 .. {width="2.0in"
 .. height="3.345138888888889in"}
 ```
 
-図 5.1‑1
+Figure 5.1‑1
 
-ポイント：
+Points:
 
-1.  入力したパスワードはマスク表示（●で表示）する
-2.  パスワードを平文表示するオプションを用意する
-3.  パスワード平文表示時の危険性を注意喚起する
+1.  The input password should be mask displayed (Display with \*)
 
-ポイント：　前回入力したパスワードを扱う場合には上記ポイントに加え、下記ポイントにも気を付けること
+2. Provide the option to display the password in a plain text.
 
-4.  Activity初期表示時に前回入力したパスワードがある場合、前回入力パスワードの桁数を推測されないよう固定桁数の●文字でダミー表示する
-5.  前回入力パスワードをダミー表示しているとき、「パスワードを表示」した場合、前回入力パスワードをクリアして、新規にパスワードを入力できる状態とする
-6.  前回入力パスワードをダミー表示しているとき、ユーザーがパスワードを入力しようとした場合、前回入力パスワードをクリアし、ユーザーの入力を新たなパスワードとして扱う
+3. Alert a user that displaying password in a plain text has a risk.
+&nbsp;
+Points: When handling the last Input password, pay attention the
+following points along with the above points.
+&nbsp;
+&nbsp;
+4. In the case there is the last input password in an initial display,
+    display the fixed digit numbers of black dot as dummy in order not
+    that the digits number of last password is guessed.
+
+5. When the dummy password is displayed and the \"Show password\"
+    button is pressed, clear the last input password and provide the
+    state for new password input.
+
+6. When last input password is displayed with dummy, in case user tries
+    to input password, clear the last input password and treat new user
+    input as a new password.
+
 
 password_activity.xml
 ```eval_rst
@@ -38,7 +59,8 @@ password_activity.xml
 ```
 
 
-次のPasswordActivity.javaの最後に配置した3つのメソッドは用途に合わせて実装内容を調整すること。
+Implementation for 3 methods which are located at the bottom of
+PasswordActivity.java, should be adjusted depends on the purposes.
 
 -   private String getPreviousPassword()
 
@@ -54,46 +76,56 @@ PasswordActivity.java
 ```
 
 
-### ルールブック<!-- c4ed2029 -->
+### Rule Book<!-- c4ed2029 -->
 
-パスワード入力画面を作る際には以下のルールを守ること。
+Follow the below rules when creating password input screen.
 
-1.  パスワードを入力するときにはマスク表示（●で表示する）機能を用意する （必須）
+1.  Provide the Mask Display Feature, If the Password Is Entered
+    (Required)
 
-1.  パスワードを平文表示するオプションを用意する （必須）
+2.  Provide the Option to Display Password in a Plain Text (Required)
 
-2.  Activity起動時はパスワードをマスク表示にする （必須）
+3.  Mask the Password when Activity Is Launched (Required)
 
-3.  前回入力したパスワードを表示する場合、ダミーパスワードを表示する （必須）
+4.  When Displaying the Last Input Password, Dummy Password Must Be
+    Displayed (Required)
 
-#### パスワードを入力するときにはマスク表示（●で表示する）機能を用意する （必須）
+#### Provide the Mask Display Feature, If the Password Is Entered (Required)
 
-スマートフォンは電車やバス等の人混みで利用されることが多く、第三者にパスワードを盗み見られるリスクが大きい。アプリの仕様として、パスワードをマスク表示する機能が必要である。
+Smartphone is often used in crowded places like in a train or in a
+bus, and the risk that password is peeked by someone. So the function
+to mask display password is necessary as an application spec.
 
-パスワードを入力するEditTextをマスク表示する方法には、静的にレイアウトXMLで指定する方法と、動的にプログラム上で切り替える方法の2種類がある。前者は、android:inputType属性に\"textPassword\"を指定することで実現でき、またandroid:password属性でも実現できる。後者は、EditTextクラスのsetInputType()メソッドでEditTextの入力タイプにInputType.TYPE\_TEXT\_VARIATION\_PASSWORDを追加することで実装できる。
+There are two ways to display the EditText as password: specifying
+this statically in the layout XML, or specifying this dynamically by
+switching the display from a program. The former is achieved by
+specifying "textPassword" for the android:inputType attribute or by
+using android:password attribute. The latter is achieved by using the
+setInputType() method of the EditText class to add
+InputType.TYPE\_TEXT\_VARIATION\_PASSWORD to its input type.
 
-以下、それぞれのサンプルコードを示す。
+Sample code of each of them is shown below.
 
-レイアウトXMLで指定する方法
+Masking password in layout XML.
 
-password_activity.xml
+password\_activity.xml
 ```xml
-    <!-- パスワード入力項目 -->
-    <!-- android:passwordをtrueに設定する -->
+    <!-- Password input item -->
+    <!-- Set true for the android:password attribute -->
     <EditText
         android:id="@+id/password_edit"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:hint="@string/hint_password"
-        android:inputType="textPassword" />
+        android:password="true" />
 ```
 
-Activity内で指定する方法
+Masking password in Activity.
 
 PasswordActivity.java
 ```java
-        // パスワード表示タイプを設定
-        // InputTypeにTYPE_TEXT_VARIATION_PASSWORDを設定する
+        // Set password display type
+        // Set TYPE_TEXT_VARIATION_PASSWORD for InputType.
         EditText passwordEdit = (EditText) findViewById(R.id.password_edit);
         int type = InputType.TYPE_CLASS_TEXT
                 | InputType.TYPE_TEXT_VARIATION_PASSWORD;
