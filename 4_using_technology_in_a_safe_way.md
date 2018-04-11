@@ -1444,56 +1444,82 @@ DisableAutofillActivity.java
    :encoding: shift-jis
 ```
 
-Broadcastを受信する・送信する
------------------------------
+Receiving/Sending Broadcasts
+----------------------------
 
-### サンプルコード<!-- a4bc3cfd -->
+### Sample Code<!-- a4bc3cfd -->
 
-Broadcastを受信するにはBroadcast
-Receiverを作る必要がある。どのようなBroadcastを受信するかによって、Broadcast
-Receiverが抱えるリスクや適切な防御手段が異なる。次の判定フローによって作成するBroadcast
-Receiverがどのタイプであるかを判断できる。ちなみに、パートナー限定の連携に必要なBroadcast送信元アプリのパッケージ名を受信側アプリで確認する手段がないため、パートナー限定Broadcast
-Receiverを作る事はできない。
+Creating Broadcast Receiver is required to receive Broadcast. Risks
+and countermeasures of using Broadcast Receiver differ depending on
+the type of the received Broadcast.
 
-![](media/image39.png)
+You can find your Broadcast Receiver in the following judgment flow.
+The receiving applications cannot check the package names of
+Broadcast-sending applications that are necessary for linking with the
+partners. As a result, Broadcast Receiver for the partners cannot be
+created.
+
+Table 4.2‑1 Definition of broadcast receiver types
+```eval_rst
+=========================== ===================================
+Type                        | Definition
+=========================== ===================================
+Private broadcast receiver  | A broadcast receiver that can receive broadcasts only from
+                            | the same application, therefore is the safest broadcast
+                            | receiver
+Public broadcast receiver   | A broadcast receiver that can receive broadcasts from an
+                            | unspecified large number of applications
+                            |
+                            | If the app's targetSDKVersion is 26 or above, then, on
+                            | terminals running Android 8.0 (API level 26） or later,
+                            | Broadcast Receivers may not be registered for implicit
+                            | Broadcast Intents [8]_
+In-house broadcast receiver | A broadcast receiver that can receive broadcasts only from
+                            | other In-house applications
+=========================== ===================================
+
+.. [8] As exceptions to this rule, some implicit Broadcast Intents sent by the system may use Broadcast Receivers. For more information, consult the following URL.
+   https://developer.android.com/guide/components/broadcast-exceptions.html
+```
+
+![](media/image40.png)
 ```eval_rst
 .. {width="6.395833333333333in"
 .. height="3.4895833333333335in"}
 ```
 
-図 4.2‑1
+Figure 4.2‑1
 
-またBroadcast Receiverにはその定義方法により、静的Broadcast
-Receiverと動的Broadcast
-Receiverとの2種類があり、下表のような特徴の違いがある。サンプルコード中では両方の実装方法を紹介している。なお、どのような相手にBroadcastを送信するかによって送信する情報の適切な防御手段が決まるため、送信側の実装についても合わせて説明する。
+In addition, Broadcast Receiver can be divided into 2 types based on
+the definition methods, Static Broadcast Receiver and Dynamic
+Broadcast Receiver. The differences between them can be found in the
+following figure. In the sample code, an implementation method for
+each type is shown. The implementation method for sending applications
+is also described because the countermeasure for sending information
+is determined depending on the receivers.
 
-表 4.2‑1
+Table 4.2‑2
 ```eval_rst
-======================= ====================== =======================================
-..                      定義方法                             特徴
-======================= ====================== =======================================
-静的Broadcast Receiver  | AndroidManifest.xml  | ・システムから送信される一部の
-                        | に<receiver>要素を   | Broadcast（ACTION_BATTERY_CHANGED
-                        | 記述することで定義   | など）を受信できない制約がある。
-                        | する                 | ・アプリが初回起動してからアンインス
-                        |                      | トールされるまでの間、Broadcastを受信
-                        |                      | できる。
-                        |                      | ・アプリのtargetSDKVersionが26以上の
-                        |                      | 場合、Android 8.0（API level 26）以降
-                        |                      | の端末では、暗黙的Broadcast Intentに
-                        |                      | 対するBroadcast Receiverを登録できない [8]_
-動的Broadcast Receiver  | プログラム中で       | ・静的Broadcast Receiverでは受信でき
-                        | registerReceiver()   | ないBroadcastでも受信できる。
-                        | および               | ・Activityが前面に出ている期間だけ
-                        | unregisterReceiver() | Broadcastを受信したいなど、
-                        | を呼び出すことにより | Broadcastの受信可能期間をプログラムで
-                        | 動的にBroadcast      | 制御できる。
-                        | Receiverを登録／     | ・非公開のBroadcast Receiverを作る
-                        | 登録解除する         | ことはできない。
-======================= ====================== =======================================
+========================== ======================== =======================================
+..                         Definition method        Characteristic
+========================== ======================== =======================================
+Static Broadcast Receiver  | Define by writing      | - There is a restriction that some
+                           | <receiver> elements    | Broadcasts
+                           |                        | (e.g. ACTION_BATTERY_CHANGED)
+                           | in AndroidManifest.xml | sent by system cannot be received.
+                           |                        | -  Broadcast can be received from
+                           |                        | application's initial boot till
+                           |                        | uninstallation.
+Dynamic Broadcast Receiver | プログラム中で         | ・静的Broadcast Receiverでは受信でき
+                           | registerReceiver()     | ないBroadcastでも受信できる。
+                           | および                 | ・Activityが前面に出ている期間だけ
+                           | unregisterReceiver()   | Broadcastを受信したいなど、
+                           | を呼び出すことにより   | Broadcastの受信可能期間をプログラムで
+                           | 動的にBroadcast        | 制御できる。
+                           | Receiverを登録／       | ・非公開のBroadcast Receiverを作る
+                           | 登録解除する           | ことはできない。
+========================== ======================== =======================================
 
-.. [8] システムが送信する暗黙的Broadcast Intentの中には例外的に利用可能なものも存在する。詳細は以下のURLを参照のこと
-   https://developer.android.com/guide/components/broadcast-exceptions.html
 ```
 
 #### 非公開Broadcast Receiver - Broadcastを受信する・送信する
