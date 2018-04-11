@@ -568,71 +568,120 @@ AndroidManifest.xml
 Please refer to \"4.1.3.3 Reading Intents Sent to an Activity\" and
 \"4.1.3.4 Root Activity.\"
 
-#### Activityに送信するIntentにはFLAG\_ACTIVITY\_NEW\_TASKを設定しない （必須）
+#### Do Not Set the FLAG\_ACTIVITY\_NEW\_TASK Flag for Intents that Start an Activity (Required)
 
-Activityの起動モードはstartActivity()あるいはstartActivityForResult()の実行時にも変更することが可能であり、タスクが新規に生成される場合がある。そのため、Activityの起動モードを実行時に変更しないようにする必要がある。
+The launch mode of an Activity can be changed when executing
+startActivity() or startActivityForResult() and in some cases a new
+task may be generated. Therefore it is necessary to not change the
+launch mode of Activity during execution.
 
-Activityの起動モードを変更するには、setFlags()やaddFlags()を用いてIntentにフラグを設定し、そのIntentをstartActivity()またはstartActivityForResult()の引数とする。タスクを新規に生成するためのフラグはFLAG\_ACTIVITY\_NEW\_TASKである。FLAG\_ACTIVITY\_NEW\_TASKが設定されると、呼び出されたActivityのタスクがバックグラウンドあるいはフォアグラウンド上に存在しない場合に、新規にタスクが生成される。FLAG\_ACTIVITY\_MULTIPLE\_TASK はFLAG\_ACTIVITY\_NEW\_TASKと同時に設定することもできる。この場合には、タスクが必ず新規生成される。どちらの設定もタスクを生成する可能性があるため、センシティブな情報を扱うIntentには設定しないようにすべきである。
+To change the Activity launch mode, set the Intent flags by using
+setFlags() or addFlags() and use that Intent as an argument to
+startActivity() or startActivityForResult(). FLAG\_ACTIVITY\_NEW\_TASK
+is the flag used to create a new task. When the
+FLAG\_ACTIVITY\_NEW\_TASK is set, a new task will be created if the
+called Activity does not exist in the background or foreground.
 
-Intentの送信例
+The FLAG\_ACTIVITY\_MULTIPLE\_TASK flag can be set simultaneously with
+FLAG\_ACTIVITY\_NEW\_TASK. In this case, a new task will always be
+created. New tasks may be created with either setting so these should
+not be set with Intents that handle sensitive information.
+
+Example of sending an intent
 ``` java
         Intent intent = new Intent();
 
-        // ★ポイント6★ Activityに送信するIntentには、フラグFLAG_ACTIVITY_NEW_TASKを設定しない
+        // \*\*\* POINT 6 \*\*\* Do not set the FLAG\_ACTIVITY\_NEW\_TASK flag for the intent to start an activity.
 
         intent.setClass(this, PrivateActivity.class);
-        intent.putExtra("PARAM", "センシティブな情報");
+        intent.putExtra("PARAM", "Sensitive Info");
 
         startActivityForResult(intent, REQUEST_CODE);
 ```
 
-なお、Activityに送信するIntentにFLAG\_ACTIVITY\_EXCLUDE\_FROM\_RECENTSフラグを明示的に設定することで、タスクが生成されたとしてもその内容が読み取られないようにできると考えるかもしれない。しかしながら、この方法を用いても送信されたIntentの内容を読み取ることが可能である。したがって、FLAG\_ACTIVITY\_NEW\_TASKの使用は避けるべきである。
+In addition, you may think that there is a way to prevent the contents
+of an Intent from being read even if a new task was created by
+explicitly setting the FLAG\_ACTIVITY\_EXCLUDE\_FROM\_RECENTS flag.
+However, even by using this method, the contents can be read by a
+third party so you should avoid any usage of
+FLAG\_ACTIVITY\_NEW\_TASK.
 
-「4.1.3.1 exported 設定とintent-filter設定の組み合わせ(Activityの場合)」および「4.1.3.3 Activityに送信されるIntentの読み取り」、「4.1.3.4 ルートActivityについて」も参照すること。
+Please refer to \"4.1.3.1Combining Exported Attributes and Intent
+Filter Settings (For Activities)\" \"4.1.3.3 Reading Intents Sent to
+an Activity\" and \"4.1.3.4 Root Activity.\"
 
-#### 受信Intentの安全性を確認する （必須）<!-- 97618625 -->
+#### Handling the Received Intent Carefully and Securely (Required)<!-- 97618625 -->
 
-Activityのタイプによって若干リスクは異なるが、受信Intentのデータを処理する際には、まず受信Intentの安全性を確認しなければならない。
+Risks differ depending on the types of Activity, but when processing a
+received Intent data, the first thing you should do is input
+validation.
 
-公開Activityは不特定多数のアプリからIntentを受け取るため、マルウェアの攻撃Intentを受け取る可能性がある。非公開Activityは他のアプリからIntentを直接受け取ることはない。しかし同一アプリ内の公開Activityが他のアプリから受け取ったIntentのデータを非公開Activityに転送することがあるため、受信Intentを無条件に安全であると考えてはならない。パートナー限定Activityや自社限定Activityはその中間のリスクであるため、やはり受信Intentの安全性を確認する必要がある。
+Since Public Activities can receive Intents from untrusted sources,
+they can be attacked by malware. On the other hand, Private Activities
+will never receive any Intents from other applications directly, but
+it is possible that a Public Activity in the targeted application may
+forward a malicious Intent to a Private Activity so you should not
+assume that Private Activities cannot receive any malicious input.
+Since Partner Activities and In-house Activities also have the risk of
+a malicious intent being forwarded to them as well, it is necessary to
+perform input validation on these Intents as well.
 
-「3.2入力データの安全性を確認する」を参照すること。
+Please refer to \"3.2 Handling Input Data Carefully and Securely\"
 
-#### 独自定義Signature Permissionは、自社アプリが定義したことを確認して利用する （必須）<!-- 5261853e -->
+#### Use an In-house Defined Signature Permission after Verifying that it is Defined by an In-House Application (Required)<!-- 5261853e -->
 
-自社アプリだけから利用できる自社限定Activityを作る場合、独自定義Signature Permissionにより保護しなければならない。AndroidManifest.xmlでのPermission定義、Permission要求宣言だけでは保護が不十分であるため、「5.2 PermissionとProtection Level」の「5.2.1.2 独自定義のSignature Permissionで自社アプリ連携する方法」を参照すること。
+Make sure to protect your in-house Activities by defining an in-house
+signature permission when creating the Activity. Since defining a
+permission in the AndroidManifest.xml file or declaring a permission
+request does not provide adequate security, please be sure to refer to
+\"5.2.1.2 How to Communicate Between In-house Applications with
+In-house-defined Signature Permission.\"
 
-#### 結果情報を返す場合には、返送先アプリからの結果情報漏洩に注意する （必須）<!-- 607bcc1f -->
+####  When Returning a Result, Pay Attention to the Possibility of Information Leakage of that Result from the Destination Application (Required)<!-- 607bcc1f -->
 
-Activityのタイプによって、setResult()を用いて結果情報を返送する際の返送先アプリの信用度が異なる。公開Activityが結果情報を返送する場合、結果返送先アプリがマルウェアである可能性があり、結果情報が悪意を持って使われる危険性がある。非公開Activityや自社限定Activityの場合は、結果返送先は自社アプリであるため結果情報の扱いをあまり心配する必要はない。パートナー限定Activityの場合はその中間に位置する。
+When you use setResult() to return data, the reliability of the
+destination application will depend on the Activity type. When Public
+Activities are used to return data, the destination may turn out to be
+malware in which case that information could be used in a malicious
+way. For Private and In-house Activities, there is not much need to
+worry about data being returned to be used maliciously because they
+are being returned to an application you control. Partner Activities
+are somewhat in the middle.
 
-このようにActivityから結果情報を返す場合には、返送先アプリからの結果情報の漏洩に配慮しなければならない。
+As above, when returning data from Activities, you need to pay
+attention to information leakage from the destination application.
 
-結果情報を返送する場合の例
+Example of returning data.
 ``` java
     public void onReturnResultClick(View view) {
 
-        // ★ポイント6★ パートナーアプリに開示してよい情報に限り返送してよい
+        // \*\*\* POINT 6 \*\*\* Information that is granted to be disclosed to a partner application can be returned.
         Intent intent = new Intent();
-        intent.putExtra("RESULT", "パートナーアプリに開示してよい情報");
+        intent.putExtra("RESULT", "Information that is granted to disclose to partner applications");
         setResult(RESULT_OK, intent);
         finish();
     }
 ```
 
-#### 利用先Activityが固定できる場合は明示的IntentでActivityを利用する （必須）
+#### Use the explicit Intents if the destination Activity is predetermined. (Required)
 
-暗黙的IntentによりActivityを利用すると、最終的にどのActivityにIntentが送信されるかはAndroid OS任せになってしまう。もしマルウェアにIntentが送信されてしまうと情報漏洩が生じる。一方、明示的IntentによりActivityを利用すると、指定したActivity以外がIntentを受信することはなく比較的安全である。
+When using an Activity by implicit Intents, the Activity in which the
+Intent gets sent to is determined by the Android OS. If the Intent is
+mistakenly sent to malware then Information leakage can occur. On the
+other hand, when using an Activity by explicit Intents, only the
+intended Activity will receive the Intent so this is much safer.
 
-処理を任せるアプリ（のActivity）をユーザーに選択させるなど、利用先Activityを実行時に決定したい場合を除けば、利用先Activityはあらかじめ特定できる。このようなActivityを利用する場合には明示的Intentを利用すべきである。
+Unless it is absolutely necessary for the user to determine which
+application\'s Activity the intent should be sent to, you should use
+explicit intents and specify the destination in advance.
 
-同一アプリ内のActivityを明示的Intentで利用する
+Using an Activity in the same application by an explicit Intent
 ``` java
         Intent intent = new Intent(this, PictureActivity.class);
         intent.putExtra("BARCODE", barcode);
         startActivity(intent);
 ```
-他のアプリの公開Activityを明示的Intentで利用する
+Using other applicaion\'s Public Activity by an explicit Intent
 ``` java
         Intent intent = new Intent();
         intent.setClassName(
@@ -640,18 +689,35 @@ Activityのタイプによって、setResult()を用いて結果情報を返送�
             "org.jssec.android.activity.publicactivity.PublicActivity");
         startActivity(intent);
 ```
-ただし他のアプリの公開Activityを明示的Intentで利用した場合も、相手先Activityを含むアプリがマルウェアである可能性がある。宛先をパッケージ名で限定したとしても、相手先アプリが実は本物アプリと同じパッケージ名を持つ偽物アプリである可能性があるからだ。このようなリスクを排除したい場合は、パートナー限定Activityや自社限定Activityの使用を検討する必要がある。
+However, even when using another application\'s Public Activity by
+explicit Intents, it is possible that the destination Activity could
+be malware. This is because even if you limit the destination by
+package name, it is still possible that a malicious application can
+fake the same package name as the real application. To eliminate this
+type of risk, it is necessary to consider using a Partner or In-house.
 
-「4.1.3.1 exported
-設定とintent-filter設定の組み合わせ(Activityの場合)」も参照すること。
+Please refer to \"4.1.3.1Combining Exported Attributes and Intent
+Filter Settings (For Activities)\"
 
-#### 利用先Activityからの戻りIntentの安全性を確認する （必須）
+#### Handle the Returned Data from a Requested Activity Carefully and Securely (Required)
 
-Activityのタイプによって若干リスクは異なるが、戻り値として受信したIntentのデータを処理する際には、まず受信Intentの安全性を確認しなければならない。
+While the risks differ slightly according to what type of Activity you
+accessing, when processing Intent data received as a returned value,
+you always need to perform input validation on the received data.
 
-利用先Activityが公開Activityの場合、不特定のアプリから戻りIntentを受け取るため、マルウェアの攻撃Intentを受け取る可能性がある。利用先Activityが非公開Activityの場合、同一アプリ内から戻りIntentを受け取るのでリスクはないように考えがちだが、他のアプリから受け取ったIntentのデータを間接的に戻り値として転送することがあるため、受信Intentを無条件に安全であると考えてはならない。利用先Activityがパートナー限定Activityや自社限定Activityの場合、その中間のリスクであるため、やはり受信Intentの安全性を確認する必要がある。
+Public Activities have to accept returned Intents from untrusted
+sources so when accessing a Public Activity it is possible that, the
+returned Intents are actually sent by malware. It is often mistakenly
+thought that all returned Intents from a Private Activity are safe
+because they are originating from the same application. However, since
+it is possible that an intent received from an untrusted source is
+indirectly forwarded, you should not blindly trust the contents of
+that Intent. Partner and In-house Activities have a risk somewhat in
+the middle of Private and Public Activities. Be sure to input validate
+these Activities as well.
 
-「3.2入力データの安全性を確認する」を参照すること。
+Please refer to \"3.2 Handling Input Data Carefully and Securely\" for
+more information.
 
 #### 他社の特定アプリと連携する場合は利用先Activityを確認する （必須）
 
