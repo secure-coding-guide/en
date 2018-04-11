@@ -815,7 +815,7 @@ it is always a good idea to make use of those methods.
 
 .. [4] If any intent filters are defined, the Activity is public;
     otherwise it is private. For more information, see
-    https://developer.android.com/guide/topics/manifest/activity-element.html\#exported.
+    https://developer.android.com/guide/topics/manifest/activity-element.html#exported.
 ```
 
 The reason why an undefined intent filter and an exported attribute of
@@ -893,7 +893,20 @@ There are two restrictions for using this method.
 -   The requesting application has to use startActivityForResult() instead of startActivity().
 -   The requesting application can only call from an Activity.
 
-2つ目の制約事項はいわば1つ目の制約事項の結果として課される制約であるので、厳密には1つの同じ制約と言える。この制約は呼び出し元アプリのパッケージ名を取得するActivity.getCallingPackage()の制約により生じている。Activity.getCallingPackage()はstartActivityForResult()で呼び出された場合にのみ利用元アプリのパッケージ名を返すが、残念ながらstartActivity()で呼び出された場合にはnullを返す仕様となっている。そのためここで紹介する方法は必ず利用元アプリが、たとえ戻り値が不要であったとしても、startActivityForResult()を使わなければならないという制約がある。さらにstartActivityForResult()はActivityクラスでしか使えないため、利用元はActivityに限定されるという制約もある。
+The second restriction is the restriction imposed as a result of the
+first restriction, so technically there is only a single restriction.
+
+This restriction occurs due to the restriction of
+Activity.getCallingPackage() which gets the package name of the
+calling application. Activity.getCallingPackage() returns the package
+name of source (requesting) application only in case it is called by
+startActivityForResult(), but unfortunately, when it is called by
+startActivity(), it only returns null. Because of this, when using the
+method explained here, the source (requesting) application needs to
+use startActivityForResult() even if it does not need to obtain a
+return value. In addition, startActivityForResult() can be used only
+in Activity classes, so the source (requester) is limited to
+Activities.
 
 PartnerActivity.java
 ```eval_rst
@@ -902,14 +915,12 @@ PartnerActivity.java
    :encoding: shift-jis
 ```
 
-
 PkgCertWhitelists.java
 ```eval_rst
 .. literalinclude:: CodeSamples/JSSEC Shared.PkgCertWhitelists.java
    :language: java
    :encoding: shift-jis
 ```
-
 
 PkgCert.java
 ```eval_rst
@@ -919,17 +930,26 @@ PkgCert.java
 ```
 
 
-#### Activityに送信されるIntentの読み取り(Android 5.0より前のバージョンについて)
+#### Reading Intents Sent to an Activity
 
-Android 5.0(API Level
-21)以降では、getRecentTasks()から取得できる情報が、自分自身のタスク情報およびホームアプリのような機密情報ではないものに限定された。しかし、Android
-5.0より前のバージョンでは、自分自身のタスク以外の情報も読み取ることができる。以下にAndroid
-5.0より前のバージョンで発生する本問題の内容を解説する。
+In Android 5.0 (API Level 21) and later, the information retrieved
+with getRecentTasks() has been limited to the caller\'s own tasks and
+possibly some other tasks such as home that are known to not be
+sensitive. However applications, which support the versions under
+Android 5.0 (API Level 21), should protect against leaking sensitive
+information.
 
-タスクのルートActivityに送信されたIntentは、タスク履歴に追加される。ルートActivityとはタスクの起点となるActivityのことである。タスク履歴に追加されたIntentは、ActivityManagerクラスを使うことでどのアプリからも自由に読み出すことが可能である。
+The following describes the contents of this problem occurring in
+Android 5.0 and earlier version.
 
-アプリからタスク履歴を参照するためのサンプルコードを以下に示す。タスク履歴を参照するためには、AndroidManifest.xmlにGET\_TASKS
-Permissionの利用を指定する。
+Intents that are sent to the task\'s root Activity are added to the
+task history. A root Activity is the first Activity started in a task.
+It is possible for any application to read the Intents added to the
+task history by using the ActivityManager class.
+
+Sample code for reading the task history from an application is shown
+below. To browse the task history, specify the GET\_TASKS permission
+in the AndroidManifest.xml file.
 
 AndroidManifest.xml
 ```eval_rst
@@ -946,59 +966,120 @@ MaliciousActivity.java
 ```
 
 
-ActivityManagerクラスのgetRecentTasks()により、指定した件数のタスク履歴を取得することができる。各タスクの情報はActivityManager.RecentTaskInfoクラスのインスタンスに格納されるが、そのメンバー変数baseIntentには、タスクのルートActivityに送信されたIntentが格納されている。ルートActivityとはタスクが生成された時に呼び出されたActivityであるので、Activityを呼び出す際には、以下の条件をどちらも満たさないように注意しなければならない。
+You can obtain specified entries of the task history by using the
+getRecentTasks() function of the AcitivityManager class. Information
+about each task is stored in an instance of the
+ActivityManager.RecentTaskInfo class, but Intents that were sent to
+the task\'s root Activity are stored in its member variable
+baseIntent. Since the root Activity is the Activity which was started
+when the task was created, please be sure to not fulfill the following
+two conditions when calling an Activity.
 
--   Activityが呼び出された際に、タスクが新規に生成される
+-   A new task is created when the Activity is called.
+-   The called Activity is the task\'s root Activity which already exists in the background or foreground.
 
--   呼び出されたActivityがバックグラウンドあるいはフォアグラウンド上に既に存在するタスクのルートActivityである
+#### Root Activity
 
-#### ルートActivityについて
+The root Activity is the Activity which is the starting point of a
+task. In other words, this is the Activity which was launched when
+task was created. For example, when the default Activity is launched
+by launcher, this Activity will be the root Activity. According to the
+Android specifications, the contents of Intents sent to the root
+Activity can be read from arbitrary applications. So, it is necessary
+to take countermeasures not to send sensitive information to the root
+Activity. In this guidebook, the following three rules have been made
+to avoid a called Activity to become root Activity.
 
-ルートActivityとはタスクの起点となるActivityのことである。タスクが生成された時に起動されたActivityのことである、と言ってもよい。例えば、デフォルト設定のActivityがランチャーから起動された場合、そのActivityはルートActivityとなる。Androidの仕様によると、ルートActivityに送信されるIntentの内容は任意のアプリによって読み取られる恐れがある。そこで、ルートActivityへセンシティブな情報を送信しないように対策を講じる必要がある。本ガイドでは、呼び出されたActivityがルートとなるのを防ぐために以下の3点をルールに掲げた。
+-   taskAffinity should not be specified.
+-   launchMode should not be specified.
+-   The FLAG\_ACTIVITY\_NEW\_TASK flag should not be set in an Intent sent to an Activity.
 
--   taskAffinityを指定しない
+We consider the situations that an Activity can become the root
+Activity below. A called Activity becoming a root Activity depends on
+the following.
 
--   launchModeを指定しない
+-   The launch mode of the called Activity
+-   The task of a called Activity and its launch mode
 
--   Activityに送信するIntentにはFLAG\_ACTIVITY\_NEW\_TASKを設定しない
+First of all, let me explain the \"Launch mode of called Activity.\"
+Launch mode of Activity can be set by writing android:launchMode in
+AndroidManifest.xml. When it\'s not written, it\'s considered as
+\"standard\". In addition, launch mode can be also changed by a flag
+to set to Intent. Flag \"FLAG\_ACTIVITY\_NEW\_TASK\" launches Activity
+by \"singleTask\" mode.
 
-以下、Activityがルートとなるのはどのような場合かを中心にルートActivityについて考察する。呼び出されたActivityがルートとなるための条件に関連するのは、以下に挙げる項目である。
-
--   呼び出されるActivityの起動モード
-
--   呼び出されるActivityのタスクとその起動状態
-
-まず、「呼び出されるActivityの起動モード」について説明する。Activityの起動モードは、AndroidManifest.xmlにandroid:launchModeを記述することで設定できる。記述しない場合は"standard"とみなされる。また、起動モードはIntentに設定するフラグによっても変更可能である。FLAG\_ACTIVITY\_NEW\_TASKフラグは、Activityを"singleTask"モードで起動させる。
-
-指定可能な起動モードは次のとおりである。特に、ルートActivityとの関連に焦点を当てて説明する。
+The launch modes that can be specified are as per below. I\'ll explain
+about the relation with the root activity, mainly.
 
 ##### standard
 
-このモードで呼び出されたActivityはルートとなることはなく、呼び出し側のタスクに所属する。また、呼び出しの度にActivityのインスタンスが生成される。
+Activity which is called by this mode won\'t be root, and it belongs
+to the caller side task. Every time it\'s called, Instance of Activity
+is to be generated.
 
 ##### singleTop
 
-"standard"と同様であるが、フォアグラウンドタスクの最前面に表示されているActivityを起動する場合には、インスタンスが生成されないという点が異なる。
+This launch mode is the same as \"standard\", except for that the
+instance is not generated when launching an Activity which is
+displayed in most front side of foreground task.
 
 ##### singleTask
 
-Activityはアフィニティの値に従って所属するタスクが決まる。Activityのアフィニティと一致するタスクがバックグラウンドあるいはフォアグラウンドに存在しない場合には、タスクがActivityのインスタンスとともに新規に生成される。存在する場合にはどちらも生成されない。前者では、起動されたActivityのインスタンスはルートとなる。
+This launch mode determines the task to which the activity would be
+belonging by Affinity value. When task which is matched with
+Activity\'s affinity doesn\'t exist either in background or in
+foreground, a new task is generated along with Activity\'s instance.
+When task exists, neither of them is to be generated. In the former
+one, the launched Activity\'s Instance becomes root.
 
 ##### singleInstance
 
-"singleTask"と同様であるが、次の点で異なる。新規に生成されたタスクには、ルートActivityのみが所属できる点である。したがって、このモードで起動されたActivityのインスタンスは常にルートである。ここで注意が必要なのは、呼び出されるActivityが持つアフィニティと同じ名前のタスクが既に存在している場合であっても、呼び出されるActivityとタスクに含まれるActivityのクラス名が異なる場合である。その場合は、新規にタスクが生成される。
+Same as \"singleTask\", but following point is different. Only root
+Activity can belongs to the newly generated task. So instance of
+Activity which was launched by this mode is always root activity. Now,
+we need to pay attention to the case that the class name of called
+Activity and the class name of Activity which is included in a task
+are different although the task which has the same name of called
+Activity\'s affinity already exists.
 
-以上より、"singleTask"または"singleInstance"で起動されたActivityはルートになる可能性があることが分かる。アプリの安全性を確保するためには、これらのモードで起動しないようにしなければならない。
+From as above, we can get to know that Activity which was launched by
+\"singleTask\" or \"singleInstance\" has the possibility to become
+root. In order to secure the application\'s safety, it should not be
+launched by these modes.
 
-次に、「呼び出されるActivityのタスクとその起動状態」について説明する。たとえ、Activityが"standard"モードで呼び出されたとしても、そのActivityが所属するタスクの状態によってルートActivityとなる場合がある。
+Next, I\'ll explain about \"Task of the called Activity and its launch
+mode\". Even if Activity is called by \"standard\" mode, it becomes
+root Activity in some cases depends on the task state to which
+Activity belongs.
 
-例として、呼び出されるActivityのタスクが既にバックグラウンドで起動している場合を考える。問題となるのは、そのタスクのActivityインスタンスが"singleInstance"で起動している場合である。"standard"で呼び出されたActivityのアフィニティがタスクと同じだった時に、既存の"singleInstance"のActivityの制限により、新規タスクが生成される。ただし、それぞれのActivityのクラス名が同じ場合は、タスクは生成されず、インスタンスは既存のものが利用される。いずれにしろ、呼び出されたActivityはルートActivityになる。
+For example, think about the case that called Activity\'s task has
+being run already in background.
 
-以上のように、ルートActivityが呼び出される条件は実行時の状態に依存するなど複雑である。アプリ開発の際には、"standard"モードでActivityを呼び出すように工夫すべきである。
+The problem here is the case that Activity Instance of the task is
+launched by "singleInstance\". When the affinity of Activity which was
+called by \"standard\" is same with the task, new task is to be
+generated by the restriction of existing \"singleInstance\" Activity.
+However, when class name of each Activity is same, task is not
+generated and existing activity Instance is to be used. In any cases,
+that called Activity becomes root Activity.
 
-非公開Activityに送信されるIntentが他アプリから読み取られる例として、非公開Activityの呼び出し側Activityを"singleInstance"モードで起動する場合のサンプルコードを以下に示す。このサンプルコードでは、非公開Activityが"standard"モードで起動されるが、呼び出し側Activityの"singleInstance"モードの条件により、非公開Activityは新規タスクのルートActivityとなってしまう。この時、非公開Activityに送信されるセンシティブな情報はタスク履歴に記録されるため、任意のアプリから読み取り可能である。なお、呼び出し側Activity、非公開Activityともに同一のアフィニティを持つ。
+As per above, the conditions that root Activity is called are
+complicated, for example it depends on the state of execution. So when
+developing applications, it\'s better to contrive that Activity is
+called by \"standard\".
 
-AndroidManifest.xml(非推奨)
+As an example of that Intent which is sent to Private Activity is read
+out form other application, the sample code shows the case that caller
+side Activity of private Activity is launched by \"singleInstance\"
+mode. In this sample code, private activity is launched by
+\"standard\" mode, but this private Activity becomes root Activity of
+new task due the \"singleInstance\" condition of caller side Activity.
+At this moment, sensitive information that is sent to Private Activity
+is recorded task history, so it can be read out from other
+applications. FYI, both caller side Activity and Private Activity have
+the same affinity.
+
+AndroidManifest.xml(Not recommended)
 ```eval_rst
 .. literalinclude:: CodeSamples/Activity SingleInstanceActivity.app.src.main.AndroidManifest.xml
    :language: xml
@@ -1006,7 +1087,7 @@ AndroidManifest.xml(非推奨)
 ```
 
 
-非公開Activityは、受信したIntentに対して結果を返すのみである。
+Private Activity only returns the results to the received Intent.
 
 PrivateActivity.java
 ```eval_rst
@@ -1016,7 +1097,8 @@ PrivateActivity.java
 ```
 
 
-非公開Activityの呼び出し側では、Intentにフラグを設定せずに、"standard"モードで非公開Activityを起動している。
+In caller side of Private Activity, Private Activity is launched by
+\"standard\" mode without setting flag to Intent.
 
 PrivateUserActivity.java
 ```eval_rst
@@ -1026,52 +1108,70 @@ PrivateUserActivity.java
 ```
 
 
-#### Activity利用時のログ出力について
+#### Log Output When using Activities 
 
-Activityを利用する際にActivityManagerがIntentの内容をLogCatに出力する。以下の内容はLogCatに出力されるため、センシティブな情報が含まれないように注意すべきだ。
+When using an activity, the contents of intent are output to LogCat by
+ActivityManager. The following contents are to be output to LogCat, so
+in this case, sensitive information should not be included here.
 
--   利用先パッケージ名
--   利用先クラス名
--   Intent#setData()で設定したURI
+-   Destination Package name
+-   Destination Class name
+-   URI which is set by Intent\#setData()
 
-例えば、メール送信する場合、URIにメールアドレスを指定してIntentを発行するとメールアドレスがLogCatに出力されてしまう。Intent\#putExtra()で設定した値はLogCatに出力されないため、Extrasに設定して送るようにした方が良い。
+For example, when an application sent mails, the mail address is
+unfortunately outputted to LogCat if the application would specify the
+mail address to URI. So, better to send by setting Extras.
 
-次のようにメール送信するとLogCatにメールアドレスが表示されてしまう
+When sending a mail as below, mail address is shown to the logCat.
 
 MainActivity.java
 ``` java
-        // URIはLogCatに出力される
+        // URI is output to the LogCat.
         Uri uri = Uri.parse("mailto:test@gmail.com");
         Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
         startActivity(intent);
 ```
 
-次のようにExtrasを使用するとLogCatにメールアドレスが表示されなくなる
+When using Extras, mail address is no more shown to the logCat.
 
 MainActivity.java
 ``` java
-        // Extraに設定した内容はLogCatに出力されない
+        // Contents which was set to Extra, is not output to the LogCat.
         Uri uri = Uri.parse("mailto:");
         Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
         intent.putExtra(Intent.EXTRA_EMAIL, new String[] {"test@gmail.com"});
         startActivity(intent);
 ```
 
-ただし、ActivityManager\#getRecentTasks() によって IntentのExtrasを他のアプリから直接読める場合があるので、注意すること。詳しくは「4.1.2.2 taskAffinityを指定しない （必須）」、「4.1.2.3 launchModeを指定しない （必須）」および「4.1.2.4Activityに送信するIntentにはFLAG\_ACTIVITY\_NEW\_TASKを設定しない （必須）」を参照のこと。
+However, there are cases where other applications can read the Extras
+data of intent using ActivityManager\#getRecentTasks(). Please refer
+to "4.1.2.2 Do Not Specify taskAffinity (Required)", "4.1.2.3 Do Not
+Specify launchMode (Required)" and "4.1.2.4　Do Not Set the
+FLAG\_ACTIVITY\_NEW\_TASK Flag for Intents that Start an Activity
+(Required)".
 
-#### PreferenceActivityのFragment Injection対策について
+#### Protecting against Fragment Injection in PreferenceActivity
 ```eval_rst
-PreferenceActivityを継承したクラスが公開Activityとなっている場合、Fragment Injection [5]_ と呼ばれる問題が発生する可能性がある。この問題を防ぐためには PreferenceActivity.IsValidFragment()をoverrideし、引数の値を適切にチェックすることでActivityが意図しないFragmentを扱わないようにする必要がある。(入力データの安全性については「3.2入力データの安全性を確認する」参照)
+When a class derived from PreferenceActivity is a public Activity, a
+problem known as *Fragment Injection* [5]_ may arise. To prevent this
+problem from arising, it is necessary to override
+PreferenceActivity.IsValidFragment() and check the validity of its
+arguments to ensure that the Activity does not handle any Fragments
+without intention. (For more on the safety of input data,　 see
+Section　\"3.2 Handling Input Data Carefully and Securely\".)
 
-.. [5] Fragment Injectionの詳細は以下のURLを参照のこと https://securityintelligence.com/new-vulnerability-android-framework-fragment-injection/
+.. [5] For more information on Fragment Injection, consult this URL: https://securityintelligence.com/new-vulnerability-android-framework-fragment-injection/
 ```
-以下に、IsValidFragment()をoverrideしたサンプルを示す。なお、ソースコードの難読化を行うと、クラス名が変わり、引数の値との比較結果が変わってまう可能性があるので、別途対応が必要になる。
+Below we show a sample in which IsValidFragment() has been overridden.
+Note that, if the source code has been obfuscated, class names and the
+results of parameter-value comparisons may change. In this case it is
+necessary to pursue alternative countermeasures.
 
-overrideしたisValidFragment()メソッドの例
+Example of an overridden isValidFragment() method
 
 ``` java
     protected boolean isValidFragment(String fragmentName) {
-        // 難読化時の対応は別途行うこと
+        // If the source code is obfuscated, we must pursue alternative strategies
         return PreferenceFragmentA.class.getName().equals(fragmentName)
                 || PreferenceFragmentB.class.getName().equals(fragmentName)
                 || PreferenceFragmentC.class.getName().equals(fragmentName)
@@ -1079,54 +1179,108 @@ overrideしたisValidFragment()メソッドの例
     }
 ```
 
-なお、アプリのtargetSdkVersionが19以上である場合、PreferenceActivity.isValidFragment()をoverrideしないと、Fragmentが挿入された段階（isValidFragment()が呼ばれた段階）でセキュリティ例外が発生しアプリが終了するため、PreferenceActivity.isValidFragment()のoverrideが必須である。
+Note that if the app\'s targetSdkVersion is 19 or greater, failure to
+override PreferenceActivity.isValidFragment() will result in a
+security exception and the termination of the app whenever a Fragment
+is inserted \[when isValidFragment() is called\], so in this case
+overriding PreferenceActivity.isValidFragment() is mandatory.
 
-#### Autofillフレームワークについて
+#### The Autofill framework
 
-AutofillフレームワークはAndroid 8.0(API Level 26)で追加された仕組みである。この仕組みを利用することで、ユーザー名、パスワード、住所、電話番号、クレジットカード情報等が入力されたときにそれらを保存しておき、再度必要になった時に取り出してアプリに自動入力(Autofill)する機能を実現することができる。ユーザーの入力負荷を軽減することができる便利な仕組みであるが、あるアプリが扱うパスワードやクレジットカード情報等のセンシティブな情報を他のアプリ（Autofill service）に渡すことを想定しており、取り扱いには十分に気をつける必要がある。
+The Autofill framework was added in Android 8.0 (API Level 26). Using
+this framework allows apps to store information entered by
+users---such as user names, passwords, addresses, phone numbers, and
+credit cards---and subsequently to retrieve this information as
+necessary to allow the app to fill in forms automatically. This is a
+convenient mechanism that reduces data-entry burdens for users;
+however, because it allows a given app to pass sensitive information
+such as passwords and credit cards to other apps, it must be handled
+with appropriate care.
 
-##### 仕組み(概要)
+##### Overview of the framework
 
-###### 2つのコンポーネント
+###### 2 components
 ```eval_rst
-以下に、Autofillフレームワークに登場する2つのコンポーネント [6]_ の概要を示す。
+In what follows, we provide an overview of the two components [6]_
+registered by the Autofill framework.
 
--   Autofillの対象となるアプリ（利用アプリ）：
+-   Apps eligible for Autofill (user apps):
 
-    -   Viewの情報（テキストおよび属性)をAutofill serviceに渡したり、Autofill serviceからAutofillに必要な情報を提供されたりする。
-    -   Activityを持つすべてのアプリが利用アプリとなる（Foreground時)。
-    -   利用アプリが持つすべてのViewがAutofillの対象になる可能性がある。View単位で明示的にAutofillの対象外とすることも可能。
-    -   Autofill機能の利用を同一パッケージ内のAutofill serviceに限定することも可能。
+    -   Pass view information (text and attributes) to Autofill service;
+        receive information from Autofill service as needed to
+        auto-fill forms.
 
--   Autofill serviceを提供するサービス（Autofill service）：
+    -   All apps that have Activities are user apps (when in the
+        foreground).
 
-    -   アプリから渡されたViewの情報を保存したり（ユーザーの許可が必要）、ViewにAutofillするための情報（候補リスト）をアプリに提供したりする。
-    -   保存対象のViewはAutofill  serviceが決定する（AutofillフレームワークはデフォルトでActivityに含まれるすべてのViewの情報をAutofill  serviceに渡す）。
-    -   3rd Party製のAutofill serviceも作成できる。
-    -   端末内に複数存在することが可能でユーザーにより「設定」から選択されたServiceのみ有効になる（「なし」も選択可能）。
-    -   Serviceが、扱うユーザー情報を保護するためにパスワード入力等によってユーザー認証をするためのUIを持つことも可能。
+    -   It is possible for all Views of all user apps to be eligible for
+        Autofill. It is also possible to explicitly specify that any
+        given individual view should be ineligible for Autofill.
 
-.. [6] 「利用アプリ」と「Autofill service」は、それぞれ同じパッケージ(APKファイル)であることも、別パッケージであることもあり得る。
+    -   It is also possible to restrict an app's use of Autofill to the
+        Autofill service within the same package.
+
+-   Services that provide Autofill (Autofill services):
+
+    -   Save View information passed by an app (requires user
+        permission); provide an app with information needed for
+        Autofill in a View (candidate lists).
+
+    -   The Views eligible for this information saving are determined by
+        the Autofill service. (Within the Autofill framework, by
+        default information on all Views contained in an Activity are
+        passed to the Autofill service.)
+
+    -   It is also possible to construct Autofill services provided by
+        third parties.
+
+    -   It is possible for several to be present within a single
+        terminal with only the service selected by the user via
+        Settings enabled (None is also a possible selection.)
+
+    -   It also possible for a Service to provide a UI to validate users
+        via password entry or other mechanisms to protect the security
+        of the user information handled.
+
+.. [6] The **user app** and the **Autofill service** may belong to the same package (the same APK file) or to different packages.
 ```
-###### Autofillフレームワークの処理フロー
+###### Procedural flowchart for the Autofill framework
 
-**図 4.1‑6**はAutofill時のAutofill関連コンポーネント間の処理フローを示している。利用アプリのViewのフォーカス移動等を契機にAutoillフレームワークを介してViewの情報（主にViewの親子関係や個々の属性）が「設定」で選択されたAutofill serviceに渡る。Autofill serviceは渡された情報を元にAutofillに必要な情報（候補リスト）をDBから取り出し、フレームワークに返信する。フレームワークは候補リストをユーザーに提示し、ユーザーが選択したデータによりアプリでAutofillが行われる。
+Figure 4.1‑6 is a flowchart illustrating the procedural flow of
+interactions among Autofill-related components during Autofill. When
+triggered by events such as motion of the focus in a user app's View,
+information on that View (primarily the parent-child relationships and
+various attributes of the View) is passed via the Autofill framework
+to the Autofill service selected within Settings**.** Based on the
+data it receives, the Autofill service fetches from a database the
+information (candidate lists) needed for Autofill, then returns this
+to the framework. The framework displays a candidate list to the user,
+and the app carries out the Autofill operation using the data selected
+by the user.
 
-![Autofillの仕組み\_Autofill](media/image37.png)
+![Autofillの仕組み\_Autofill](media/image38.png)
 ```eval_rst
 .. {width="7.266666666666667in" height="3.325in"}
 ```
 
-**図** **4.1‑6Autofill時のコンポーネント間の処理フロー**
+Figure 4.1‑6: Procedural flow among components for Autofill
 
-一方、**図 4.1‑7**はAutofillによるユーザーデータ保存時の処理フローを示している。AutofillManager\#commit()の呼び出しやActivityの終了を契機に、AutofillしたViewの値に変更があり、かつ、Autofillフレームワークが表示する保存許可ダイアログに対してユーザーが許可した場合、Viewの情報（テキスト含む）がAutofillフレームワークを介して「設定」で選択されたAutofill serviceに渡され、Autofill serviceがViewの情報をDBに保存して一連の処理が完了となる。
+Next, Figure 4.1‑7 is a flowchart illustrating the procedural flow for
+saving user data via Autofill. Upon a triggering event such as when
+AutofillManager\#commit() is called or when an Activity is unfocused, if
+any Autofilled values for the View have been modified *and* the user has
+granted permission via the Save Permission dialog box displayed by the
+Autofill framework, information on the View (including text) is passed
+via the Autofill framework to the Autofill service selected via
+Settings, and the Autofill service stores information in the database to
+complete the procedural sequence.
 
-![Autofillの仕組み\_Save](media/image38.png)
+![Autofillの仕組み\_Save](media/image39.png)
 ```eval_rst
 .. {width="7.258333333333334in" height="3.3333333333333335in"}
 ```
 
-**図** **4.1‑7 ユーザーデータ保存時のコンポーネント間の処理フロー**
+Figure 4.1‑7: Procedural flow among components for saving user data
 
 ##### Autofill利用アプリにおけるセキュリティ上の懸案
 
