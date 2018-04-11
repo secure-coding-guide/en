@@ -132,163 +132,200 @@ PasswordActivity.java
         passwordEdit.setInputType(type);
 ```
 
-#### パスワードを平文表示するオプションを用意する （必須）
+#### Provide the Option to Display Password in a Plain Text (Required)
 
-スマートフォンにおけるパスワード入力はタッチパネルでの入力となるため、PC
-でキーボード入力する場合と比較すると誤入力が生じやすい。その入力の煩わしさからユーザーは単純なパスワードを利用してしまう可能性があり、かえって危険である。また複数回のパスワード入力失敗によりアカウントをロックするなどのポリシーがある場合、誤入力はできるだけ避けるようにする必要もある。それらの解決策として、パスワードを平文表示できるオプションを用意することで、安全なパスワードを利用してもらえるようになる。
+Password input in Smartphone is done by touch panel input, so compared
+with keyboard input in PC, miss input may be easily happened. Because
+of the inconvenience of inputting, user may use the simple password,
+and it makes more dangerous. In addition, when there\'s a policy like
+account is locked due the several times of password input failure,
+it\'s necessary to avoid from miss input as much as possible. As a
+solution of these problems, by preparing an option to display password
+in a plain text, user can use the safe password.
 
-ただし、パスワードを平文表示した際に覗き見される可能性もあるため、そのオプションを使う際に、ユーザーに背後からの覗き見への注意を促す必要がある。また、平文表示するオプションをつけた場合、平文表示の時間を設定するなど平文表示の自動解除を行う仕組みも用意する必要がある。パスワードの平文表示の制限については今後の版にて別途記事を設ける予定である。そのため、この版のサンプルコードにはパスワードの平文表示の制限は含めていない。
+However, when displaying password in a plain text, it may be sniffed,
+so when using this option. It\'s necessary to call user cautions for
+sniffing from behind. In addition, in case option to display in a
+plain text is implemented, it\'s also necessary to prepare the system
+to auto cancel the plain text display like setting the time of plain
+display. The restrictions for password plain text display are
+published in another article in future edition. So, the restrictions
+for password plain text display are not included in sample code.
 
-![](media/image56-57.png)
+![](media/image58.png)
 
-図 5.1‑2
+Figure 5.1‑2
 
-EditTextのInputType指定で、マスク表示と平文表示を切り替えることができる
+By specifying InputType of EditText, mask display and plain text
+display can be switched.
 
 PasswordActivity.java
 ```java
     /**
-     * パスワードの表示オプションチェックを変更した場合の処理
+     * Process when check of password display option is changed.
      */
     private class OnPasswordDisplayCheckedChangeListener implements
             OnCheckedChangeListener {
 
         public void onCheckedChanged(CompoundButton buttonView,
                 boolean isChecked) {
-            // ★ポイント5★ ダミー表示時は空表示にする
+            // *** POINT 5 *** When the dummy password is displayed and the "Show password" button is pressed,
+            // Clear the last input password and provide the state for new password input.
             if (mIsDummyPassword && isChecked) {
-                // ダミーパスワードフラグを設定する
+                // Set dummy password flag
                 mIsDummyPassword = false;
-                // パスワードを空表示にする
+                // Set password empty
                 mPasswordEdit.setText(null);
             }
 
-            // カーソル位置が最初に戻るので今のカーソル位置を記憶する
+            // Cursor position goes back the beginning, so memorize the current cursor position.
             int pos = mPasswordEdit.getSelectionStart();
 
-            // ★ポイント2★ チェックに応じてパスワードを平文表示する
-            // InputTypeの作成
+            // *** POINT 2 *** Provide the option to display the password in a plain text
+            // Create InputType
             int type = InputType.TYPE_CLASS_TEXT;
             if (isChecked) {
-                // チェックON時は平文表示
+                // Plain display when check is ON.
                 type |= InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
             } else {
-                // チェックOFF時はマスク表示
+                // Masked display when check is OFF.
                 type |= InputType.TYPE_TEXT_VARIATION_PASSWORD;
             }
 
-            // パスワードEditTextにInputTypeを設定
+            // Set InputType to password EditText
             mPasswordEdit.setInputType(type);
 
-            // カーソル位置を設定する
+            // Set cursor position
             mPasswordEdit.setSelection(pos);
         }
 
     }
 ```
 
-#### Activity起動時はパスワードをマスク表示にする （必須）
+#### Mask the Password when Activity Is Launched (Required)
 
-意図せずパスワード表示してしまい、第三者に見られることを防ぐため、Activity起動時にパスワードを表示するオプションのデフォルト値はオフにするべきである。デフォルト値は安全側に定めるのが基本である。
+To prevent it from a password peeping out, the default value of
+password display option, should be set OFF, when Activity is launched.
+The default value should be always defined as safer side, basically.
 
-#### 前回入力したパスワードを表示する場合、ダミーパスワードを表示する （必須）
+#### When Displaying the Last Input Password, Dummy Password Must Be Displayed (Required)
 
-前回入力したパスワードを指定する場合、第三者にパスワードのヒントを与えないように、固定文字数のマスク文字（●など）でダミー表示するべきである。また、ダミー表示時に「パスワードを表示する」とした場合は、パスワードをクリアしてから平文表示モードにする。これにより、スマートフォンが盗難される等によって第三者の手に渡ったとしても前回入力したパスワードが盗み見られる危険性を低く抑えることができる。なお、ダミー表示時にユーザーがパスワードを入力しようとした場合には、ダミー表示を解除して通常の入力状態に戻す必要がある。
+When specifying the last input password, not to give the third party
+any hints for password, it should be displayed as dummy with the fixed
+digits number of mask characters (\* etc.). In addition, in the case
+pressing \"Show password\" when dummy display, clear password and
+switch to plain text display mode. It can help to suppress the risk
+that the last input password is sniffed low, even if the device is
+passed to a third person like when it\'s stolen. FYI, In case of dummy
+display and when a user tries to input password, dummy display should
+be cancelled, it necessary to turn the normal input state.
 
-前回入力したパスワードを表示する場合、ダミーパスワードを表示する
+When displaying the last Input password, display dummy password.
 
 PasswordActivity.java
 ```java
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
-        // ～省略～
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.password_activity);
 
-        // 前回入力パスワードがあるか
+        // Get View
+        mPasswordEdit = (EditText) findViewById(R.id.password_edit);
+        
+        mPasswordDisplayCheck = (CheckBox);
+        findViewById(R.id.password_display_check);
+
+        // Whether last Input password exist or not.
         if (getPreviousPassword() != null) {
-            // ★ポイント4★ 前回入力パスワードがある場合はダミーパスワードを表示する
-
-            // 表示はダミーパスワードにする
+            // *** POINT 4 *** In the case there is the last input password in an initial display,
+            // display the fixed digit numbers of black dot as dummy in order not that the digits number of last password is guessed.
+            // Display should be dummy password.
             mPasswordEdit.setText("**********");
-            // パスワード入力時にダミーパスワードをクリアするため、テキスト変更リスナーを設定
+            // To clear the dummy password when inputting password, set text change listener.
             mPasswordEdit.addTextChangedListener(new PasswordEditTextWatcher());
-            // ダミーパスワードフラグを設定する
+            // Set dummy password flag
             mIsDummyPassword = true;
         }
 
-        // ～省略～
+        [...]
 
     }
 
     /**
-     * 前回入力パスワードを取得する
+     * Get the last input password.
      *
-     * @return 前回入力パスワード
+     * @return the last input password
      */
     private String getPreviousPassword() {
-        // 保存パスワードを復帰させたい場合にパスワード文字列を返す
-        // パスワードを保存しない用途ではnullを返す
+        // To restore the saved password, return the password character string.
+        // For the case password is not saved, return null.
         return "hirake5ma";
     }
 ```
 
-ダミー表示時は、パスワードを表示するオプションをオンにすると表示内容をクリアする
+In the case of dummy display, when password display option is turned
+ON, clear the displayed contents.
 
 PasswordActivity.java
 ```java
     /**
-     * パスワードの表示オプションチェックを変更した場合の処理
+     * Process when check of password display option is changed.
      */
     private class OnPasswordDisplayCheckedChangeListener implements
             OnCheckedChangeListener {
 
         public void onCheckedChanged(CompoundButton buttonView,
                 boolean isChecked) {
-            // ★ポイント5★ ダミー表示時は空表示にする
+            // *** POINT 5 *** When the dummy password is displayed and the "Show password" button is pressed,
+            // Clear the last input password and provide the state for new password input.
             if (mIsDummyPassword && isChecked) {
-                // ダミーパスワードフラグを設定する
+                // Set dummy password flag
                 mIsDummyPassword = false;
-                // パスワードを空表示にする
+                // Set password empty
                 mPasswordEdit.setText(null);
             }
 
-            // ～省略～
+            [...]
 
         }
 
     }
 ```
 
-ダミー表示時にユーザーがパスワードを入力した場合には、ダミー表示を解除する
+In case of dummy display, when user tries to input password, clear
+dummy display.
 
 PasswordActivity.java
 ```java
-    // 状態保存用のキー
+    // Key to save the state
     private static final String KEY_DUMMY_PASSWORD = "KEY_DUMMY_PASSWORD";
 
-    // ～省略～
+    [...]
 
-    // パスワードがダミー表示かを表すフラグ
+    // Flag to show whether password is dummy display or not.
     private boolean mIsDummyPassword;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
-        // ～省略～
+        [...]
 
-        // 前回入力パスワードがあるか
+        // Whether last Input password exist or not.
         if (getPreviousPassword() != null) {
-            // ★ポイント4★ 前回入力パスワードがある場合はダミーパスワードを表示する
+            // *** POINT 4 *** In the case there is the last input password in an initial display,
+            // display the fixed digit numbers of black dot as dummy in order not that the digits number of last password is guessed.
 
-            // 表示はダミーパスワードにする
+            // Display should be dummy password.
             mPasswordEdit.setText("**********");
-            // パスワード入力時にダミーパスワードをクリアするため、テキスト変更リスナーを設定
+            // To clear the dummy password when inputting password, set text change listener.
             mPasswordEdit.addTextChangedListener(new PasswordEditTextWatcher());
-            // ダミーパスワードフラグを設定する
+            // Set dummy password flag
             mIsDummyPassword = true;
         }
 
-        // ～省略～
+        [...]
 
     }
 
@@ -296,8 +333,8 @@ PasswordActivity.java
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        // 画面の縦横変更でActivityが再生成されないよう指定した場合には不要
-        // Activityの状態保存
+        // Unnecessary when specifying not to regenerate Activity by the change in screen aspect ratio.
+        // Save Activity state
         outState.putBoolean(KEY_DUMMY_PASSWORD, mIsDummyPassword);
     }
 
@@ -305,133 +342,209 @@ PasswordActivity.java
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-        // 画面の縦横変更でActivityが再生成されないよう指定した場合には不要
-        // Activityの状態の復元
+        // Unnecessary when specifying not to regenerate Activity by the change in screen aspect ratio.
+        // Restore Activity state
         mIsDummyPassword = savedInstanceState.getBoolean(KEY_DUMMY_PASSWORD);
     }
 
     /**
-     * パスワードを入力した場合の処理
+     * Process when inputting password.
      */
     private class PasswordEditTextWatcher implements TextWatcher {
 
         public void beforeTextChanged(CharSequence s, int start, int count,
                 int after) {
-            // 未使用
+            // Not used
         }
 
         public void onTextChanged(CharSequence s, int start, int before,
                 int count) {
-            // ★ポイント6★ ダミー表示時にパスワードを再入力した場合は入力内容に応じた表示にする
+            // *** POINT 6 *** When last Input password is displayed as dummy, in the case an user tries to input password,
+            // Clear the last Input password, and treat new user input as new password.
             if (mIsDummyPassword) {
-                // ダミーパスワードフラグを設定する
+                // Set dummy password flag
                 mIsDummyPassword = false;
-                // パスワードを入力した文字だけにする
+                // Trim space
                 CharSequence work = s.subSequence(start, start + count);
                 mPasswordEdit.setText(work);
-                // カーソル位置が最初に戻るので最後にする
+                // Cursor position goes back the beginning, so bring it at the end.
                 mPasswordEdit.setSelection(work.length());
             }
         }
 
         public void afterTextChanged(Editable s) {
-            // 未使用
+            // Not used
         }
 
     }
 ```
 
-### アドバンスト<!-- c699a7d7 -->
+### Advanced Topics<!-- c699a7d7 -->
 
-#### ログイン処理について
+#### Login Process
 
-パスワード入力が求められる場面の代表例はログイン処理である。ログイン処理で気を付けるポイントをいくつか紹介する。
+The representative example of where password input is required is
+login process. Here are some Points that need cautions in Login
+process.
 
-##### ログイン失敗時のエラーメッセージ
+##### Error message when login fail
 
-ログイン処理ではID（アカウント）とパスワードの2つの情報を入力する。ログイン失敗時にはIDが存在しない場合と、IDは存在するがパスワードが間違っている場合の2つがある。ログイン失敗のメッセージでこの2つの場合を区別して表示すると、攻撃者は「指定したIDが存在するか否か」を推測できてしまう。このような推測を許さないためにも、ログイン失敗時のメッセージでは、上記2つの場合を区別せずに下記のように表示すべきである。
+In login process, need to input 2 information which is ID(account) and
+password. When login failure, there are 2 cases. One is ID doesn\'t
+exist. Another is ID exists but password is incorrect. If either of
+these 2 cases is distinguished and displayed in a login failure
+message, attackers can guess whether the specified ID exists or not.
+To stop this kind of guess, these 2 cases should not be specified in
+login failure message, and this message should be displayed as per
+below.
 
-メッセージ例： ログインID または パスワード が間違っています。
+Message example: Login ID or password is incorrect.
 
-##### 自動ログイン機能
+##### Auto Login function
 
-一度、ログイン処理が成功すると次回以降はログインIDとパスワードの入力を省略して、自動的にログインを行う機能がある。自動ログイン機能は煩わしい入力が省略できるので利便性が高まるが、その反面スマートフォンが盗難された場合に第三者に悪用されるリスクが伴う。
+There is a function to perform auto login by omitting login
+ID/password input in the next time and later, after successful login
+process has been completed once. Auto login function can omit the
+complicated input. So the convenience will increase, but on the other
+hand, when a Smartphone is stolen, the risk which is maliciously being
+used by the third party, will follow.
 
-第三者に悪用された場合の被害が受け入れられる用途か、十分なセキュリティ対策が可能な場合にのみ、自動ログイン機能は利用することができる。例えば、オンラインバンキングアプリの場合、第三者に端末を操作されると金銭的な被害が出るので自動ログイン機能に合わせてセキュリティ対策が必須となる。対策としては、「決済処理などの金銭的な処理が発生する直前にはパスワードの再入力を求める」、「自動ログイン設定時にユーザーに対して十分に注意を喚起し、確実な端末のロックを促す」などいくつか考えられる。自動ログインの利用にあたっては、これらの対策を前提に利便性とリスクを勘案して、慎重な検討を行うべきである。
+Only the use when damages caused by the malicious third party is
+somehow acceptable, or only in the case enough security measures can
+be taken, auto login function can be used. For example, in the case of
+online banking application, when the device is operated by the third
+party, financial damage may be caused. So in this case, security
+measures are necessary along with auto login function. There are some
+possible counter-measures, like \[Require re-inputting password just
+before financial process like payment process occurs\], \[When setting
+auto login, call a user for enough attentions and prompt user to
+secure device lock\], etc. When using auto login, it\'s necessary to
+investigate carefully considering the convenience and risks along with
+the assumed counter measures.
 
-#### パスワード変更について
+#### Changing Password
 
-一度設定したパスワードを別のパスワードに変更する場合、以下の入力項目を画面上に用意すべきである。
+When changing the password which was once set, following input items
+should be prepared on the screen.
 
--   現在のパスワード
+-   Current password
 
--   新しいパスワード
+-   New password
 
--   新しいパスワード（入力確認用）
+-   New password (confirmation)
 
-自動ログイン機能がついている場合、第三者がアプリを利用できる可能性がある。その場合、勝手にパスワードを変更されないよう、現在のパスワードの入力を求める必要がある。また、新しいパスワードが入力ミスで使用不能に陥る危険を減らすため、新しいパスワードは2回、入力を求める必要がある。
+When auto login function is introduced, there are possibilities that
+third party can use an application. In that case, to avoid from
+changing password unexpectedly, it\'s necessary to require the current
+password input. In addition, to decrease the risk of getting into
+unserviceable state due to miss inputting new password, it\'s
+necessary to require new password input 2 times.
 
-#### システムの「パスワードを表示」設定メニューについて
+#### Regarding \"Make passwords visible\" Setting
 
-Androidの設定メニューの中に「パスワードを表示」という設定がある。
+There is a setting in Android\'s setting menu, called \"Make passwords
+visible.\" In case of Android 4.4, it\'s shown as below.
 ```
-設定 >セキュリティ > パスワードを表示
+Setting > Security > Make passwords visible
 ```
 
-Android 5.0より前のバージョンまで、この手順で設定できる。ただしAndroid
-5.0以降では、「パスワードを表示」はチェックボックスからトグルボタンに変更されている。
+There is a setting in Android\'s setting menu, called \"Make passwords
+visible.\" In case of Android 4.4, it\'s shown as below.
 
-![設定-パスワードを表示](media/image61.png)
+![](media/image59.png)
 ```eval_rst
 .. {width="1.6598425196850393in"
 .. height="2.7598425196850394in"}
 ```
 
-図 5.1‑3
+Figure 5.1‑3
 
-「パスワードを表示」設定をオンにすると最後に入力した１文字が平文表示となる。一定時間（2秒程度）経過後、または次の文字が入力されると平文表示されていた文字はマスク表示される。オフにすると、入力直後からマスク表示となる。これはシステム全体に影響する設定であり、EditTextのパスワード表示機能を使用しているすべてのアプリに適用される。
+When turning ON \"Make passwords visible\" setting, the last input
+character is displayed in a plain text. After the certain time (about
+2 seconds) passed, or after inputting the next character, the
+characters which was displayed in a plain text is masked. When turning
+OFF, it\'s masked right after inputting. This setting affects overall
+system, and it\'s applied to all applications which use password
+display function of EditText.
 
-![](media/image62-63.png)
 
-図 5.1‑4
+![](media/image60.png)
 
-#### スクリーンキャプチャの無効化
+Figure 5.1‑4
 
-パスワード入力画面ではパスワードなどの個人情報が画面上に表示される可能性がある。そのような画面では第三者によってスクリーンキャプチャから個人情報が流出してしまう恐れがある。よってパスワード入力画面などの個人情報が表示されてしまう恐れのある画面ではスクリーンキャプチャを無効にしておく必要がある。スクリーンキャプチャの無効化はWindowManagerにaddFlagでFLAG\_SECUREを設定することで実現できる。
+#### Disabling Screen Shot
 
-PermissionとProtection Level
-----------------------------
+In password input screens, passwords could be displayed in the clear
+on the screens. In such screens as handle personal information, they
+could be leaked from screenshot files stored on external storage if
+the screenshot function is stayed enable as default. Thus it is
+recommended to disable the screenshot function for such screens as
+password input screens. The screenshot can be disabled by appending
+the following code.
 
-PermissionのProtection Levelにはnormal, dangerous, signature,
-signatureOrSystemの4種類がある。その他に「development」「system」「appop」も存在するが、一般的なアプリでは使用しないので本章での説明は省略する。PermissionはどのProtection
-Levelであるかによってそれぞれ、Normal Permission, Dangerous Permission,
-Signature Permission, SignatureOrSystem
-Permissionと呼ばれる。以下、このような名称を使う。
-
-### サンプルコード<!-- 93d9a76c -->
-
-#### Android　OS既定のPermissionを利用する方法
-```eval_rst
-Android OSは電話帳やGPSなどのユーザー資産をマルウェアから保護するためのPermissionというセキュリティの仕組みがある。Android
-OSが保護対象としている、こうした情報や機能にアクセスするアプリは、明示的にそれらにアクセスするための権限（Permission）を利用宣言しなければならない。ユーザー確認が必要なPermissionでは、そのPermissionを利用宣言したアプリがインストールされるときに次のようなユーザー確認画面が表示される [27]_。
-
-.. [27] Android 6.0(API Level 23)以降では、ユーザー確認と権限の付与はインストール時に行われず、アプリの実行中に権限の利用を要求する仕様に変更された。詳細は「5.2.1.4 Android 6.0以降でDangerous Permissionを利用する方法」および「5.2.3.6 Android 6.0以降のPermissionモデルの仕様変更について」を参照すること。
+PasswordActivity.java
+```java
+    @Override
+    [...]
+    Window window = getWindow();
+    window.addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+    setContentView(R.layout.passwordInputScreen);
+    [...]
 ```
 
-![usespermission\_install](media/image66.png)
+Permission and Protection Level
+-------------------------------
+
+There are four types of Protection Level within permission and they
+consist of normal, dangerous, signature, and signatureOrSystem.
+Depending on the Protection Level, permission is referred to as normal
+permission, dangerous permission, signature permission, or
+signatureOrSystem permission. In the following sections, such names
+are used.
+
+### Sample Code<!-- 93d9a76c -->
+
+#### How to Use System Permissions of Android OS
+```eval_rst
+Android OS has a security mechanism called \"permission\" that
+protects its user\'s assets such as contacts and a GPS feature from a
+malware. When an application seeks access to such information and/or
+features, which are protected under Android OS, the application needs
+to explicitly declare a permission in order to access them. When an
+application, which has declared a permission that needs user\'s
+consent to be used, is installed, the following confirmation screen
+appears
+[27]_.
+
+.. [27] In Android 6.0 (API Level 23) and later, the granting or refusal
+    of user permissions does not occur when an app is installed, but
+    instead at runtime when then app requests permissions. For more
+    details, see Section　"5.2.1.4　Methods for using Dangerous
+    Permissions in Android 6.0 and later"　and Section
+    "5.2.3.6　Modifications to the Permission model specifications in
+    Android versions 6.0 and later".
+```
+
+![](media/image61.png)
 ```eval_rst
 .. {width="1.8645833333333333in"
 .. height="3.34375in"}
 ```
 
-図 5.2‑1
+Figure 5.2‑1
 
-この確認画面により、ユーザーはそのアプリがどのような機能や情報にアクセスしようとしているのかを知ることができる。もし、アプリの動作に明らかに不必要な機能や情報にアクセスしようとしている場合は、そのアプリは悪意があるアプリの可能性が高い。ゆえに自分のアプリがマルウェアであると疑われないためにも、利用宣言するPermissionは最小限にしなければならない。
+From this confirmation screen, a user is able to know which types of
+features and/or information an application is trying to access. If the
+behavior of an application is trying to access features and/or
+information that are clearly unnecessary, then there is a high
+possibility that the application is a malware. Hence, as your
+application is not suspected to be a malware, declarations of
+permission to use needs to be minimized.
 
-ポイント：
+Points:
 
-1.  利用するPermissionをAndroidManifest.xmlにuses-permissionで利用宣言する
-2.  不必要なPermissionは利用宣言しない
+1.  Declare a permission used in an application with uses-permission.
+2.  Do not declare any unnecessary permissions with uses-permission.
 
 AndroidManifest.xml
 ```eval_rst
@@ -440,31 +553,43 @@ AndroidManifest.xml
    :encoding: shift-jis
 ```
 
-#### 独自定義のSignature Permissionで自社アプリ連携する方法
+#### How to Communicate Between In-house Applications with In-house-defined Signature Permission
 
-Android
-OSが定義する既定のPermissionの他に、アプリが独自にPermissionを定義することができる。独自定義のPermission（正確には独自定義のSignature　Permission）を使えば、自社アプリだけが連携できる仕組みを作ることができる。複数の自社製アプリをインストールした場合に、それぞれのアプリの単機能に加え、アプリ間連携による複合機能を提供することで、複数の自社製アプリをシリーズ販売して収益を上げる、といった用途がある。
+Besides system permissions defined by Android OS, an application can
+define its own permissions as well. If using an in-house-defined
+permission (it is an in-house-defined signature permission to be more
+precise), you can build a mechanism where only communications between
+in-house applications is permitted. By providing the composite
+function based on inter-application communication between multiple
+in-house applications, the applications get more attractive and your
+business could get more profitable by selling them as series. It is a
+case of using in-house-defined signature permission.
 
-サンプルプログラム「独自定義Signature
-Permission（UserApp）」はサンプルプログラム「独自定義Signature
-Permission（ProtectedApp）」にstartActivity()する。両アプリは同じ開発者鍵で署名されている必要がある。もし署名した開発者鍵が異なる場合は、UserAppはIntentを送信せず、ProtectedAppは受信したIntentを処理しない。またアドバンストセクションで説明しているインストール順序によるSignature
-Permission回避の問題にも対処している。
+The sample application \"In-house-defined Signature Permission
+(UserApp)\" launches the sample application \"In-house-defined
+Signature Permission (ProtectedApp)\" with Context.startActivity()
+method. Both applications need to be signed with the same developer
+key. If keys for signing them are different, the UserApp sends no
+Intent to the ProtectedApp, and the ProtectedApp processes no Intent
+received from the UserApp. Furthermore, it prevents malwares from
+circumventing your own signature permission using the matter related
+to the installation order as explained in the Advanced Topic section.
 
-![](media/image67.png)
+![](media/image62.png)
 ```eval_rst
 .. {width="6.889763779527559in"
 .. height="2.0933070866141734in"}
 ```
 
-図 5.2‑2
+Figure 5.2‑2
 
-ポイント：Componentを提供するアプリ
+Points: Application Providing Component
 
-1.  独自PermissionをprotectionLevel=\"signature\"で定義する
-2.  Componentにはpermission属性で独自Permission名を指定する
-3.  ComponentがActivityの場合にはintent-filterを定義しない
-4.  ソースコード上で、独自定義Signature Permissionが自社アプリにより定義されていることを確認する
-5.  Componentを利用するアプリと同じ開発者鍵でAPKを署名する
+1.  Define a permission with protectionLevel=\"signature\".
+2.  For a component, enforce the permission with its permission attribute.
+3.  If the component is an activity, you must define no intent-filter.
+4.  At run time, verify if the signature permission is defined by itself on the program code.
+5.  When exporting an APK, sign the APK with the same developer key that applications using the component use.
 
 AndroidManifest.xml
 ```eval_rst
@@ -496,25 +621,25 @@ PkgCert.java
 ```
 
 
-★ポイント5★ Android Studioからメニュー：Build -\> Generated Signed
-APKと選択し、Componentを提供するアプリと同じ開発者鍵で署名する。
+*** Point 5 *** When exporting an APK, sign the APK with the
+same developer key that applications using the component have used.
 
-![](media/image68.png)
+![](media/image35.png)
 ```eval_rst
 .. {width="4.646481846019247in"
 .. height="3.2817082239720037in"}
 ```
 
-図 5.2‑3
+Figure 5.2‑3
 
-ポイント：Componentを利用するアプリ
+Points: Application Using Component
 
-6.  独自定義Signature Permissionは定義しない
-7.  uses-permissionにより独自Permissionを利用宣言する
-8.  ソースコード上で、独自定義Signature Permissionが自社アプリにより定義されていることを確認する
-9.  利用先アプリが自社アプリであることを確認する
-10.  利用先ComponentがActivityの場合、明示的Intentを使う
-11.  Componentを提供するアプリと同じ開発者鍵でAPKを署名する
+6.  The same signature permission that the application uses must not be defined.
+7.  Declare the in-house permission with uses-permission tag.
+8.  Verify if the in-house signature permission is defined by the application that provides the component on the program code.
+9.  Verify if the destination application is an in-house application.
+10.  Use an explicit intent when the destination component is an activity.
+11.  When exporting an APK, sign the APK with the same developer key that the destination application uses.
 
 AndroidManifest.xml
 ```eval_rst
@@ -545,107 +670,144 @@ PkgCert.java
 ```
 
 
-★ポイント11★ Android Studioからメニュー：Build -\> Generated Signed
-APKと選択し、Componentを提供するアプリと同じ開発者鍵で署名する。
+*** Point 11 *** When generating an APK by \[Build\] -\>
+\[Generate Signed APK\], sign the APK with the same developer key that
+the destination application uses.
 
-![](media/image68.png)
+![](media/image35.png)
 ```eval_rst
 .. {width="4.646481846019247in"
 .. height="3.2817082239720037in"}
 ```
 
-図 5.2‑4
+Figure 5.2‑4
 
-#### アプリの証明書のハッシュ値を確認する方法
+#### How to Verify the Hash Value of an Application\'s Certificate
 
-このガイド文書の各所で出てくるアプリの証明書のハッシュ値を確認する方法を紹介する。厳密には「APKを署名するときに使った開発者鍵の公開鍵証明書のSHA256ハッシュ値」を確認する方法である。
+We will provide an explanation on how to verify the hash value of an
+application\'s certificate that appears at different points in this
+Guidebook. Strictly speaking, the hash value means \"the SHA256 hash
+value of the public key certificate for the developer key used to sign
+the APK.\"
 
-##### Keytoolにより確認する方法
+##### How to verify it with Keytool
 
-JDKに付属するkeytoolというプログラムを利用すると開発者鍵の公開鍵証明書のハッシュ値（証明書のフィンガープリントとも言う）を求めることができる。ハッシュ値にはハッシュアルゴリズムの違いによりMD5やSHA1、SHA256など様々なものがあるが、このガイド文書では暗号ビット長の安全性を考慮してSHA256の利用を推奨している。残念なことにAndroid
-SDKで利用されているJDK6に付属するkeytoolはSHA256でのハッシュ値出力に対応しておらず、JDK7以降に付属するkeytoolを使う必要がある。
+Using a program called keytool that is bundled with JDK, you can get
+the hash value (also known as certificate fingerprint) of a public key
+certificate for the developer key. There are various hash methods such
+as MD5, SHA1, and SHA256 due to the differences in hash algorithm.
+However, considering the security strength of the encryption bit
+length, this Guidebook recommends the use of SHA256. Unfortunately,
+the keytool bundled to JDK6 that is used in Android SDK does not
+support SHA256 for calculating hash values. Therefore, it is necessary
+to use the keytool that is bundled to JDK7 or later.
 
-Androidのデバッグ証明書の内容をkeytoolで出力する例
+Example of outputting the content of a debugging certicate of an
+Android through a keytool
 ```shell
 > keytool -list -v -keystore <キーストアファイル> -storepass <パスワード>
 
-キーストアのタイプ: JKS
-キーストア・プロバイダ: SUN
+Type of keystore: JKS
+Keystore provider: SUN
 
-キーストアには1エントリが含まれます
+One entry is included in a keystore
 
-別名: androiddebugkey
-作成日: 2012/01/11
-エントリ・タイプ: PrivateKeyEntry
-証明書チェーンの長さ: 1
-証明書[1]:
-所有者: CN=Android Debug, O=Android, C=US
-発行者: CN=Android Debug, O=Android, C=US
-シリアル番号: 4f0cef98
-有効期間の開始日: Wed Jan 11 11:10:32 JST 2012終了日: Fri Jan 03 11:10:32 JST 2042
-証明書のフィンガプリント:
+Other name: androiddebugkey
+Date of creation: 2012/01/11
+Entry type: PrivateKeyEntry
+Length of certificate chain: 1
+Certificate[1]:
+Owner: CN=Android Debug, O=Android, C=US
+Issuer: CN=Android Debug, O=Android, C=US
+Serial number: 4f0cef98
+Start date of validity period: Wed Jan 11 11:10:32 JST 2012 End date: Fri Jan 03 11:10:32 JST 2042
+Certificate fingerprint:
          MD5:  9E:89:53:18:06:B2:E3:AC:B4:24:CD:6A:56:BF:1E:A1
          SHA1: A8:1E:5D:E5:68:24:FD:F6:F1:ED:2F:C3:6E:0F:09:A3:07:F8:5C:0C
          SHA256: FB:75:E9:B9:2E:9E:6B:4D:AB:3F:94:B2:EC:A1:F0:33:09:74:D8:7A:CF:42:58:22:A2:56:85:1B:0F:85:C6:35
-         署名アルゴリズム名: SHA1withRSA
-         バージョン: 3
+         Signatrue algorithm name: SHA1withRSA
+         Version: 3
 
 
 *******************************************
 *******************************************
 ```
 
-##### JSSEC証明書ハッシュ値チェッカーにより確認する方法
+##### How to Verify it with JSSEC Certificate Hash Value Checker
 
-JDK7以降をインストールしなくても、JSSEC証明書ハッシュ値チェッカーを使えば簡単に証明書ハッシュ値を確認できる。
+Without installing JDK7 or later, you can easily verify the
+certificate hash value by using JSSEC Certificate Hash Value Checker.
 
 ![C:\\Users\\0025110063\\AppData\\Local\\Microsoft\\Windows\\Temporary
 Internet
-Files\\Content.Word\\Screenshot\_2012-04-24-13-01-57.png](media/image69.png)
+Files\\Content.Word\\Screenshot\_2012-04-24-13-01-57.png](media/image63.png)
 ```eval_rst
 .. {width="3.93125in"
 .. height="2.2180555555555554in"}
 ```
 
-図 5.2‑5
+Figure 5.2‑5
 
-これは端末にインストールされているアプリの証明書ハッシュ値を一覧表示するAndroidアプリである。上図中、「sha-256」の右に表示されている16進数文字列64文字が証明書ハッシュ値である。このガイド文書と一緒に配布しているサンプルコードの「JSSEC
-CertHash
-Checker」フォルダがそのソースコード一式である。ビルドして活用していただきたい。
+This is an Android application that displays a list of certificate
+hash values of applications which are installed in the device. In the
+Figure above, the 64-character hexadecimal notation string that is
+shown on the right of \"sha-256\" is the certificate hash value. The
+sample code folder, \"JSSEC CertHash Checker\" that comes with this
+Guidebook is the set of source codes. If you would like, you can
+compile the codes and use it.
 
-#### Android 6.0以降でDangerous Permissionを利用する方法
+#### Methods for using Dangerous Permissions in Android 6.0 and later
 
-アプリに対するPermission付与のタイミングについて、Android 6.0(API Level
-23)でアプリの実装にかかわる仕様変更が行われた。
+Android 6.0 (API Level 23) incorporates modified specifications that
+are relevant to the implementation of apps\-\--specifically, to the
+times at which apps are granted permission.
 
-Android 5.1(API Level 22)以前のPermissionモデル（「5.2.3.6 Android
-6.0以降のPermissionモデルの仕様変更について」参照）では、アプリが利用宣言しているPermissionは全てアプリのインストール時に付与される。しかし、Android
-6.0以降では、Dangerous
-Permissionについてはアプリが適切なタイミングでPermissionを要求するよう、アプリ開発者が明示的に実装しなければならない。アプリがPermissionを要求すると、Android
-OSはユーザーに対して下記のような確認画面を表示し、そのPermissionの利用を許可するかどうかの判断を求めることになる。ユーザーがPermissionの利用を許可すれば、アプリはそのPermissionを必要とする処理を実行することができる。
+Under the Permission model of Android 5.1 (API Level 22) and earlier
+versions (See section
 
-![](media/image70.png)
+"5.2.3.6 Modifications to the Permission model specifications in
+Android versions 6.0 and later"), all Permissions declared by an app
+are granted to that app at the time of installation. However, in
+Android 6.0 and later versions, app developers must explicitly
+implement apps in such a way that, for Dangerous Permissions, the app
+requests Permission at appropriate times. When an app requests a
+Permission, a confirmation window like that shown below is displayed
+to the Android OS user, requesting a decision from the user as to
+whether or not to grant the Permission in question. If the user allows
+the use of the Permission, the app may execute whatever operations
+require that Permission.
+
+![](media/image64.png)
 ```eval_rst
 .. {width="2.0072648731408576in"
 .. height="3.571259842519685in"}
 ```
 
-図 5.2‑6
+Figure 5.2‑6
 
-Permissionを付与する単位にも変更が加えられている。従来はすべてのPermissionが一括して付与されていたが、Android
-6.0（API Level 23）以降ではPermission Group毎に、Android 8.0(API Level
-26)以降ではPermission個別に付与される。これに伴いユーザー確認画面も個別に表示され、ユーザーはPermission利用の可・不可について従来よりも柔軟に判断できるようになった。アプリ開発者は、Permissionの付与が拒否された場合も考慮して、アプリの仕様や設計を見直す必要がある。
+The specifications are also modified regarding the units in which
+Permissions are granted. Previously, all Permissions were granted
+simultaneously; in Android 6.0 (API Level 23) and later versions,
+Permissions are granted by Permission Group. In Android 8.0 (API 
+Level 26) and later versions, Permissions are granted individually. In
+conjunction with this modification, users are now shown individual
+confirmation windows for each Permission, allowing users to make more
+flexible decisions regarding the granting or refusal of Permissions.
+App developers must revisit the specifications and design of their
+apps with full consideration paid to the possibility that Permissions
+may be refused.
 
-Android 6.0以降のPermissionモデルについての詳細は「5.2.3.6 Android
-6.0以降のPermissionモデルの仕様変更について」を参照すること。
+For details on the Permission model in Android 6.0 and later, see
+Section "5.2.3.6 Modifications to the Permission model specifications
+in Android versions 6.0 and later".
 
-ポイント：
+Points:
 
-1.  アプリで利用するPermissionを利用宣言する
-2.  不必要なPermissionは利用宣言しない
-3.  Permissionがアプリに付与されているか確認する
-4.  Permissionを要求する（ユーザーに許可を求めるダイアログを表示する）
-5.  Permissionの利用が許可されていない場合の処理を実装する
+1.  Apps declare the Permissions they will use
+2.  Do not declare the use of unnecessary Permissions
+3.  Check whether or not Permissions have been granted to the app
+4.  Request Permissions (open a dialog to request permission from users)
+5.  Implement appropriate behavior for cases in which the use of a Permission is refused
 
 AndroidManifest.xml
 ```eval_rst
@@ -663,231 +825,413 @@ MainActivity.java
 ```
 
 
-### ルールブック<!-- 9e17b769 -->
+### Rule Book<!-- 9e17b769 -->
 
-独自Permission利用時には以下のルールを守ること。
+Be sure to follow the rules below when using in-house permission.
 
-1.  Android OS規定のDangerous Permissionはユーザーの資産を保護するためにだけ利用する （必須）
+1.  System Dangerous Permissions of Android OS Must Only Be Used for Protecting User Assets (Required)
 
-1.  独自定義のDangerous Permissionは利用してはならない （必須）
+2.  Your Own Dangerous Permission Must Not Be Used (Required)
 
-2.  独自定義Signature PermissionはComponentの提供側アプリでのみ定義する （必須）
+3.  Your Own Signature Permission Must Only Be Defined on the Provider-side Application (Required)
 
-3.  独自定義Signature Permissionは自社アプリにより定義されていることを確認する （必須）
+4.  Verify If the In-house-defined Signature Permission Is Defined by an In-house Application (Required)
 
-4.  独自定義のNormal Permissionは利用してはならない （推奨）
+5.  Your Own Normal Permission Should Not Be Used (Recommended)
 
-5.  独自定義のPermission名はアプリのパッケージ名を拡張した文字列にする （推奨）
+6.  The String for Your Own Permission Name Should Be of an Extent of the Package Name of Application (Recommended)
 
-#### Android OS規定のDangerous Permissionはユーザーの資産を保護するためにだけ利用する （必須）
+#### System Dangerous Permissions of Android OS Must Only Be Used for Protecting User Assets (Required)
 
-独自定義のDangerous Permissionの利用は非推奨（「5.2.2.2
-独自定義のDangerous Permissionは利用してはならない
-（必須）」参照）のため、ここではAndroid OS規定のDangerous
-Permissionを前提に話をする。
+Since the use of your own dangerous permission is not recommended
+(please refer to \"5.2.2.2 Your Own Dangerous Permission Must Not Be
+Used (Required)\", we will proceed on the premise of using system
+dangerous permission of Android OS.
 
-Dangerous
-Permissionは他の3つのPermissionと異なり、アプリにその権限を付与するかどうかをユーザーに判断を求める機能がある。Dangerous
-Permissionを利用宣言しているアプリを端末にインストールするとき、次のような画面が表示される。これにより、そのアプリがどのような権限（Dangerous
-PermissionおよびNormal
-Permission）を利用しようとしているのかをユーザーが知ることができる。ユーザーが「インストール」をタップすることで、そのアプリは利用宣言した権限が付与され、インストールされるようになっている。
+Unlike the other three types of permissions, dangerous permission has
+a feature that requires the user\'s consent to the grant of the
+permission to the application. When installing an application on a
+device that has declared a dangerous permission to use, the following
+screen will be displayed. Subsequently, the user is able to know what
+level of permission (dangerous permission and normal permission) the
+application is trying to use. When the user taps \"install,\" the
+application will be granted the permission and then it will be
+installed.
 
-![permission\_network](media/image71.png)
+![](media/image61.png)
 ```eval_rst
 .. {width="1.6666666666666667in"
 .. height="2.7736111111111112in"}
 ```
 
-図 5.2‑7
+Figure 5.2‑7
 
-アプリの中には、ユーザーの資産とアプリ開発者が保護したい資産がある。それらのうち、Dangerous
-Permissionで保護できるのはユーザーの資産だけであることに注意が必要である。なぜなら、権限の付与がユーザーの判断に委ねられているためである。一方、アプリ開発者が保護したい資産については、この方法では保護できない。
+An application can handle user assets and assets that the developer
+wants to protect. We must be aware that dangerous permission can
+protect only user assets because the user is just who the granting of
+permission is entrusted to. On the other hand, assets that the
+developer wants to protect cannot be protected by the method above.
 
-例えば、自社アプリだけと連携するComponentは他社アプリからのアクセスを禁止したい場合を考える。このようなComponentをDangerous
-Permissionにより保護するように実装したとする。他社アプリがインストールされるときに、ユーザーの判断により他社アプリに対して権限の付与を許可してしまうと、保護すべき自社の資産が他社アプリに悪用される危険が生じる。このような場合に自社の資産を保護するためには、独自定義のSignature
-Permissionを使うとよい。
+For example, suppose that an application has a Component that
+communicates only with an In-house application, it doesn\'t permit the
+access to the Component from any applications of the other companies,
+and it is implemented that it\'s protected by dangerous permission.
+When a user grants permission to an application of another company
+based on the user\'s judgment, in-house assets that need to be
+protected may be exploited by the application granted. In order to
+provide protection for in-house assets in such cases, we recommend the
+usage of in-house-defined signature permission.
 
-#### 独自定義のDangerous Permissionは利用してはならない （必須）
+#### Your Own Dangerous Permission Must Not Be Used (Required)
 
-独自定義のDangerous
-Permissionを使用しても、インストール時に「ユーザーに権限の許可を求める」画面が表示されない場合がある。つまりDangerous
-Permissionの特徴であるユーザーに判断を求める機能が働かないことがあるのだ。よって本ガイドでは「独自定義のDangerous
-Permissionを利用しない」ことをルールとする。
+Even when in-house-defined Dangerous Permission is used, the screen
+prompt \"Asking for the Allowance of Permission from User\" is not
+displayed in some cases. This means that at times the feature that
+asks for permission based on the judgment of a user, which is the
+characteristic of Dangerous Permission, does not function.
+Accordingly, the Guidebook will make the rule \"In-house -defined
+dangerous permission must not be used.\"
 
-まず説明のために2つのアプリを想定する。1つは独自のDangerous
-Permissionを定義し、このPermissionにより保護したComponentを公開するアプリである。これをProtectedAppとする。もう1つはProtectedAppのComponentを悪用しようとする別のアプリでこれをAttackerAppとする。ここでAttackerAppはProtectedAppが定義したPermissionの利用宣言とともに同じPermissionの定義も行っているものとする。
+In order to explain it, we assume two types of applications. The first
+type of application defines an in-house dangerous permission, and it
+is an application that makes a Component, which is protected by this
+permission, public. We call this ProtectedApp. The other is another
+application which we call AttackerApp and it tries to exploit the
+Component of ProtectedApp. Also we assume that the AttackerApp not
+only declares the permission to use it, but also defines the same
+permission.
 
-AttackerAppがユーザーの許可なしにProtectedAppのComponentを利用できてしまうケースは以下のような場合に起きる。
+AttackerApp can use the Component of a ProtectedApp without the
+consent of a user in the following cases:
 
-1.  ユーザーがまずAttackerAppをインストールすると、Dangerous
-    Permissionの利用許可を求める画面は表示されずに、そのままインストールが完了してしまう
+1.  When the user installs the AttackerApp, the installation will be
+    completed without the screen prompt that asks for the user to
+    grant the application the dangerous permission.
 
-2.  次にProtectedAppをインストールすると、ここでも特に警告もなくインストールできてしまう
+2.  Similarly, when the user installs the ProtectedApp, the installation
+    will be completed without any special warnings.
 
-3.  その後、ユーザーがAttackerAppを起動すると、AttackerAppはユーザーの気づかぬうちにProtectedAppのComponentにアクセスできてしまい、場合によっては被害に繋がる
+3.  When the user launches the AttackerApp afterwards, the AttackerApp
+    can access the Component of the ProtectedApp without being
+    detected by the user, which can potentially lead to damage.
 
-このケースの原因は次の通りである。先にAttackerAppをインストールしようとするとuses-permissionにより利用宣言されたPermissionはまだその端末上では定義されていない。このときAndroid
-OSはエラーとすることもなくインストールを続行してしまう。Dangerous
-Permissionのユーザー確認はインストール時だけしか実施されないため、一度インストールされたアプリは権限を許可されたものとして扱われる。したがって後からインストールされるアプリのComponentを同名のDangerous
-Permissionで保護していた場合、ユーザーの許可なく先にインストールされたアプリからそのComponentが利用できてしまうのである。
+The cause of this case is explained in the following. When the user
+tries to install the AttackerApp first, the permission that has been
+declared for usage with uses-permission is not defined on the
+particular device yet. Finding no error, Android OS will continue the
+installation. Since the user consent for dangerous permission is
+required only at the time of installation, an application that has
+already been installed will be handled as if it has been granted
+permission. Accordingly, if the Component of an application which is
+installed later is protected with the dangerous permission of the same
+name, the application which was installed beforehand without the user
+permission will be able to exploit the Component.
 
-なお、Android OS既定のDangerous
-Permissionはアプリがインストールされるときにはその存在が保証されているので、uses-permissionしているアプリがインストールされるときには必ずユーザー確認画面が表示される。独自定義のDangerous
-Permissionの場合にだけこの問題は生じる。
+Furthermore, since the existence of system dangerous permissions
+defined by Android OS is guaranteed when an application is installed,
+the user verification prompt will be displayed every time an
+application with uses-permission is installed. This problem arises
+only in the case of self-defined dangerous permission.
 
-現在、このケースでComponentへのアクセスを防止するよい方法は見つかっていない。したがって、独自定義のDangerous
-Permissionは利用してはならない。
+At the time of this writing, no viable method to protect the access to
+the Component in such cases has been developed yet. Therefore, your
+own dangerous permission must not be used.
 
-#### 独自定義Signature PermissionはComponentの提供側アプリでのみ定義する （必須）
+#### Your Own Signature Permission Must Only Be Defined on the Provider-side Application (Required)
 
-自社アプリ間で連携する場合、実行時にSignature
-Permissionをチェックすることでセキュリティを担保できることを「5.2.1.2
-独自定義のSignature
-Permissionで自社アプリ連携する方法」で例示した。この仕組みを利用する際には、Protection
-LevelがSignatureの独自Permissionの定義は、Component提供側アプリのAndroidManifest.xmlでのみ行い、利用側アプリでは独自のSignature
-Permissionを定義してはならない。
+As demonstrated in, \"5.2.1.2 How to Communicate Between In-house
+Applications with In-house-defined Signature Permission,\" the
+security can be assured by checking the signature permission at the
+time of executing inter-communications between In-house applications.
+When using this mechanism, the definition of the permission whose
+Protection Level is signature must be written in AndroidManifest.xml
+of the provider-side application that has the Component, but the
+user-side application must not define the signature permission.
 
-なお、signatureOrSystem　Permissionについても同様である。
+This rule is applied to signatureOrSystem　Permission　as well.
 
-以下がその理由となる。
+The reason for this is as follows.
 
-提供側アプリより先にインストールされた利用側アプリが複数あり、どの利用側アプリも独自定義Permissionの利用宣言とともにPermissionの定義もしている場合を考える。この状況で提供側アプリをインストールすると、すべての利用側アプリから提供側アプリにアクセスすることが可能になる。次に、最初にインストールした利用側アプリをアンインストールすると、Permissionの定義が削除され、Permissionが未定義となる。そのため、残った利用側アプリからの提供側アプリの利用が不可能となってしまう。
-
-このように、利用側アプリでPermissionの定義を行うと思わぬPermissionの未定義状態が発生するので、Permissionの定義は保護するComponentの提供側アプリのみ行い、利用側アプリでPermissionを定義するのは避けなければならない。
+We assume that there are multiple user-side applications that have
+been installed prior to the provider-side application and every
+user-side application not only has required the signature permission
+that the provider-side application has defined, but also has defined
+the same permission. Under these circumstances, all user-side
+applications will be able to access the provider-side application just
+after the provider-side application is installed. Subsequently, when
+the user-side application that was installed first is uninstalled, the
+definition of the permission also will be deleted and then the
+permission will turn out to be undefined. As a result, the remaining
+user-side applications will be unable to access to the provider-side
+application.
 
 ```eval_rst
-こうすることで、提供側アプリのインストール時に権限付与が行われ、かつ、アンインストール時にPermissionが未定義となり、提供側アプリとPermissionの定義の存在期間が必ず一致するので、適正なComponentの提供と保護が可能である。
-なお、独自定義Signature Permissionに関しては、連携するアプリのインストール順によらず、利用側アプリにPermission利用権限が付与されるため、この議論が成り立つことに注意 [28]_。
+In this manner, when the user-side application defines a self-defined
+permission, it can unexpectedly turn out the permission to be
+undefined. Therefore, only the provider-side application providing the
+Component that needs to be protected should define the permission, and
+defining the permission on the user-side must be avoided.
 
-.. [28] Normal/Dangerous
-    Permissionを利用する場合には、Permissionが未定義のまま利用側アプリが先にインストールされると、利用側アプリへの権限の付与が行われず、提供側アプリがインストールされた後もアクセスができない
+By doing as mentioned just above, the self-defined permission will be
+applied by Android OS at the time of the installation of the
+provider-side application, and the permission will turn out to be
+undefined at the time of the uninstallation of the application.
+Therefore, since the existence of the permission\'s definition always
+corresponds to that of the provider-side application, it is possible
+to provide an appropriate Component and protect it. Please be aware
+that this argument stands because regarding in-house-defined signature
+permission the user-side application is granted the permission
+regardless of the installation order of applications in
+inter-communication
+[28]_.
+
+.. [28] If using normal/dangerous permission, the permission will not be
+    granted the user-side application if the user-side application is
+    installed before the provider-side application, the permission
+    remains undefined. Therefore, the Component cannot be accessed even
+    after the provider-side application has been installed.
 ```
 
-#### 独自定義Signature Permissionは自社アプリにより定義されていることを確認する （必須）
+#### Verify If the In-house-defined Signature Permission Is Defined by an In-house Application (Required)
 
-AnroidManifest.xmlでSignature
-Permissionを宣言し、ComponentをそのPermissionで保護しただけでは、実は保護が十分ではない。この詳細はアドバンストセクションの「5.2.3.1
-独自定義Signature Permissionを回避できるAndroid
-OSの特性とその対策」を参照すること。
+Actuality, you cannot say to be secure enough only by declaring a
+signature permission through AnroidManifest.xml and protecting the
+Component with the permission. For the details of this issue, please
+refer to, \"5.2.3.1 Characteristics of Android OS that Avoids
+Self-defined Signature Permission and Its Counter-measures\" in the
+Advanced Topics section.
 
-以下、独自定義Signature Permissionを安全に正しく使う手順である。
+The following are the steps for using in-house-defined signature
+permission securely and correctly.
 
-まず、AndroidManifest.xmlにて次を行う。
+First, write as the followings in AndroidManifest.xml:
+1.  Define an in-house signature permission in the AndroidManifest.xml
+    of the provider-side application. (definition of permission)<br/>
+    Example: \<permission android:name=\"xxx\"
+    android:protectionLevel=\"signature\" /\>
 
-1.  保護したいComponentのあるアプリのAndroidManifest.xmlにて、独自Signature
-    Permissionを定義する（Permissionの定義）<br/>
-    例： \<permission android:name="xxx"
-    android:protectionLevel="signature" /\>
+2.  Enforce the permission with the permission attribute of the
+    Component to be protected in the AndroidManifest.xml of the
+    provider-side application. (enforcement of permission)<br/>
+    Example: \<activity android:permission=\"xxx\"
+    \... \>\...\</activity\>
 
-2.  保護したいComponentのあるAndroidManifest.xmlにて、そのComponentの定義タグのpermission属性で、独自定義Signature Permissionを指定する（Permissionの要求宣言）<br/>
-    例： \<activity android:permission="xxx" ... \>...\</activity\>
+3.  Declare the in-house-defined signature permission with the
+    uses-permission tag in the AndroidManifest.xml of every user-side
+    application to access the Component to be protected. (declaration
+    of using permission)<br/>
+    Example: \<uses-permission android:name=\"xxx\" /\>
+&nbsp;
+Next, implement the followings in the source code.
+&nbsp;
+4.  Before processing a request to the Component, first verify that the
+    in-house-defined signature permission has been defined by an
+    in-house application. If not, ignore the request. (protection in the
+    provider-side component)
 
-3.  保護したいComponentにアクセスする連携アプリのAndroidManifest.xmlにて、uses-permissionタグに独自定義Signature
-    Permissionを指定する（Permissionの利用宣言）<br/>
-    例： \<uses-permission android:name="xxx" /\>
+5.  Before accessing the Component, first verify that the
+    in-house-defined signature permission has been defined by an
+    in-house application. If not, do not access the Component
+    (protection in the user-side component).
+&nbsp;
+Lastly, execute the following with the Signing function of Android
+Studio.
+&nbsp;
+6.  Sign APKs of all inter-communicating applications with the same
+    developer key.
 
-続いて、ソースコード上にて次を実装する。
+Here, for specific points on how to implement \"Verify that the
+in-house-defined signature permission has been defined by an In house
+application\", please refer to \"5.2.1.2 How to Communicate Between
+In-house Applications with In-house-defined Signature Permission\".
 
-4.  保護したいComponentでリクエストを処理する前に、独自定義したSignature Permissionが自社アプリにより定義されたものかどうかを確認し、そうでなければリクエストを無視する（Component提供側による保護）
+This rule is applied to signatureOrSystem　Permission　as well.
 
-5.  保護したいComponentにアクセスする前に、独自定義したSignature Permissionが自社アプリにより定義されたものかどうかを確認し、そうでなければComponentにアクセスしない（Component利用側による保護）
+#### Your Own Normal Permission Should Not Be Used (Recommended)
 
-最後にAndroid Studioの署名機能にて次を行う。
+An application can use a normal permission just by declaring it with
+uses-permission in AndroidManifest.xml. Therefore, you cannot use a
+normal permission for the purpose of protecting a Component from a
+malware installed.
 
-6.  連携するすべてのアプリのAPKを同じ開発者鍵で署名する
+Furthermore, in the case of inter-application communication with
+self-defined normal permission, whether an application can be granted
+the permission depends on the order of installation. For example, when
+you install an application (user-side) that has declared to use a
+normal permission prior to another application (provider-side) that
+possesses a Component which has defined the permission, the user-side
+application will not be able to access the Component protected with
+the permission even if the provider-side application is installed
+later.
 
-ここで「独自定義したSignature Permissionが、自社アプリにより定義されたものかどうかを確認」する必要があるが、具体的な実装方法についてはサンプルコードセクションの「5.2.1.2 独自定義のSignature Permissionで自社アプリ連携する方法」を参照すること。
+As a way to prevent the loss of inter-application communication due to
+the order of installation, you may think of defining the permission in
+every application in the communication. By this way, even if a
+user-side application has been installed prior to the provider-side
+application, all user-side applications will be able to access the
+provider-side application. However, it will create a situation that
+the permission is undefined when the user-side application installed
+first is uninstalled. As a result, even if there are other user-side
+applications, they will not be able to gain access to the
+provider-side application.
 
-なお、signatureOrSystem　Permissionについても同様である。
+As stated above, there is a concern of damaging the availability of an
+application, thus your own normal permission should not be used.
 
-#### 独自定義のNormal Permissionは利用してはならない （推奨）
+#### The String for Your Own Permission Name Should Be of an Extent of the Package Name of Application (Recommended)
 
-Normal Permissionを利用するアプリはAndroid Manifest.xmlにuses-permissionで利用宣言するだけでその権限を得ることができる。そのため、一度インストールされてしまったマルウェアからComponentを保護するような目的にNormal Permissionは利用できない。
-
-さらに独自定義Normal Permissionを用いてアプリ間連携を行う場合、連携する各アプリへのPermissionの付与はインストール順に依存する。例えば、Permissionを定義したコンポーネントを持つアプリよりも先にそのPermissionを利用宣言したアプリをインストールすると、Permissionを定義したアプリをインストールした後も利用側アプリはPermissionで保護されたコンポーネントにアクセスすることができない。
-
-インストール順によりアプリ間連携ができなくなる問題を回避する方法として、連携する全てのアプリにPermissionを定義することも考えられる。そうすることにより最初に利用側アプリがインストールされた場合でも、全ての利用側アプリが提供側アプリにアクセスすることが可能となる。しかし、最初にインストールした利用側アプリがアンインストールされた際にPermissionが未定義な状態となり、他に利用側アプリが存在していても、それらのアプリから提供側アプリにアクセスすることができなくなってしまうのである。
-
-以上のようにアプリの可用性が損なわれる恐れがあることから、独自定義Normal Permissionの利用は控えるべきである。
-
-#### 独自定義のPermission名はアプリのパッケージ名を拡張した文字列にする （推奨）
-
-複数のアプリが同じ名前でPermissionを定義する場合、先にインストールされたアプリが定義するProtection Levelが適用される。先にインストールされたアプリがNormal Permissionを定義し、後にインストールされたアプリが同じ名前でSignature
-Permissionを定義した場合、Signature Permissionによる保護がまったく効かない。悪意がない場合でも、複数のアプリにおいてPermission名が衝突して意図しないProtection Levelで動作する可能性がある。このような事故を防ぐため、Permission名にはアプリのパッケージ名を入れた方が良い。
+When multiple applications define permissions under the same name, the
+Protection Level that has been defined by an application installed
+first will be applied. Protection by signature permission will not be
+available in the case that the application installed first defines a
+normal permission and the application installed later defines a
+signature permission under the same name. Even in the absence of
+malicious intent, a conflict of permission names among multiple
+applications could cause behavior s of any applications as an
+unintended Protection Level. To prevent such accidents, it is
+recommended that a permission name extends (starts with) the package
+name of the application defining the permission as below.
 
 ```
-(パッケージ名).permission.(識別する文字列)
+(package name).permission.(identifying string)
 ```
 
-例えば、org.jssec.android.sampleというパッケージにREADアクセスのPermissionを定義するならば、次の様な命名が好ましい。
+For example, the following name would be preferred when defining a
+permission of READ access for the package of org.jssec.android.sample.
 
 ```java
 org.jssec.android.sample.permission.READ
 ```
 
-### アドバンスト<!-- 8340873a -->
+### Advanced Topics<!-- 8340873a -->
 
-#### 独自定義Signature Permissionを回避できるAndroid OSの特性とその対策
+#### Characteristics of Android OS that Avoids Self-defined Signature Permission and Its Counter-measures
 
-独自定義Signature Permissionは、同じ開発者鍵で署名されたアプリ間だけでアプリ間連携を実現するPermissionである。開発者鍵はプライベート鍵であり絶対に公開してはならないものであるため、Signature Permissionによる保護は自社アプリだけで連携する場合に使われることが多い。
+Self-defined signature permission is a permission that actualizes
+inter-application communication between the applications signed with
+the same developer key. Since a developer key is a private key and
+must not be public, there is a tendency to use signature permission
+for protection only in cases where in-house applications communicate
+with each other.
 
-まずは、AndroidのDev Guide（[http://developer.android.com/guide/topics/security/security.html](http://developer.android.com/guide/topics/security/security.html)）で説明されている独自定義Signature Permissionの基本的な使い方を紹介する。ただし、後述するように、この使い方にはPermission回避の問題があることが分かっており、本ガイドに掲載した対策が必要となる。
+First, we will describe the basic usage of self-defined signature
+permission that is explained in the Developer Guide
+([http://developer.android.com/guide/topics/security/security.html](http://developer.android.com/guide/topics/security/security.html))
+of Android. However, as it will be explained later, there are problems
+with regard to the avoidance of permission. Consequently,
+counter-measures that are described in this Guidebook are necessary.
 
-以下、独自定義Signature Permissionの基本的な使い方である。
+The followings are the basic usage of self-defined Signature
+Permission.
 
-1.  保護したいComponentのあるアプリのAndroidManifest.xmlにて、独自Signature Permissionを定義する<br/>
-例： \<permission android:name="xxx" android:protectionLevel="signature" />
+1.  Define a self-defined signature permission in the
+    AndroidManifest.xml of the provider-side application. (definition of
+    permission)<br/>
+    Example: \<permission android:name=\"xxx\"
+    android:protectionLevel=\"signature\" /\>
 
-2.  保護したいComponentを持つアプリのAndroidManifest.xmlで、保護したいComponentにandroid:permission属性を指定し、1.で定義したSignature Permissionを要求する<br/>
-例： \<activity android:permission="xxx" ... \>...\</activity\>
+2.  Enforce the permission with the permission attribute of the
+    Component to be protected in the AndroidManifest.xml of the
+    provider-side application. (enforcement of permission)<br/>
+    Example: \<activity android:permission=\"xxx\"
+    \... \>\...\</activity\>
 
-3.  保護したいComponentにアクセスしたい連携アプリのAndroidManifest.xmlにて、独自定義Signature Permissionを利用宣言する<br/>
-例： \<uses-permission android:name="xxx" /\>
+3.  Declare the self-defined signature permission with the
+    uses-permission tag in the AndroidManifest.xml of every user-side
+    application to access the Component to be protected. (declaration of
+    using permission)<br/>
+    Example: \<uses-permission android:name=\"xxx\" /\>
 
-4.  連携するすべてのアプリのAPKを同じ開発者鍵で署名する
+4.  Sign APKs of all inter-communicating applications with the same
+    developer key.
 
-実は、この使い方だけでは、次の条件が成立するとSignature Permission回避の抜け道ができてしまう。
+Actually, if the following conditions are fulfilled, this approach
+will create a loophole to avoid signature permission from being
+performed.
 
-説明のために独自定義のSignature Permissionで保護したアプリをProtectedAppとし、ProtectedAppとは異なる開発者鍵で署名したアプリをAttackerAppとする。
-ここでSignature Permission回避の抜け道とは、AttackerAppは署名が一致していないにもかかわらず、ProtectedAppのComponentにアクセス可能になることである。
+For the sake of explanation, we call an application that is protected
+by self-defined signature permission as ProtectedApp, and AttackerApp
+for an application that has been signed by a different developer key
+from the ProtectedApp. What a loophole to avoid signature permission
+from being performed means is, despite the mismatch of the signature
+for AttackerApp, it is possible to gain access to the Component of
+ProtectedApp.
 
-条件1.  AttackerAppもProtectedAppが独自定義したSignature Permissionと同じ名前でNormal Permissionを定義する（厳密にはSignature
-    Permissionでも構わない）<br/>
-例: \<permission android:name=\" xxx \" android:protectionLevel=\"normal\" /\>
+1.  An AttackerApp also defines a normal permission (strictly speaking,
+    signature permission is also acceptable) under the same name as
+    the signature permission which has been defined by the
+    ProtectedApp.<br/>
+    Example: \<permission android:name=\" xxx\"
+    android:protectionLevel=\"normal\" /\>
 
-条件2.  AttackerAppは独自定義したNormal Permissionをuses-permissionで利用宣言する<br/>
-例: \<uses-permission android:name=\"xxx\" /\>
+2.  The AttackerApp declares the self-defined normal permission with
+    uses-permission.<br/>
+    Example: \<uses-permission android:name=\"xxx\" /\>
 
-条件3.  AttackerAppをProtectedAppより先に端末にインストールする
+3.  The AttackerApp has installed on the device prior to the
+    ProtectedApp.
 
-![](media/image72.png)
+![](media/image65.png)
 ```eval_rst
 .. {width="6.5in" height="4.270833333333333in"}
 ```
 
-図 5.2‑8
+Figure 5.2‑8
 
-条件1および条件2の成立に必要なProtectedApp独自定義のPermission名は、APKファイルからAndroidManifest.xmlを取り出せば攻撃者にとって容易に知ることができる。条件3もユーザーを騙すなどの方法により攻撃者にある程度制御の余地がある。
+The permission name that is necessary to meet Condition 1 and
+Condition 2 can easily be known by an attacker taking
+AndroidManifest.xml out from an APK file. The attacker also could
+satisfy Condition 3 with a certain amount of effort (e.g. deceiving a
+user).
 
-このように独自定義のSignature
-Permissionには基本的な使い方だけでは保護を回避されてしまう危険性があり、抜け道をふさぐような対策が必要である。具体的にはルールセクションの「5.2.2.4
-独自定義Signature
-Permissionは自社アプリにより定義されていることを確認する
-（必須）」に掲載している方法で対処できるので、そちらを参照のこと。
+There is a risk of self-defined signature permission to evade
+protection if only the basic usage is adopted, and a counter-measure
+to prevent such loopholes is needed. Specifically, you could find how
+to solve the above-mentioned issues by using the method described in
+\"5.2.2.4 Verify If the In-house-defined Signature Permission Is
+Defined by an In-house Application(Required)\".
 
-#### ユーザーがAndroidManifest.xmlを改ざんする
+#### Falsification of AndroidManifest.xml by a User
 
-独自PermissionのProtection
-Levelが意図しないものになるケースは既に説明した。そのことによる不具合を防ぐために、Javaのソースコード側で何らかの対応を実施する必要があった。ここでは、AndroidManifest.xmlが改ざんされるという視点から、ソースコード側の対応について述べる。改ざんを検知する簡易な実装例を提示するが、犯罪意識をもって改ざんを行うプロのハッカーに対してはほとんど効果がない方法であることに注意すること。
+We have already touched on the case that a Protection Level of
+self-defined permission could be changed as not intended. To prevent
+malfunctioning due to such cases, it has been needed to implement some
+sort of counter-measures on the source-code side of Java. From the
+viewpoint of AndroidManifest.xml falsification, we will talk about the
+counter-measures to be taken on the source-code side. We will
+demonstrate a simple case of installation that can detect
+falsifications. However, please note that these counter-measures are
+little effective against professional hackers who falsify with
+criminal intent.
 
-この節はアプリの改ざんに関するものであり、ユーザー自身が悪意を持っているケースである。本来はガイドラインの範囲外であるが、Permissionに関する事、これを行うツールがアプリとして公開されている事、から「プロでないハッカーに対する簡易な対策」として述べておくことにした。
+This section is about the falsification of an application and users
+with malicious intent. Although this is originally outside of the
+scope of a Guidebook, from the fact that this is related to Permission
+and the tools for such falsification are provided in public as Android
+applications, we decided to mention it as \"Simple counter-measures
+against amateur hackers\".
 
-Androidアプリは、root権限無しに改ざんできることを頭に置いておく必要がある。なぜなら、AndroidManifest.xmlを変更してAPKファイルを再生成、署名するツールが配布されているためである。このツールを使用する事で、誰でも任意のアプリからPermissionを削除することが可能になっている。
+It must be remembered that applications that can be installed from
+market are applications that can be falsified without root privilege.
+The reason is that applications that can rebuild and sign APK files
+with altered AndroidManifest.xml are distributed. By using these
+applications, anyone can delete any permission from applications they
+have installed.
 
-事例としてはINTERNET
-Permissionを取り除いたAndroidManifest.xmlから別署名のAPKを生成し、アプリに組み込まれた広告モジュールが動作しないようにするケースが多いようである。個人情報がどこかに送信されているかもしれない等の不安が払拭されるということで、この種のツールの存在を評価しているユーザーも存在する。このような行為は、アプリに組み込まれた広告が機能しなくなるため、広告収入を期待している開発者に対して金銭的被害を与える行動であるとも言える。ユーザーのほとんどは罪の意識無くこれらの行為を行っていると思われる。
+As an example, there seems to be cases of rebuilding APKs with
+different signatures altering AndroidManifest.xml with INTERNET
+permission removed to render advertising modules attached in
+applications as useless. There are some users who praise these types
+of tools due to the fact that no personal information is leaked
+anywhere. As these ads which are attached in applications stop
+functioning, such actions cause monetary damage for developers who are
+counting on ad revenue. And it is believed that most of the users
+don\'t have any compunction.
 
-インターネットPermissionをuses-permissionで宣言しているアプリが、実行時に自身のAndroidManifest.xmlに記載されているPermissionを確認する実装例を次に示す。
+In the following code, we show an instance of implementation that an
+application that has declared INTERNET permission with uses-permission
+verifies if INTERNET permission is described in the
+AndroidManifest.xml of itself at run time.
 
 ```java
 public class CheckPermissionActivity extends Activity {
@@ -897,10 +1241,10 @@ public class CheckPermissionActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        // AndroidManifest.xmlに定義したPermissionを取得
+        // Acquire Permission defined in AndroidManifest.xml
         List<String> list = getDefinedPermissionList();
         
-        // 改ざんを検知する
+        // Detect falsification
         if( checkPermissions(list) ){
             // OK
             Log.d("dbg", "OK.");
@@ -911,7 +1255,7 @@ public class CheckPermissionActivity extends Activity {
     }
 
     /**
-     * AndroidManifest.xmlに定義したPermissionをリストで取得する
+     * Acquire Permission through list that was defined in AndroidManifest.xml
      * @return
      */
     private List<String> getDefinedPermissionList(){
@@ -921,7 +1265,7 @@ public class CheckPermissionActivity extends Activity {
     }
     
     /**
-     * Permissionが変更されていないことを確認する。
+     * Verify that Permission has not been changed Permission
      * @param permissionList
      * @return
      */
@@ -933,7 +1277,7 @@ public class CheckPermissionActivity extends Activity {
             if (permissionArray != null) {
                 for (String permission : permissionArray) {
                     if(! permissionList.remove(permission)){
-                        // 意図しないPermissionが付加されている
+                        // Unintended Permission has been added
                         return false;
                     }
                 }
@@ -952,18 +1296,39 @@ public class CheckPermissionActivity extends Activity {
 }
 ```
 
-#### APKの改ざんを検出する
+#### Detection of APK Falsification
 
-「5.2.3.2
-ユーザーがAndroidManifest.xmlを改ざんする」ではユーザーによるPermission改ざんの検出について説明した。しかし、アプリの改ざんはPermissionに限らず、リソースを差し替えて別のアプリとしてマーケットで配布するなど、ソースコードを変更することなく改ざんし流用する事例が多様に存在する。ここではAPKファイルが改ざんされたことを検出するためのより汎用的な方法を紹介する。
+We explained about detecting the falsification of permissions by a
+user in \"5.2.3.2 Falsification of AndroidManifest.xml by a User\".
+However, the falsification of applications is not limited to
+permission only, and there are many other cases where applications are
+appropriated without any changes in the source code. For example, it
+is a case where they distribute other developers\' applications
+(falsified) in the market as if they were their own applications just
+by replacing resources to their own. Here, we will show a more generic
+method to detect the falsification of an APK file.
 
-APKの改ざんを行うには、APKファイルを一度展開し、内容を改変した後に再びAPKファイルとして再構成する必要がある。その際に改ざん者は元の開発者の鍵を持ち得ないので、改ざん者自身の鍵でAPKを署名することになる。このようにAPKの改ざんには署名(証明書)の変更を伴うため、アプリ起動時にAPKの証明書と予めソースコードに埋め込んだ開発者の証明書を比較することで改ざんの有無を検出することができる。
+In order to falsify an APK, it is needed to decode the APK file into
+folders and files, modify their contents, and then rebuild them into a
+new APK file. Since the falsifier does not have the key of the
+original developer, he would have to sign the new APK file with his
+own key. As the falsification of an APK inevitably brings with a
+change in signature (certificate), it is possible to detect whether an
+APK has been falsified at run time by comparing the certificate in the
+APK and the developer\'s certificate embedded in the source code as
+below.
 
-以下にサンプルコードを示す。なお、実装例のままではプロのハッカーであれば改ざん検出の無効化が容易である。あくまで簡易な実装例であることを念頭においてアプリへの適用を検討するべきである。
+The following is a sample code. Also, a professional hacker will be
+able to easily circumvent the detection of falsification if this
+implementation example is used as it is. Please apply this sample code
+to your application by being aware that this is a simple
+implementation example.
 
-ポイント：
+Points:
 
-1.  主要な処理を行うまでの間に、アプリの証明書が開発者の証明書であることを確認する
+1.  Verify that an application\'s certificate belongs to the developer
+    before major processing is started.
+
 
 SignatureCheckActivity.java
 ```eval_rst
@@ -981,49 +1346,98 @@ PkgCert.java
 ```
 
 
-#### Permissionの再委譲問題
+#### Permission Re-delegation Problem
 
-アプリがAndroid
-OSに保護されている電話帳やGPSといった情報や機能にアクセスするためにはPermissionを利用宣言しなければならない。Permissionを利用宣言し許可されると、そのアプリにはそのPermissionが委譲されたことになり、そのPermissionにより保護された情報や機能にアクセスできるようになる。
+An application must declare to use permission when accessing contacts
+or GPS with its information and features that are protected by Android
+OS. When the permission required is granted, the permission is
+delegated to the application and the application would be able to
+access the information and features protected with the permission.
 
-プログラムの組み方によっては、Permissionを委譲された（許可された）アプリはPermissionで保護されたデータを取得し、そのデータを別のアプリに何のPermissionも要求せずに提供することもできてしまう。これはPermissionを持たないアプリがPermissionで保護されたデータにアクセスできることに他ならない。実質的にPermissionを再委譲していることと等価になるので、これをPermissionの再委譲問題と呼ぶ。このようにAndroidのPermissionセキュリティモデルでは、保護されたデータへのアプリからの直接アクセスだけしか権限管理ができないという仕様上の性質がある。
+Depending on how the program is designed, the application to which has
+been delegated (granted) the permission is able to acquire data that
+is protected with the permission. Furthermore, the application can
+offer another application the protected data without enforcing the
+same permission. This is nothing less than permission-less application
+to access data that is protected by permission. This is virtually the
+same thing as re-delegating the permission, and this is referred to
+the Permission Re-delegation Problem. Accordingly, the specification
+of the permission mechanism of Android only is able to manage
+permission of direct access from an application to protected data.
 
-具体例を図
-5.2‑9に示す。中央のアプリはandroid.permission.READ\_CONTACTSを利用宣言したアプリが連絡先情報を読み取って自分のDBに蓄積している。何の制限もなくContent
-Provider経由で蓄積した情報を他のアプリに提供した場合に、Permissionの再委譲問題が生じる。
+A specific example is shown in Figure 5.2‑9. The application in the
+center shows that an application which has declared
+android.permission.READ\_CONTACTS to use it reads contacts and then
+stores them into its own database. The Permission Re-delegation
+Problem occurs when information that has been stored is offered to
+another application without any restriction via Content Provider.
 
-![](media/image73.png)
+![](media/image66.png)
 ```eval_rst
 .. {width="5.375in" height="3.8020833333333335in"}
 ```
 
-図
-5.2‑9　Permissionを持たないアプリが連絡先情報を取得する
+Figure 5.2‑9 An Application without Permission Acquires Contacts
 
-同様の例として、android.permission.CALL\_PHONEを利用宣言したアプリが、同Permissionを利用宣言していない他のアプリからの任意の電話番号を受け付け、ユーザーの確認もなくその番号に電話を掛けることができるならば、Permissionの再委譲問題がある。
+As a similar example, an application that has declared
+android.permission.CALL\_PHONE to use it receives a phone number
+(maybe input by a user) from another application that has not declared
+the same permission. If that number is being called without the
+verification of a user, then also there is the Permission
+Re-delegation Problem.
 
-Permissionの利用宣言をして得た情報資産・機能資産をほぼそのままの形で他のアプリに二次提供する場合には、提供先アプリに対し同じPermissionを要求するなどして、元の保護水準を維持しなければならない。また情報資産・機能資産の一部分のみを他のアプリに二次提供する場合には、その情報資産・機能資産の一部分が悪用されたときの被害度合に応じた適切な保護が必要である。たとえば前述と同様に同じPermissionを要求したり、ユーザーへ利用許諾を確認したり、「4.1.1.1
-非公開Activityを作る・利用する」「4.1.1.4
-自社限定Activityを作る・利用する」などを利用して対象アプリの制限を設けるなどの保護施策がある。
+There are cases where the secondary provision of another application
+with nearly-intact information asset or functional asset acquired with
+the permission is needed. In those cases, the provider-side
+application must demand the same permission for the provision in order
+to maintain the original level of protection. Also, in the case of
+only providing a portion of information asset as well as functional
+asset in a secondary fashion, an appropriate amount of protection is
+necessary in accordance with the degree of damage that is incurred
+when a portion of that information or functional asset is exploited.
+We can use protective measures such as demanding permission as similar
+to the former, verifying user consent, and setting up restrictions for
+target applications by using \"4.1.1.1 Creating/Using Private
+Activities,\" or \"4.1.1.4 Creating/Using In-house Activities\" etc.
 
-このような再委譲問題はPermissionに限ったことではない。Androidアプリでは、アプリに必要な情報･機能を他のアプリやネットワーク・記憶媒体から調達することが一般に行われている。提供元がAndroidアプリであればPermission、ネットワークであればログイン、記憶媒体であればアクセス制限といったように、それぞれ調達する際に必要な権限や制限が存在することも多い。こうして調達した情報や機能をその所有者であるユーザーから二次的に他のアプリに提供したり、ネットワークや記憶媒体に転送する際には、ユーザーの意図に反した利用がないように慎重に検討してアプリに対策を施すべきである。必要に応じて、Permissionの例と同様に提供先に対して権限の要求や使用の制限を行わなければならない。ユーザーへの利用許諾もその一環である。
+Such Permission Re-delegation Problem is not only limited to the issue
+of the Android permission. For an Android application, it is generic
+that the application acquires necessary information/functions from
+different applications, networks, and storage media. And in many
+cases, some permissions as well as restrictions are needed to access
+them. For example, if the provider source is an Android application,
+it is the permission, if it is a network, then it is the log-in, and
+if it is a storage media, there will be access restrictions.
+Therefore, such measures need to be implemented for an application
+after carefully considering as information/functions are not used in
+the contrary manner of the user\'s intention. This is especially
+important at the time of providing acquired information/functions to
+another application in a secondary manner or transferring to networks
+or storage media. Depending on the necessity, you have to enforce
+permission or restrict usage like the Android permission. Asking for
+the user\'s consent is part of the solution.
 
-以下では、READ\_CONTACTS　Permissionを利用して連絡先DBから一覧を取得したアプリが、情報提供先のアプリに対して同じREAD\_CONTACTS　Permissionを要求する例を示す。
+In the following code, we demonstrate a case where an application that
+acquires a list from the contact database by using READ\_CONTACTS
+permission enforces the same READ\_CONTACTS permission on the
+information destination source.
 
-ポイント：
+Point
 
-1.  Manifestで提供元と同じPermissionを要求する
+1.  Enforce the same permission that the provider does.
 
 AndroidManifest.xml
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.jssec.android.permission.transferpermission" >
-
+    package="org.jssec.android.permission.transferpermission"
+    android:versionCode="1"
+    android:versionName="1.0" >
+    
+    <uses-sdk android:minSdkVersion="8" >
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
 
     <application
-        android:allowBackup="false"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
@@ -1036,7 +1450,7 @@ AndroidManifest.xml
             </intent-filter>
         </activity>
 
-        <!-- ★ポイント1★ Manifestで提供元と同じPermissionを要求する-->
+        <!-- *** Point1 *** Enforce the same permission that the rovider does. -->
         <provider
             android:name=".TransferPermissionContentProvider"
             android:authorities="org.jssec.android.permission.transferpermission"
@@ -1049,16 +1463,20 @@ AndroidManifest.xml
 </manifest>
 ```
 
+When an application enforces multiple permissions, the above method
+will not solve it. By using Context\#checkCallingPermission() or
+PackageManager\#checkPermission() from the source code, verify whether
+the invoker application has declared all permissions with
+uses-permission in the Manifest.
 
-アプリが複数のPermissionを要求する必要がある場合は、上記の方法では解決することができない。ソースコード上でContext\#checkCallingPermission()やPackageManager\#checkPermission()を使用して、呼び出し元のアプリがManifestですべてのPermissionの利用宣言を行っているかどうかを確認することになる。
+In the case of an Activity
 
-Activityの場合
 ```java
 public void onCreate(Bundle savedInstanceState) {
-// ～省略～
+    [...]
 	if (checkCallingPermission("android.permission.READ_CONTACTS") == PackageManager.PERMISSION_GRANTED
 	 && checkCallingPermission("android.permission.WRITE_CONTACTS") == PackageManager.PERMISSION_GRANTED) {
-		// 呼び出し元が正しくPermissionを利用宣言していた時の処理
+		// Processing during the time when an invoker is correctly declaring to use
 		return;
 	}
 	finish();
