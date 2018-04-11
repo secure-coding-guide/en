@@ -1258,7 +1258,7 @@ to the framework. The framework displays a candidate list to the user,
 and the app carries out the Autofill operation using the data selected
 by the user.
 
-![Autofillの仕組み\_Autofill](media/image38.png)
+![](media/image38.png)
 ```eval_rst
 .. {width="7.266666666666667in" height="3.325in"}
 ```
@@ -1275,89 +1275,141 @@ via the Autofill framework to the Autofill service selected via
 Settings, and the Autofill service stores information in the database to
 complete the procedural sequence.
 
-![Autofillの仕組み\_Save](media/image39.png)
+![](media/image39.png)
 ```eval_rst
 .. {width="7.258333333333334in" height="3.3333333333333335in"}
 ```
 
 Figure 4.1‑7: Procedural flow among components for saving user data
 
-##### Autofill利用アプリにおけるセキュリティ上の懸案
+##### Security concerns for Autofill user apps
 
-「仕組み（概要）」の項で示した通りAutofillフレームワークにおけるセキュリティモデルでは、ユーザーが「設定」で安全なAutofill serviceを選択し、保存時にどのデータをどのAutofill serviceに渡してもよいか適切に判断できることを前提としている。
+As noted in the section "Overview of the framework" above, the
+security model adopted by the Autofill framework is premised on the
+assumption that the user configures the Settings to select secure
+Autofill services and makes appropriate decisions regarding which data
+to pass to which Autofill service when storing data.
 
-ところが、ユーザーがうっかり安全でないAutofill serviceを選択したり、Autofill serviceに渡すべきでないセンシティブな情報の保存を許可してしまったりする可能性がある。以下に、この場合に起きうる被害について考察する。
+However, if a user unwittingly selects a non-secure Autofill service,
+there is a possibility that the user may permit the storage of
+sensitive information that should not be passed to the Autofill
+service. In what follows we discuss the damage that could result in
+such a scenario.
 
-保存時、ユーザーがAutofill serviceを選択し、保存許可ダイアログに対して許可した場合、利用アプリで表示されているActivityに含まれるすべてのViewの情報がAutofill serviceに渡る可能性がある。ここで、Autofill serviceがマルウェアの場合や、Autofill serviceにViewの情報を外部ストレージや安全でないクラウドサービスに保存する等のセキュリティ上の問題があった場合には、利用アプリで扱う情報の漏洩につながってしまうリスクが考えられる。
+When saving information, if the user selects an Autofill service and
+grants it permission via the Save Permission dialog box, information
+for all Views contained in the Activity currently displayed by the app
+in use may be passed to the Autofill service. If the Autofill service
+is malware, or if other security issues arise---for example, if View
+information is stored by the Autofill service on an external storage
+medium or on an insecure cloud service---this could create the risk
+that information handled by the app might be leaked.
 
-一方、Autofill時、ユーザーがAutofill serviceとしてマルウェアを選択してしまっていた場合、マルウェアが送信した値を入力してしまう可能性がある。ここで、アプリやアプリのデータを送信した先のクラウドサービスが入力データの安全性を十分に確認していなかった場合、情報漏洩やアプリ／サービスの停止等につながってしまうリスクが考えられる。
+On the other hand, during Autofill, if the user has selected a piece
+of malware as the Autofill service, values transmitted by the malware
+may be entered as input. At this point, if the security of the data
+input is not adequately validated by the app or by the cloud services
+to which the app sends data, risks of information leakage and/or
+termination of the app or the service may arise.
 
-なお、「2つのコンポーネント」で書いたように、Activityを持つアプリが自動的にAutofillの対象になるため、Activityを持つアプリのすべての開発者は上記のリスクを考慮して設計や実装を行う必要がある。以下に、上記のリスクに対する対策案を示すが、「3.1.3 資産分類と保護施策」なども参考にして、アプリに必要な対策を検討した上で、適用することをお勧めする。
+Note that, as discussed above in the section *"2 components",* apps
+with Activities are automatically eligible for Autofill, and thus all
+developers of apps with Activities must take the risks described above
+into account when designing and implementing apps. In what follows we
+will present countermeasures to mitigate the risks described above we
+recommend that these be adopted as appropriate based on a
+consideration of the countermeasures required by an app---referring to
+"3.1.3 Asset Classification and Protective Countermeasures" and other
+relevant resources.
 
-##### リスクに対する対策-1
+##### Steps to mitigate risk: 1
 ```eval_rst
-前述のように、Autofillフレームワークでは基本的にユーザーの裁量によってセキュリティが担保されている。そのためアプリでできる対策は限られているが、Viewに対してimportantForAutofill 属性で"no"等を指定してAutofill serviceにViewの情報を渡さないようにする（Autofillの対象外とする）ことで、ユーザーが適切な選択や許可をできなかった場合（マルウェアをAutofill serviceとして利用するように選択する等）でも、上記の懸案を軽減することができる。[7]_
+As discussed above, security within the Autofill framework is
+ultimately guaranteed only at the user's discretion. For this reason,
+the range of countermeasures available to apps is somewhat limited.
+However, there is one way to mitigate the concerns described above:
+Setting the importantForAutofill attribute for a view to "no" ensures
+that no View information is passed to the Autofill service (i.e. the
+View is made ineligible for Autofill), even if the user cannot make
+appropriate selections or permissions (such as selecting a piece of
+malware as the Autofill service). [7]_
 
-.. [7] ユーザーが意図的にAutofill機能を利用した場合など、本対策でも上記の懸案を回避できないことがある。「リスクに対する対策-2」を実施することでこのような場合にも対応することができる。
+.. [7] Even after taking this step, in some cases it may not be possible
+    to avoid the security concerns described above---for example, if the
+    user intentionally uses Autofill. Implementing the steps described
+    in **"**Steps to mitigate risk: 2**"** will improve security in
+    these cases.
 ```
-importantForAutofill 属性は、以下のいずれかの方法によって指定することができる。
+The importantForAutofill attribute may be specified by any of the
+following methods.
 
--   レイアウトXMLのimportantForAutofill属性を指定する
--   View\#setImportantForAutofill()を呼び出す
+-   Set the importantForAutofill attribute in the layout XML
+-   Call View\#setImportantForAutofill()
 
-以下に指定可能な値を示す。指定する範囲によって適切な値を使うこと。特に、"no"を指定した場合、指定したViewはAutofillの対象外になるが、子供はAutofillの対象になることに注意すること。デフォルト値は、"auto"となっている。
+The values that may be set for this attribute are shown below. Make
+sure to use values appropriate for the specified range. In particular,
+note with caution that, when a value is set to "no" for a View, that
+View will be ineligible for Autofill, but its children *will* remain
+eligible for Autofill. The default value is "auto."
 
-表 4.1‑2
+Figure 4.1‑2
 
 <table border="yes" bordercolor="gray">
     <thead bgcolor="lightgray">
 		<tr>
-			<th rowspan="2">値</th>
-			<th rowspan="2">定数名</th>
-			<th colspan="2">Autofillの対象になるか</th>
+			<th rowspan="2">Value</th>
+			<th rowspan="2">Name of constant</th>
+			<th colspan="2">Eligible for Autofill?</th>
 		</tr>
 		<tr>
-			<th width="10%">指定したView</th>
-			<th width="10%">子供のView</th>
+			<th width="10%">Specified View</th>
+			<th width="10%">Child View</th>
 		</tr>
     </thead>
 	<tbody>
 		<tr>
 			<td>"auto"</td>
 			<td>IMPORTANT_FOR_AUTOFILL_AUTO</td>
-			<td>Autofillフレームワークが決定</td>
-			<td>Autofillフレームワークが決定</td>
+			<td>Determined by Autofill framework</td>
+			<td>Determined by Autofill framework</td>
 		</tr>
 		<tr>
 			<td>"no"</td>
 			<td>IMPORTANT_FOR_AUTOFILL_NO</td>
-			<td>対象外</td>
-			<td>対象</td>
+			<td>No</td>
+			<td>Yes</td>
 		</tr>
 		<tr>
 			<td>"noExcludeDescendants"</td>
 			<td>IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS</td>
-			<td>対象外</td>
-			<td>対象外</td>
+			<td>No</td>
+			<td>No</td>
 		</tr>
 		<tr>
 			<td>"yes"</td>
 			<td>IMPORTANT_FOR_AUTOFILL_YES</td>
-			<td>対象</td>
-			<td>対象</td>
+			<td>Yes</td>
+			<td>Yes</td>
 		</tr>
 		<tr>
 			<td>"yesExcludeDescendants"</td>
 			<td>IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS</td>
-			<td>対象</td>
-			<td>対象外</td>
+			<td>Yes</td>
+			<td>No</td>
 		</tr>
 	</tbody>
 </table>
 
-また、AutofillManager\#hasEnabledAutofillServices()を利用して、Autofill機能の利用を同一パッケージ内のAutofill serviceに限定することも可能である。
+It is also possible to use
+AutofillManager\#hasEnabledAutofillServices() to restrict the use of
+Autofill functionality to Autofill services within the same package.
 
-以下に、「設定」で同一パッケージ内のAutofill serviceを利用するように設定されている場合のみ、Activityの全てのViewをAutofillの対象にする（実際にAutofillの対象になるかはAutofill service次第）場合の例を示す。個別のViewに対してView\#setImportantForAutofill()を呼び出すことも可能である。
+In what follows, we show an example that all Views in an Activity are
+eligible for Autofill (whether or not a View actually uses Autofill is
+determined by the Autofill service) only in case that settings have
+been configured to use a Autofill service within the same package. It
+is also possible to call View\#setImportantForAutofill() for
+individual Views.
 
 DisableForOtherServiceActivity.java
 ```eval_rst
@@ -1366,13 +1418,24 @@ DisableForOtherServiceActivity.java
    :encoding: shift-jis
 ```
 
-##### リスクに対する対策-2
+##### Steps to mitigate risk: 2
 
-アプリで「リスクに対する対策-1」を施した場合でも、ユーザーがViewの長押しでフローティングツールバーなどを表示させて「自動入力」を選択すると、強制的にAutofillを利用できてしまう。この場合、importantForAutofill属性で"no"等を指定したViewを含む全てのViewの情報がAutofill Servicceに渡ることになる。
+Even in cases where an app has implemented the steps described in the
+previous section ("Steps to mitigate risk: 1"), the user can forcibly
+enable the use of Autofill by long-pressing the View, displaying the
+floating toolbar or a similar control interface, and selecting
+"Automatic input." In this case, information for all Views---including
+Views for which the importantForAutofill attribute has been set to
+"no," or for which similar steps have been taken---will be passed to
+the Autofill service.
 
-「リスクに対する対策-1」に加えて、フローティングツールバーなどのメニューから「自動入力」を削除することで、上記のような場合でも、情報漏えいのリスクを回避することができる。
+It is possible to avoid the risk of information leakage even in
+circumstances such as these by deleting the "Automatic Input" option
+from the floating-toolbar menu and other control interfaces; this step
+is to be carried out in addition to the procedures described in "Steps
+to mitigate risk: 1"
 
-以下にサンプルコードを示す。
+Sample code for this purpose is shown below.
 
 DisableAutofillActivity.java
 ```eval_rst
