@@ -1686,59 +1686,86 @@ user, and hence the modified specification has no impact in this case.
 
 -   android.permission.NFC
 
-Account Managerに独自アカウントを追加する
------------------------------------------
+Add In-house Accounts to Account Manager
+----------------------------------------
 ```eval_rst
-Account Managerはアプリがオンラインサービスへアクセスするために必要となるアカウント情報（アカウント名、パスワード）および認証トークンを一元管理するAndroid OSの仕組みである [31]_。ユーザーは事前にアカウント情報をAccount Managerに登録しておき、アプリがオンラインサービスにアクセスしようとしたときにユーザーの許可を得て、Account Managerがアプリに認証トークンを自動提供する仕組みである。パスワードという極めてセンシティブな情報をアプリが扱わなくて済むことがAccount Managerの利点である。
+Account Manager is the Android OS\'s system which centrally manages
+account information (account name, password) which is necessary for
+applications to access to online service and authentication token
+[31]_.
+A user needs to register the account information to Account Manager in
+advance, and when an application tries to access to online service,
+Account Manager will automatically provide application authentication
+token after getting user\'s permission. The advantage of Account
+Manager is that an application doesn\'t need to handle the extremely
+sensitive information, password.
 
 .. [31] Account Managerはオンラインサービスとの同期の仕組みも提供するが、本節では扱っていない。
 ```
-Account Managerを使用したアカウント管理機能は図
-5.3‑1のような構成となる。「利用アプリ」は認証トークンの提供を受けてオンラインサービスにアクセスするアプリであり、前述のアプリのことである。一方、「Authenticatorアプリ」はAccount
-Managerの機能拡張であり、Authenticatorと呼ばれるオブジェクトをAccount
-Managerに提供することにより、Account
-Managerがそのオンラインサービスのアカウント情報および認証トークンを一元管理できるようになる。利用アプリとAuthenticatorアプリは別のアプリである必要はなく、一つのアプリとして実装することもできる。
+The structure of account management function which uses Account
+Manager is as per below Figure 5.3‑1. \"Requesting application\" is
+the application which accesses the online service, by getting
+authentication token, and this is above mentioned application. On the
+other hand, \"Authenticator application\" is function extension of
+Account Manager, and by providing Account Manager of an object called
+Authenticator, as a result Account Manager can manage centrally the
+account information and authentication token of the online service.
+Requesting application and Authenticator application don\'t need to be
+the separate ones, so these can be implemented as a single
+application.
 
-![](media/image75.png)
+![](media/image68.png)
 ```eval_rst
 .. {width="6.889763779527559in" height="1.9748031496062992in"}
 ```
 
-図 5.3‑1Account
-Managerを使用したアカウント管理機能の構成
+Figure 5.3‑1 Configuration of account management function which uses
+Account Manager
 
-本来、利用アプリとAuthenticatorアプリは開発者の署名鍵が異なっていてもよい。しかしAndroid
-4.0.x の端末に限りAndroid
-Frameworkのバグがあり、利用アプリとAuthenticatorアプリの署名鍵が異なっていると利用アプリで例外が発生してしまい、独自アカウントが利用できない。ここで紹介するサンプルコードはこの不具合には対応できていない。詳しくは「5.3.3.2
-Android
-4.0.xでは利用アプリとAuthenticatorアプリの署名鍵が異なると例外が発生する」を参照すること。
+Originally, the developer\'s signature key of user application
+(requesting application) and Authenticator application can be the
+different ones. However, only in Android 4.0.x devices, there\'s an
+Android Framework bug, and when the signature key of user application
+and Authenticator application are different, exception occurs in user
+application, and in-house account cannot be used. The following sample
+code does not implement any workarounds against this defect. Please
+refer to \"5.3.3.2 Exception Occurs When Signature Keys of User
+Application and Authenticator Application Are Different, in Android
+4.0.x\" for details.
 
-### サンプルコード<!-- ff53be23 -->
+### Sample Code<!-- ff53be23 -->
 
-Authenticatorアプリのサンプルとして「5.3.1.1
-独自アカウントを作る」を、利用アプリのサンプルとして「5.3.1.2
-独自アカウントを利用する」を用意した。JSSECのWebサイトで配布しているサンプルコード一式ではそれぞれAccountManager
-AuthenticatorおよびAccountManager Userに対応している。
+\"5.3.1.1 Creating In-house account\" is prepared as a sample of
+Authenticator application, and \"5.3.1.2 Using In-house Account\" is
+prepared as a sample of requesting application. In sample code set
+which is distributed in JSSEC\'s Web site, each of them is
+corresponded to AccountManager Authenticator and AccountManager User.
 
-#### 独自アカウントを作る
+#### Creating In-house accounts
 
-ここではAccount
-Managerが独自アカウントを扱えるようにするAuthenticatorアプリのサンプルコードを紹介する。このアプリはホーム画面から起動できるActivityは存在しない。もう一つのサンプルアプリ「5.3.1.2
-独自アカウントを利用する」からAccount
-Manager経由で間接的に呼び出されることに注意してほしい。
+Here is the sample code of Authenticator application which enables
+Account Manager to use the in-house account. There is no Activity
+which can be launched from home screen in this application. Please pay
+attention that it\'s called indirectly via Account Manager from
+another sample code \"5.3.1.2 Using In-house Account.\"
 
-ポイント：
+Points:
 
-1.  Authenticatorを提供するServiceは非公開Serviceとする
-2.  ログイン画面ActivityはAuthenticatorアプリで実装する
-3.  ログイン画面Acitivityは公開Activityとする
-4.  KEY\_INTENTには、ログイン画面Activityのクラス名を指定した明示的Intentを与える
-5.  アカウント情報や認証トークンなどのセンシティブな情報はログ出力しない
-6.  Account Managerにパスワードを保存しない
-7.  Authenticatorとオンラインサービスとの通信はHTTPSで行う
+1.  The service that provides an authenticator must be private.
+2.  The login screen activity must be implemented in an authenticator
+    application.
+3.  The login screen activity must be made as a public activity.
+4.  The explicit intent which the class name of the login screen
+    activity is specified must be set to KEY\_INTENT.
+5.  Sensitive information (like account information or authentication
+    token) must not be output to the log.
+6.  Password should not be saved in Account Manager.
+7.  HTTPS should be used for communication between an authenticator and
+    the online services.
 
-AndroidManifest.xmlにてAuthenticatorのIBinderをAccount
-Managerに提供するサービスを定義。meta-dataにてAuthenticatorを記述したリソースXMLファイルを指定。
+Service which gives Account Manager IBinder of Authenticator is
+defined in AndroidManifest.xml. Specify resource XML file which
+Authenticator is written, by meta-data.
 
 AccountManager Authenticator/AndroidManifest.xml
 ```eval_rst
@@ -1747,8 +1774,8 @@ AccountManager Authenticator/AndroidManifest.xml
    :encoding: shift-jis
 ```
 
-
-XMLファイルでAuthenticatorを定義。独自アカウントのアカウントタイプ等を指定する。
+Define Authenticator by XML file. Specify account type etc. of
+in-house account.
 
 res/xml/authenticator.xml
 ```eval_rst
@@ -1757,9 +1784,9 @@ res/xml/authenticator.xml
    :encoding: shift-jis
 ```
 
-
-AuthenticatorのインスタンスをAccount
-Managerに提供するサービス。このサンプルで実装するAuthenticatorであるJssecAuthenticatorクラスのインスタンスをonBind()でreturnするだけの簡単な実装でよい。
+Service which gives Authenticator\'s Instance to AccountManager. Easy
+implementation which returns Instance of JssecAuthenticator class that
+is Authenticator implemented in this sample by onBind(), is enough.
 
 AuthenticationService.java
 ```eval_rst
@@ -1768,10 +1795,12 @@ AuthenticationService.java
    :encoding: shift-jis
 ```
 
-
-このサンプルで実装するAuthenticatorであるJssecAuthenticator。AbstractAccountAuthenticatorを継承してabstractメソッドをすべて実装する。これらのメソッドはAccount
-Managerから呼ばれる。addAccount()およびgetAuthToken()では、オンラインサービスから認証トークンを取得するためのLoginActivityを起動するintentをAccount
-Managerに返している。
+JssecAuthenticator is the Authenticator which is implemented in this
+sample. It inherits AbstractAccountAuthenticator, and all abstract
+methods are implemented. These methods are called by Account Manager.
+At addAccount() and at getAuthToken(), the intent for launching
+LoginActivity to get authentication token from online service are
+returned to Account Manager.
 
 JssecAuthenticator.java
 ```eval_rst
@@ -1780,8 +1809,11 @@ JssecAuthenticator.java
    :encoding: shift-jis
 ```
 
-
-オンラインサービスにアカウント名、パスワードを送信してログイン認証を行い、その結果として認証トークンを取得するLoginActivity。新規アカウント追加および認証トークン再取得の場合に表示される。オンラインサービスへの実際のアクセスはWebServiceクラス内で実装されるものとしている。
+This is Login activity which sends an account name and password to
+online service, and perform login authentication, and as a result, get
+an authentication token. It\'s displayed when adding a new account or
+when getting authentication token again. It\'s supposed that the
+actual access to online service is implemented in WebService class.
 
 LoginActivity.java
 ```eval_rst
@@ -1790,8 +1822,10 @@ LoginActivity.java
    :encoding: shift-jis
 ```
 
-
-実際にはWebServiceクラスはダミー実装となっており、常に認証が成功し固定文字列を認証トークンとして返すサンプル実装になっている。
+Actually, WebService class is dummy implementation here, and this is
+the sample implementation which supposes authentication is always
+successful, and fixed character string is returned as an
+authentication token.
 
 WebService.java
 ```eval_rst
@@ -1801,25 +1835,31 @@ WebService.java
 ```
 
 
-#### 独自アカウントを利用する
+#### Using In-house Accounts
 
-独自アカウントの追加と認証トークンの取得を行うアプリのサンプルコードを以下に示す。もう一つのサンプルアプリ「5.3.1.1
-独自アカウントを作る」が端末にインストールされているときに、独自アカウントの追加や認証トークンの取得ができる。「アクセスリクエスト」　画面は両アプリの署名鍵が異なる場合にだけ表示される。
+Here is the sample code of an application which adds an in-house
+account and gets an authentication token. When another sample
+application \"5.3.1.1 Creating In-house account\" is installed in a
+device, in-house account can be added or authentication token can be
+got. \"Access request\" screen is displayed only when the signature
+keys of both applications are different.
 
-![](media/image76.png)
+![](media/image69.png)
 ```eval_rst
 .. {width="6.889763779527559in"
 .. height="2.296456692913386in"}
 ```
 
-図 5.3‑2 サンプルアプリAccountManager Userの動作画面
+Figure 5.3‑2 Behavior screen of sample application AccountManager User
 
-ポイント：
+Point:
 
-1.  Authenticatorが正規のものであることを確認してからアカウント処理を実施する
+1.  Execute the account process after verifying if the authenticator is
+    regular one.
 
-利用アプリのAndroidManifest.xml。必要なPermissionを利用宣言。必要なPermissionについては「5.3.3.1
-Account Managerの利用とPermission」を参照。
+AndroidManifest.xml of AccountManager user application. Declare to use
+necessary Permission. Refer to \"5.3.3.1 Usage of Account Manager and
+Permission\" for the necessary Permission.
 
 AccountManager User/AndroidManifest.xml
 ```eval_rst
@@ -1829,7 +1869,11 @@ AccountManager User/AndroidManifest.xml
 ```
 
 
-利用アプリのActivity。画面上のボタンをタップするとaddAcount()またはgetAuthToken()が実行される。指定のアカウントタイプに対応したAuthenticatorが偽物であるケースがあるので、正規のAuthenticatorであることを確認してからアカウント処理を始めていることに注意。
+Activity of user application. When tapping the button on the screen,
+either addAccount() or getAuthToken() is to be executed. Authenticator
+which corresponds to the specific account type may be fake in some
+cases, so pay attention that the account process is started after
+verifying that the Authenticator is regular one.
 
 UserActivity.java
 ```eval_rst
@@ -1847,101 +1891,201 @@ PkgCert.java
 ```
 
 
-### ルールブック<!-- b26235fa -->
+### Rule Book<!-- b26235fa -->
 
-Authenticatorアプリを実装する際には以下のルールを守ること。
+Follow the rules below when implementing Authenticator application.
 
-1.  Authenticatorを提供するServiceは非公開Serviceとする （必須）
+1.  Service that Provides Authenticator Must Be Private (Required)
 
-2.  ログイン画面ActivityはAuthenticatorアプリで実装する （必須）
+2.  Login Screen Activity Must Be Implemented by Authenticator
+    Application (Required)
 
-3.  ログイン画面Activityは公開Activityとして他のアプリからの攻撃アクセスを想定する （必須）
+3.  The Login Screen Activity Must Be Made as a Public Activity and
+    Suppose Attack Accesses by Other Applications (Required)
 
-4.  KEY\_INTENTには、ログイン画面Activityのクラス名を指定した明示的Intentを与える （必須）
+4.  Provide KEY\_INTENT with Explicit Intent with the Specified Class
+    Name of Login Screen Activity (Required)
 
-5.  アカウント情報や認証トークンなどのセンシティブな情報はログ出力しない （必須）
+5.  Sensitive Information (like Account Information and Authentication
+    Token) Must Not Be Output to the Log (Required)
 
-6.  Account Managerにパスワードを保存しない （推奨）
+6.  Password Should Not Be Saved in Account Manager (Recommended)
 
-7.  Authenticatorとオンラインサービスとの通信はHTTPSで行う （必須）
+7.  HTTPS Should Be Used for Communication Between an Authenticator and
+    the Online Service (Required)
+&nbsp;
+Follow the rules below when implementing user application.
+&nbsp;
+&nbsp;
+8.  Account Process Should Be Executed after verifying if the
+    Authenticator is the regular one (Required)
 
-利用アプリを実装する際には以下のルールを守ること。
+#### Service that Provides Authenticator Must Be Private (Required)
 
-1.  Authenticatorが正規のものであることを確認してからアカウント処理を実施する （必須）
+It\'s presupposed that the Service which provides with Authenticator
+is used by Account Manager, and it should not be accessed by other
+applications. So, by making it Private Service, it can exclude
+accesses by other applications. In addition, Account Manager runs with
+system privilege, so Account Manager can access even if it\'s private
+Service.
 
-#### Authenticatorを提供するServiceは非公開Serviceとする （必須）
+#### Login Screen Activity Must Be Implemented by Authenticator Application (Required)
 
-Authenticatorを提供するServiceはAccount
-Managerから利用されることを前提としており、他のアプリがアクセスできてはならない。非公開Serviceとすることにより、他のアプリからのアクセスを排除することができる。またAccount
-Managerはsystem権限で動作しているので非公開Serviceであってもアクセスできる。
+Login screen for adding a new account and getting the authentication
+token should be implemented by Authenticator application. Own Login
+screen should not be prepared in user application side. As mentioned
+at the beginning of this article, \[The advantage of AccountManager is
+that the extremely sensitive information/password is not necessarily
+to be handled by application.\], If login screen is prepared in user
+application side, password is handled by user application, and its
+design becomes what is beyond the policy of Account Manager.
 
-#### ログイン画面ActivityはAuthenticatorアプリで実装する （必須）
+By preparing login screen by Authenticator application, who can
+operate login screen is limited only the device\'s user. It means that
+there\'s no way to attack the account for malicious applications by
+attempting to login directly, or by creating an account.
 
-新規アカウント追加および認証トークン再取得の場合に表示されるログイン画面はAuthenticatorアプリで実装すべきである。利用アプリ側で独自にログイン画面を用意してはならない。この記事の冒頭で「パスワードという極めてセンシティブな情報をアプリが扱わなくて済むことがAccount
-Managerの利点である。」と呼べた。もし利用アプリ側でログイン画面を用意してしまうと、利用アプリがパスワードを扱ってしまうことになり、Account
-Managerの思想から逸脱した設計となってしまう。
+#### The Login Screen Activity Must Be Made as a Public Activity and Suppose Attack Accesses by Other Applications (Required)
 
-Authenticatorアプリがログイン画面を用意することにより、ログイン画面を操作できるのは端末のユーザーだけに限定される。これは悪意あるアプリが直接ログインを試みたり、アカウントを作成したりといったアカウント攻撃をする手段がないということである。
+Login screen Activity is the system launched by the user
+application\'s p. In order that the login screen Activity is displayed
+even when the signature keys of user application and Authenticator
+application are different, login screen Activity should be implemented
+as Public Activity.
 
-#### ログイン画面Activityは公開Activityとして他のアプリからの攻撃アクセスを想定する （必須）
+What login screen Activity is public Activity means, that there\'s a
+chance that it may be launched by malicious applications. Never trust
+on any input data. Hence, it\'s necessary to take the counter-measures
+mentioned in \"3.2 Handling Input Data Carefully and Securely\"
 
-ログイン画面Activityは利用アプリの権限で起動する仕組みとなっている。利用アプリとAuthenticatorアプリの署名鍵が異なる場合にもログイン画面Activityが表示されるためには、ログイン画面Activityは公開Activityとして実装しなければならない。
+#### Provide KEY\_INTENT with Explicit Intent with the Specified Class Name of Login Screen Activity (Required)
 
-ログイン画面Activityが公開Activityであるということは、悪意あるアプリからも起動される可能性があるということである。入力データは一切信用してはならない。したがって「3.2
-入力データの安全性を確認する」で述べたような対策が必要となる。
+When Authenticator needs to open login screen Activity, Intent which
+launches login screen Activity is to be given in the Bundle that is
+returned to Account Manager, by KEY\_INTENT. The Intent to be given,
+should be the explicit Intent which specifies class name of login
+screen Activity. If an *implicit* Intent is given, the framework may
+attempt to launch an Activity *other* than the Activity prepared by
+the Authenticator app for the login window. On Android 4.4 (API Level 19) 
+and later versions, this may cause the app to crash; on earlier
+versions it may cause unintended Activities prepared by other apps to
+be launched.
 
-#### KEY\_INTENTには、ログイン画面Activityのクラス名を指定した明示的Intentを与える （必須）
+On Android 4.4(API Level 19) and later versions, if the signature of
+an app launched by an intent given by the framework via KEY\_INTENT
+does not match the signature of the Authenticator app, a
+SecurityException is generated; in this case, there is no risk that a
+false login screen will be launched; however, there is a possibility
+that the ordinary screen will be able to launch and the user's normal
+use of the app will be obstructed. On versions prior to Android
+4.4(API Level 19), there is a risk that a false login screen prepared
+by a malicious app will be launched, and thus that the user may input
+passwords and other authentication information to the malicious app.
 
-Authenticatorがログイン画面Activityを開きたいときには、Account
-Managerに返すBundleの中にログイン画面Activityを起動するIntentをKEY\_INTENTで与えることになっている。ここで与えるIntentはログイン画面Activityをクラス名で指定する明示的Intentでなければならない。暗黙的Intentを与えた場合は、フレームワークがAuthenticatorアプリがログイン画面のために用意したActivity以外のActivityの起動を試みる可能性がある。これによって、Andorid
-4.4（API Level 19）以降のバージョンではアプリがクラッシュしたり、Android
-4.4（API Level
-19）より前のバージョンでは他のアプリの用意した意図しないActivityが起動したりする場合がある。
+#### Sensitive Information (like Account Information and Authentication Token) Must Not Be Output to the Log (Required)
 
-Android 4.4（API Level
-19）以降のバージョンでは、フレームワークがKEY\_INTENTで与えるIntentで起動されるアプリの署名とAuthenticatorアプリの署名が一致しない場合にはSecurityExceptionを発生させるため、偽のログイン画面を起動される恐れはないが、正規のログイン画面を起動できずユーザーの正常なアプリ利用を妨げられるおそれがある。Android
-4.4（API Level
-19）より前のバージョンでは、悪意のあるアプリの用意した偽のログイン画面を起動され、ユーザーが悪意のあるアプリにパスワード等認証情報を入力してしまう危険がある。よって、いずれにバージョンであっても、KEY\_INTENTで与えるIntentは明示的Intentでなければならない。
+Applications which access to online service sometimes face a trouble
+like it cannot access to online service successfully. The causes of
+unsuccessful access are various, like lack in network environment
+arrangement, mistakes in implementing communication protocol, lack of
+Permission, authentication error, etc. A common implementation is that
+a program outputs the detailed information to log, so that developer
+can analyze the cause of a problem later.
 
-#### アカウント情報や認証トークンなどのセンシティブな情報はログ出力しない （必須）
+Sensitive information like password or authentication token should not
+be output to log. Log information can be read from other applications,
+so it may become the cause of information leakage. Also, account names
+should not be output to log, if it could be lead the damage of
+leakage.
 
-オンラインサービスに接続するアプリは、その開発時だけでなく運用時においても、オンラインサービスにうまく接続できないトラブルに悩まされることがある。接続できない原因は多岐に渡り、ネットワーク環境の整備不足、通信プロトコルの実装ミス、Permission不足、認証エラーなど様々である。こうした原因の切り分けを目的として、プログラム内部で得られた情報をログ出力する実装もよくみられる。
+#### Password Should Not Be Saved in Account Manager (Recommended)
 
-パスワードや認証トークンなどのセンシティブな情報は決してログ出力してはならない。ログ情報は他のアプリからも読み取ることができるため情報漏洩の原因となりかねないからだ。アカウント名も漏洩も被害につながる場合にはログ出力してはならない。
-
-#### Account Managerにパスワードを保存しない （推奨）
-
-Account
-Managerに登録するアカウントには、パスワードと認証トークンの2つの認証情報を保存することができる。これらの情報は次のディレクトリのaccounts.dbの中に平文で（つまり暗号化されず）保存される。
-- Android 4.1以前<br/>
+Two of authentication information, password and authentication token,
+can be saved in an account to be register to AccountManager. This
+information is to be stored in accounts.db under the following
+directories, in a plain text (i.e. without encryption).
+- Android 4.1 or earlier<br/>
 /data/system/accounts.db
-- Android 4.2以降Android 6.0以前<br/>
-/data/system/users/0/accounts.db
+- Android 4.2 to Android 6.0<br/>
+/data/system/0/accounts.db or /data/system/\<UserId\>/accounts.db
 - Android 7.0以降
 /data/system\_ce/0/accounts\_ce.db<br/>
 
-※Android 4.2以降はマルチユーザー機能がサポートされているため、ユーザーに合わせたディレクトリへ保存されるように変更されている。また、Android 7.0以降ではDirect Boot対応のため、ロック時にデータを扱う際のデータベース /data/system\_de/0/accounts\_de\_db とアンロック時にデータを扱う /data/system\_ce/0/accounts\_ce.db にデータベースファイルが分割された。認証情報は平文の状態で後者のデータベースファイルに保存される。
+Note: Because multiuser functionality is supported on Android 4.2 and
+later versions, this has been changed to save the content to a
+user-specific directory. Also, because Android 7.0 and later versions
+support Direct Boot, the database file is divided into two parts: one
+file that handles data while locked
+(/data/system\_de/0/accounts\_de\_db) and a separate file that handles
+data while unlocked (/data/system\_ce/0/accounts\_ce.db) Under
+ordinary circumstances, authentication information is stored in the
+latter database file.
 
-このaccounts.dbの内容を読み取るためにはroot権限またはsystem権限が必要であり、市販のAndroid端末では読み取ることができない。もし、攻撃者にroot権限やsystem権限が奪われてしまう脆弱性がAndroid OSにある場合には、accounts.dbの中に保存された認証情報が危険にさらされることになる。
+Root privileges or system privileges are required to read the content
+of these database files, so they cannot be read on commercial Android
+terminals. If Android OS contains any vulnerabilities that allow
+attackers to acquire root privileges or system privileges, this would
+leave the authentication information stored in accounts.db exposed to
+risk.
 
-この記事で紹介しているAuthenticatorアプリは、Account Managerに認証トークンは保存するが、ユーザーのパスワードは保存しない設計としている。一定の期間以内にオンラインサービスに継続的に接続していれば、認証トークンの有効期間が延長されるのが一般的であるため、パスワードを保存しない設計で十分であることが多い。
+To read in the contents of accounts.db, either root privilege or
+system privilege is required, and it cannot be read from the marketed
+Android devices. In the case there is any vulnerability in Android OS,
+which root privilege or system privilege may be taken over by
+attackers, authentication information which is saved in accounts.db
+will be on the edge of the risk.
 
-認証トークンは一般にパスワードよりも有効期限が短く、いつでも無効化できる特徴がある、いわば使い捨ての認証情報である。万一、認証トークンが漏洩したとしても、認証トークンを無効化することができるため、認証トークンはパスワードに比べ安全性が高いとされている。認証トークンが無効化された場合には、ユーザーはもう一度パスワードを入力して新しい認証トークンを取得すればよい。
+The Authentication application, which is introduced in this article,
+is designed to save authentication token in AccountManager without
+saving user password. When accessing to online service continuously in
+a certain period, generally the expiration period of authentication
+token is extended, so the design that password is not saved is enough
+in most cases.
 
-パスワードが漏洩した場合、パスワードを無効化してしまうと、そのユーザーはオンラインサービスを利用できなくなってしまう。このような場合、コールセンター対応等が必要となってしまうため大きなコストが発生する。ゆえにAccount
-Managerにパスワードを保存する設計はできるだけ避けるべきである。どうしてもパスワードを保存する設計をしなければならない場合は、パスワードを暗号化して、暗号化の鍵を難読化するなど、高度なリバースエンジニアリング対策を実施することになる。
+In general, valid date of authentication token is shorter than
+password, and it\'s characteristic that it can be disabled anytime. In
+case, authentication token is leaked, it can be disabled, so
+authentication token is comparatively safer, compared with password.
+In the case authentication token is disabled, user can input the
+password again to get a new authentication token.
 
-#### Authenticatorとオンラインサービスとの通信はHTTPSで行う （必須）
+If disabling password when it\'s leaked, user cannot use online
+service any more. In this case, it requires call center support etc.,
+and it will take huge cost. Hence, it\'s better to avoid from the
+design to save password in AccountManager. In case, the design to save
+password cannot be avoided, high level of reverse engineering
+counter-measures like encrypting password and obfuscating the key of
+that encryption, should be taken.
 
-パスワードや認証トークンはいわゆる認証情報といい、これを第三者に奪われてしまうと、第三者がユーザーになりすましできることになる。Authenticatorはオンラインサービスとこうした認証情報を送受信することになるので、HTTPS等の安全性の確立した暗号化通信方式で通信しなければならない。
+#### HTTPS Should Be Used for Communication Between an Authenticator and the Online Service (Required)
 
-#### Authenticatorが正規のものであることを確認してからアカウント処理を実施する （必須）
+Password or authentication token is so called authentication
+information, and if it\'s taken over by the third party, the third
+party can masquerade as the valid user. Since Authenticator
+sends/receives these types of authentication information with online
+service, reliable encrypted communication method like an HTTPS should
+be used.
 
-端末に同一のアカウントタイプを定義したAuthenticatorが複数存在する場合、先にインストールされたAuthenticatorが有効になる。自分のAuthenticatorが後にインストールされた場合には利用されないということである。
+#### Account Process Should Be Executed after verifying if the Authenticator is the regular one (Required)
 
-もし先にインストールされたAuthenticatorがマルウェアによる偽装であった場合には、ユーザーが入力したアカウント情報がマルウェアに奪われてしまう恐れがある。利用アプリはアカウント操作を行うアカウントタイプについて、正規のAuthenticatorがそのアカウントタイプに割り当てられていることを確認してから、アカウント操作を実施しなければならない。
+In the case there are several Authenticators which the same account
+type is defined in a device, Authenticator which was installed earlier
+becomes valid. So, when the own Authenticator was installed later,
+it\'s not to be used.
 
-あるアカウントタイプに割り当てられているAuthenticatorが正規のものであるかは、そのAuthenticatorを含むパッケージの証明書ハッシュ値を、事前に確認している正規の証明書ハッシュ値と一致するかどうかで確認できる。もし証明書ハッシュ値が一致しないことが判明した場合、そのアカウントタイプに割り当てられている意図しないAuthenticatorを含むパッケージをアンインストールするようユーザーを促すといった対処を施すことが望ましい。
+If the Authenticator which was installed earlier, is the malware\'s
+masquerade, account information inputted by user may be taken over by
+malware. User application should verify the account type which
+performs account operation, whether the regular Authenticator is
+allocated to it or not, before executing account operation.
+
+Whether the Authenticator which is allocated to one account type is
+regular one or not, can be verified by checking whether the
+certificate hash value of the package of Authenticator matches with
+pre-confirmed valid certificate hash value. If the certificate hash
+values are found to be not matched, a measure to prompt user to
+uninstall the package which includes the unexpected Authenticator
+allocated to that account type, is preferable.
 
 ### アドバンスト<!-- 1b5bcc77 -->
 
