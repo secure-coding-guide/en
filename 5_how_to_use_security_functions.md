@@ -2087,147 +2087,197 @@ values are found to be not matched, a measure to prompt user to
 uninstall the package which includes the unexpected Authenticator
 allocated to that account type, is preferable.
 
-### アドバンスト<!-- 1b5bcc77 -->
+### Advanced Topics<!-- 1b5bcc77 -->
 
-#### Account Managerの利用とPermission
+#### Usage of Account Manager and Permission
 
-AccountManagerクラスの各メソッドを利用するためには、アプリのAndroidManifest.xmlにそれぞれ適正なPermissionの利用宣言をする必要がある。Android
-5.1(API Level
-22)以前のバージョンではAUTHENTICATE\_ACCOUNTSやGET\_ACCOUNTS,
-MANAGE\_ACCOUNTSといった権限が必要であり、メソッドとの対応を表
-5.3‑1に示す。
+To use each method of AccountManager class, it\'s necessary to declare
+to use the appropriate Permission respectively, in application\'s
+AndroidManifest.xml. In Android 5.1 (API Level 22) and earlier
+versions, privileges such as AUTHENTICATE\_ACCOUNTS, GET\_ACCOUNTS, or
+MANAGE\_ACCOUNTS are required; the privileges corresponding to various
+methods are shown in Table 5.3‑1.
 
-表 5.3‑1　Account Managerの機能とPermission
+Table 5.3‑1 Function of Account Manager and Permission
 
 ```eval_rst
 +------------------------------+---------------------------------------------------------------------+
-|                              | Account Managerが提供する機能                                       |
+|                              | Functions that Account Manager provides                             |
 +------------------------------+--------------------------------+------------------------------------+
-|| Permission                  | メソッド                       || 説明                              |
+|| Permission                  | Method                         || Explanation                       |
 +==============================+================================+====================================+
-|| AUTHENTICATE_ACCOUNTS       | getPassword()                  || パスワードの取得                  |
-|| (Authenticatorと同じ        +--------------------------------+------------------------------------+
-|| 鍵で署名されたPackage       | getUserData()                  || 利用者情報の取得                  |
-|| のみ利用可能)               +--------------------------------+------------------------------------+
-|                              | addAccountExplicitly()         || アカウントのDBへの追加            |
+|| AUTHENTICATE_ACCOUNTS       | getPassword()                  || To get password                   |
+|| (Only Packages which are    +--------------------------------+------------------------------------+
+|| signed by the same key of   | getUserData()                  || To get user information           |
+|| Authenticator, can use.)    +--------------------------------+------------------------------------+
+|                              | addAccountExplicitly()         || To add accounts to DB             |
 |                              +--------------------------------+------------------------------------+
-|                              | peekAuthToken()                || キャッシュされた                  |
-|                              |                                || トークンの取得                    |
+|                              | peekAuthToken()                || To get cached token               |
 |                              +--------------------------------+------------------------------------+
-|                              | setAuthToken()                 || 認証トークンの登録                |
+|                              | setAuthToken()                 || To register authentication token  |
 |                              +--------------------------------+------------------------------------+
-|                              | setPassword()                  || パスワードの変更                  |
+|                              | setPassword()                  || To change password                |
 |                              +--------------------------------+------------------------------------+
-|                              | setUserData()                  || 利用者情報の設定                  |
+|                              | setUserData()                  || To set user information           |
 |                              +--------------------------------+------------------------------------+
-|                              | renameAccount()                || アカウント名の変更                |
+|                              | renameAccount()                || To rename account                 |
 +------------------------------+--------------------------------+------------------------------------+
-|| GET_ACCOUNTS                | getAccounts()                  || すべてのアカウントの              |
-|                              |                                || 一覧取得                          |
+|| GET_ACCOUNTS                | getAccounts()                  || To get a list of all accounts     |
 |                              +--------------------------------+------------------------------------+
-|                              | getAccountsByType()            || アカウントタイプが同じ            |
-|                              |                                || アカウントの一覧取得              |
+|                              | getAccountsByType()            || To get a list of all accounts     |
+|                              |                                || which account types are same      |
 |                              +--------------------------------+------------------------------------+
-|                              | getAccountsByTypeAndFeatures() || 指定した機能を持った              |
-|                              |                                || アカウントの一覧取得              |
+|                              | getAccountsByTypeAndFeatures() || To get a list of all accounts     |
+|                              |                                || which have the specified function |
 |                              +--------------------------------+------------------------------------+
-|                              | addOnAccountsUpdatedListener() || イベントリスナーの登録            |
+|                              | addOnAccountsUpdatedListener() || To register event listener        |
 |                              +--------------------------------+------------------------------------+
-|                              | hasFeatures()                  || 指定した機能の有無                |
+|                              | hasFeatures()                  || Whether it has the specified      |
+|                              |                                || function or not                   |
 +------------------------------+--------------------------------+------------------------------------+
-|| MANAGE_ACCOUNTS             | getAuthTokenByFeatures()       || 指定した機能を持つアカウ          |
-|                              |                                || ントの認証トークンの取得          |
+|| MANAGE_ACCOUNTS             | getAuthTokenByFeatures()       || To get authentication token of    |
+|                              |                                || the accounts which have the       |
+|                              |                                || specified function                |
 |                              +--------------------------------+------------------------------------+
-|                              | addAccount()                   || ユーザーへのアカウント            |
-|                              |                                || 追加要請                          |
+|                              | addAccount()                   || To request a user to add accounts |
 |                              +--------------------------------+------------------------------------+
-|                              | removeAccount()                || アカウントの削除                  |
+|                              | removeAccount()                || To remove an account              |
 |                              +--------------------------------+------------------------------------+
-|                              | clearPassword()                || パスワードの初期化                |
+|                              | clearPassword()                || Initialize password               |
 |                              +--------------------------------+------------------------------------+
-|                              | updateCredentials()            || ユーザーへのパスワード            |
-|                              |                                || 変更要請                          |
+|                              | updateCredentials()            || Request a user to change password |
 |                              +--------------------------------+------------------------------------+
-|                              | editProperties()               || Authenticatorの設定変更           |
+|                              | editProperties()               || Change Authenticator setting      |
 |                              +--------------------------------+------------------------------------+
-|                              | confirmCredentials()           || ユーザーへのパスワード            |
-|                              |                                || 再入力要請                        |
+|                              | confirmCredentials()           || Request a user to input password  |
+|                              |                                || again                             |
 +------------------------------+--------------------------------+------------------------------------+
-|| USE_CREDENTIALS             | getAuthToken()                 || 認証トークンの取得                |
+|| USE_CREDENTIALS             | getAuthToken()                 || To get authentication token       |
 |                              +--------------------------------+------------------------------------+
-|                              | blockingGetAuthToken()         || 認証トークンの取得                |
+|                              | blockingGetAuthToken()         || To get authentication token       |
 +------------------------------+--------------------------------+------------------------------------+
-|| MANAGE_ACCOUNTS             | invalidateAuthToken()          || キャッシュされた                  |
-|| または                      |                                || トークンの削除                    |
+|| MANAGE_ACCOUNTS             | invalidateAuthToken()          || To delete cached token            |
+|| or                          |                                |                                    |
 || USE_CREDENTIALS             |                                |                                    |
 +------------------------------+--------------------------------+------------------------------------+
 ```
 
-ここで、AUTHENTICATE\_ACCOUNTS
-Permissionが必要なメソッド群を使う場合にはPermissionに加えてパッケージの署名鍵に関する制限が設けられている。具体的には、Authenticatorを提供するパッケージの署名に使う鍵とメソッドを使うアプリのパッケージの署名に使う鍵が同じでなければならない。そのため、Authenticator以外にAUTHENTICATE\_ACCOUNTS
-Permissionが必要なメソッド群を使うアプリを配布する際には、Authenticatorと同じ鍵で署名を施すことになる。
+In case using methods group which AUTHENTICATE\_ACCOUNTS Permission is
+necessary, there is a restriction related to package signature key
+along with Permission. Specifically, the key for signature of package
+that provides Authenticator and the key for signature of package in
+the application that uses methods, should be the same. So, when
+distributing an application which uses method group which
+AUTHENTICATE\_ACCOUNTS Permission is necessary other than
+Authenticator, signature should be signed by the key which is the same
+as Authenticator.
 
-Android 6.0(API Level
-23)以降のバージョンではGET\_ACCOUNTS以外のPermissionは使用されておらず、宣言してもしなくてもできることに差はない。Android
-5.1(API Level
-22)以前のバージョンにおいてAUTHENTICATE\_ACCOUNTSを要求していたメソッドについては、Permissionを要求しないものの、同様に署名が一致する場合のみしか呼び出せない
-(署名が一致しない場合にはSecurityExceptionが発生する) ことに注意する。
+In Android 6.0 (API Level 23) and later versions, Permissions other
+than GET\_ACCOUNTS are not used, and there is no difference between
+what may be done whether or not it is declared. For methods that
+request AUTHENTICATE\_ACCOUNTS on Android 5.1 (API Level 22) and
+earlier versions, note that---even if you wish to request a
+Permission---the call can only be made if signatures match (if the
+signatures do not match then a SecurityException is generated).
 
-さらに、Android 8.0（API Level
-26）でGET\_ACCOUNTSを必要としていたAPIのアクセス制御も変更された。Android
-8.0（API Level
-26）以降のバージョンで、アカウント情報の利用側のアプリのtargetSdkVersionが26以上の場合には、GET\_ACCOUNTSが付与されていたとしても原則としてAuthenticatorアプリと署名が一致する場合にしかアカウントの情報は取得できない。ただし、AuthenticatorアプリはsetAccountVisibilityメソッドを呼び出してパッケージ名を指定することで、署名の一致しないアプリに対してもアカウント情報を提供することができる。
+In addition, access controls for API routines that require
+GET\_ACCOUNTS changed in Android 8.0 (API Level 26). In this and later
+versions, if the targetSdkVersion of the app on the side using the
+account information is 26 or higher, account information can generally
+not be obtained if the signature does not match that of the
+Authenticator app, even if GET\_ACCOUNTS has been granted. However, if
+the Authenticator app calls the setAccountVisibility method to specify
+a package name, account information can be provided even to apps with
+non-matching signatures.
 
-Android
-Studioでの開発の際には設定した署名鍵が固定で使われるため、鍵のことを意識せずにPermissionだけで実装や動作確認が出来てしまう。特にアプリによって署名鍵を使い分けている開発者は、この制限を考慮してアプリに使う鍵を選定する必要があるので注意をすること。また、Account
-Managerから取得するデータにはセンシティブな情報が含まれるため、漏洩や不正利用などのリスクを減らすように扱いには十分注意すること。
+In a development phase by Android Studio, since a fixed debug keystore
+might be shared by some Android Studio projects, developers might
+implement and test Account Manager by considering only permissions and
+no signature. It\'s necessary for especially developers who use the
+different signature keys per applications, to be very careful when
+selecting which key to use for applications, considering this
+restriction. In addition, since the data which is obtained by
+AccountManager includes the sensitive information, so need to handle
+with care in order to decrease the risk like leakage or unauthorized
+use.
 
-#### Android 4.0.xでは利用アプリとAuthenticatorアプリの署名鍵が異なると例外が発生する
+#### Exception Occurs When Signature Keys of User Application and Authenticator Application Are Different, in Android 4.0.x
 
-Authenticatorを含むAuthenticatorアプリと異なる開発者鍵で署名された利用アプリから認証トークンの取得機能が要求された場合、Account
-Managerは認証トークン使用許諾画面（GrantCredentialsPermissionActivity）を表示してユーザーに認証トークンの使用可否を確認する。しかし、Android
-4.0.xのAndroid Frameworkには不具合があり、Account
-Managerによってこの画面が開かれた途端、例外が発生し、アプリが強制終了してしまう（図
-5.3‑3）。不具合の詳細は
+When authentication token acquisition function, is required by the
+user application which is signed by the developer key which is
+different from the signature key of Authenticator application that
+includes Authenticator, AccountManager verifies users whether to grant
+the usage of authentication token or not, by displaying the
+authentication token license screen
+(GrantCredentialsPermissionActivity.) However, there\'s a bug in
+Android Framework of Android 4.0.x, as soon as this screen in opened
+by AccountManager, exception occurs, and application is force closed.
+(Figure 5.3‑3:). See
 [https://code.google.com/p/android/issues/detail?id=23421](https://code.google.com/p/android/issues/detail?id=23421)
-に記載されている。Android 4.1.x以降ではこの不具合はない。
+for the details of the bug. This bug cannot be found in Android 4.1.x.
+and later.
 
-![](media/image77.png)
+![](media/image70.png)
 ```eval_rst
 .. {width="6.3597222222222225in" height="4.5in"}
 ```
 
-図
-5.3‑3Android標準の認証トークン使用許諾画面を表示した場合
+Figure 5.3‑3: When displaying Android standard authentication token
+license screen.
 
-#### Android 8.0（API Level 26）以降で署名の一致しないAuthenticatorのアカウントを読めるケース
+#### Cases in which Authenticator accounts with non-matching signatures may be read in Android 8.0 (API Level 26) or later {#cases-in-which-authenticator-accounts-with-non-matching-signatures-may-be-read-in-android-8.0-api-level-26-or-later-1}
 
-Android 8.0（API Level 26）から、アカウント情報の取得などAndroid
-7.1（API Level 25）以前ではGET\_ACCOUNTS
-Permissionが必要であったメソッドの呼び出しに対してGET\_ACCOUNTS
-Permissionが不要になり、代わりに署名が一致する場合やAuthenticatorアプリ側でsetAccountVisibilityメソッドによってアカウント情報の提供先アプリとして指定された場合にのみアカウントの情報が取得できるようになった。ただし、フレームワークの課すこのルールにはいくつかの例外があり、注意が必要である。その例外について以下に述べる。
+In Android 8.0 (API Level 26) and later versions,
+account-information-fetching methods that required GET\_ACCOUNTS
+Permission in Android 7.1 (API Level 25) and earlier versions may now
+be called without that permission. Instead, account information may
+now be obtained only in cases where the signature matches or in which
+the setAccountVisibility method has been used on the Authenticator app
+side to specify an app to which account information may be provided
+However, note carefully that there are a number of exceptions to this
+rule, implemented by the framework. In what follows we discuss these
+exceptions.
 
-まず、アカウント情報利用側アプリのtargetSdkVersionが25 (Android 7.1)
-以下の場合には、上記のルールが適用されず、GET\_ACCOUNTS
-Permissionを持っているアプリは署名に関係なく端末内のアカウント情報を取得できる。ただし、この挙動はAuthenticator側の実装によって変更することができることを後に述べる。
+First, when the targetSdkVersion of the app using the account
+information is 25 (Android 7.1) or below, the above rule does not
+apply; in this case apps with the GET\_ACCOUNTS permission may obtain
+account information within the terminal regardless of its signature.
+However, below we discuss how this behavior may be changed depending
+on the Authenticator-side implementation.
 ```eval_rst
-次に、WRITE\_CONTACTS Permissionを利用宣言しているAuthenticatorのアカウント情報は、READ\_CONTACTS Permissionを持っている他アプリから、署名に関係なく読めてしまう。これは、バグではなくフレームワークの仕様である [32]_。ただし、この挙動もまた、Authenticator側の実装によって変更することができる。
+Next, account information for Authenticators that declare the use of
+WRITE\_CONTACTS Permission may be read by other apps with READ\_CONTACTS
+Permission, regardless of signature. This is not a bug, but is rather
+the way the framework is designed
+[32]_.Note again that this behavior
+may differ depending on the Authenticator-side implementation.
 
-.. [32] WRITE\_CONTACTS Permissionを利用宣言しているAuthenticatorはアカウント情報をContactsProviderに書き込むとの想定で、READ\_CONTACTS Permissionを持つアプリにアカウント情報取得を許可していると考えられる。
+.. [32] It is assumed that Authenticators that declare the use of
+    WRITE\_CONTACTS Permission will write account information to
+    ContactsProvider, and that apps with READ\_CONTACTS Permission will
+    be granted permission to obtain account information.
 ```
-以上のように署名が一致しておらず、かつsetAccountVisibilityメソッドの呼び出しによってアカウント情報の提供先に指定していないアプリにもアカウント情報を読まれてしまう例外的なケースはあるのだが、これらの挙動はAuthenticator側で予め次のスニペットのようにsetAccountVisibilityメソッドを呼び出しておくことで変更できる。
+Thus we see that there are some exceptional cases in which account
+information may be read even for apps with non-matching signatures and
+for which the setAccountVisibility method has not been called to
+specify a destination to which account information is to be provided.
+However, these behaviors may be modified by calling the
+setAccountVisibility method on the Authenticator side, as in the
+following snippet.
 
-第三者アプリにアカウント情報を提供しない
+Do not provide account information to third-party apps
 ```java
-accountManager.setAccountVisibility(account, // visibilityを変更するアカウント
+accountManager.setAccountVisibility(account, // account for which to change visibility
         AccountManager.PACKAGE_NAME_KEY_LEGACY_VISIBLE,
         AccountManager.VISIBILITY_USER_MANAGED_NOT_VISIBLE);
 
 ```
 
-この通りにsetAccountVisibilityメソッドを呼び出したAuthenticatorのアカウント情報については、フレームワークはデフォルトの挙動ではなく、targetSdkVersion
-\<=
-25のケースやREAD\_CONTACTSを持っている場合であってもアカウント情報を提供しないように挙動を変更する。
+By proceeding this way, we can avoid the framework's default behavior
+regarding account information for Authenticators that have called the
+setAccountVisibility method; the above modification ensures that
+account information is not provided even in cases where
+targetSdkVersion \<= 25 or READ\_CONTACTS permission is present.
 
 HTTPSで通信する
 ---------------
