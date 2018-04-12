@@ -1484,105 +1484,191 @@ public void onCreate(Bundle savedInstanceState) {
 
 ```
 
-#### 独自定義Permissionの署名チェック機構について (Android 5.0以降)
+#### Signature check mechanism for custom permissions (Android 5.0 and later)
 
-Android 5.0(API Level
-21)以降の端末では、独自のPermissionを定義したアプリにおいて以下のような条件に合致するとインストールに失敗するように仕様変更された。
+In versions of Android 5.0 (API Level 21) and later, the application
+which defines its own custom permissions cannot be installed if the
+following conditions are met.
 
-1.  既に同名のPermissionを定義したアプリがインストールされている
+1.  Another application which defines its own permission with the same
+    name has already installed on the device.
 
-2.  そのインストール済みのアプリと署名が一致しない
+2.  The applications are signed with different keys
 
-この仕様変更により、保護対象の機能
-(Component)の提供側アプリと利用側アプリの双方でPermissionを定義した場合には、同じPermissionを定義した署名の異なる他社アプリが両アプリと同時にインストールされるのを防ぐことができる。しかしながら、「5.2.2.3
-独自定義Signature PermissionはComponentの提供側アプリでのみ定義する
-（必須）」で言及した通り、アプリのアンインストール操作などによって、双方のアプリにPermissionを定義するとそのPermissionが意図せず未定義状態になる場合があるため、この仕様を自社の定義したSignature
-Permissionが他アプリに定義されていないことのチェックに活用することはできないことが分かっている。
+When both an application with the protected function (Component) and
+an application using the function define their own permission with the
+same name and are signed with the same key, the above mechanism will
+protect against installation of other company\'s applications which
+define their own custom permission with the same name. However, as
+mentioned in \"5.2.2.3 Your Own Signature Permission Must Only Be
+Defined on the Provider-side Application (Required)\", that mechanism
+won\'t work well for checking if a custom permission is defined by
+your own company because the permission could be undefined without
+your intent by uninstalling applications when plural applications
+define the same permission.
 
-結果として、自社限定アプリで独自定義Signature
-Permissionを利用する場合は、引き続き「5.2.2.3 独自定義Signature
-PermissionはComponentの提供側アプリでのみ定義する
-（必須）」、「5.2.2.4　独自定義Signature
-Permissionは自社アプリにより定義されていることを確認する
-（必須）」のルールを順守する必要がある。
+To sum it up, also in versions of Android 5.0 (API Level 21) and
+later, you are required to comply with the two rules, \"5.2.2.3 Your
+Own Signature Permission Must Only Be Defined on the Provider-side
+Application (Required)\" and \"5.2.2.4 Verify If the In-house-defined
+Signature Permission Is Defined by an In-house Application
+(Required)\" when your application defines your own Signature
+Permission.
 
-#### Android 6.0以降のPermissionモデルの仕様変更について
+#### Modifications to the Permission model specifications in Android versions 6.0 and later
 
-Android 6.0(API Level
-23)においてアプリの仕様や設計にも影響を及ぼすPermissionモデルの仕様変更が行われた。本節ではAndroid
-6.0以降のPermissionモデルの概要を解説する。またAndroid
-8.0以降での変更点についても記載する。
+Android 6.0 (API Level 23) introduces modified specifications for the
+Permission model that affect both the design and specifications of
+apps. In this section we offer an overview of the Permission model in
+Android 6.0 and later. We also describe modifications made in Android
+8.0 and later.
 
-##### 権限の付与・取り消しのタイミング
+##### The timing of permission grants and refusals
 
-ユーザー確認が必要な権限（Dangerous Permission）をアプリが利用宣言している場合（「5.2.2.1 Android　OS既定のPermissionを利用する方法」参照）、Android 5.1（API Level 22）以前の仕様では、アプリのインストール時にその権限一覧が表示され、ユーザーがすべての権限を許可することでインストールが行われる。この時点で、アプリが利用宣言している(Dangerous Permission以外の権限を含め)全ての権限はアプリに付与され、一度付与された権限はアプリが端末からアンインストールされるまで有効である。
+In cases where an app declares use of permissions requiring user
+confirmation (Dangerous Permissions) \[see Section "5.2.2.1 System
+Dangerous Permissions of Android OS Must Only Be Used for Protecting
+User Assets (Required)"\], the specifications for Android 5.1 (API
+level 22) and earlier versions called for a list of such permissions
+to be displayed when the app is installed, and the user must grant all
+permissions for the installation to proceed. At this point, all
+permissions declared by the app (including permissions other than
+Dangerous Permissions) were granted to the app; once these permissions
+were granted to the app, they remained in effect until the app was
+>uninstalled from the terminal.
 ```eval_rst
-しかしAndroid 6.0以降の仕様では、権限の付与はアプリの実行時に行う仕様となり、アプリのインストール時には権限の付与もユーザーへの確認も行われない。アプリは、Dangerous Permissionを必要とする処理を実行する際、事前にその権限がアプリに付与されているかどうかを確認し、権限が付与されていない場合にはAndroid OSに確認画面を表示させ、ユーザーに権限利用の許可を求める必要がある [29]_。ユーザーが確認画面で許可することでその権限はアプリに付与される。ただし、ユーザーは一度アプリに許可した権限(Dangerous
-Permission)を、設定メニューを通じて任意のタイミングで取り消すことができる（図 5.2‑10）ため、権限がアプリに付与されておらず必要な情報や機能にアクセスすることができない状況においても、アプリが異常な動作を起こすことがないよう適切な処理を実装する必要がある。
+However, in the specifications for Android 6.0 and later versions, the
+granting of permissions takes place when an app is executed. The
+granting of permissions, and user confirmation of permissions, does
+not take place when the app is installed. When an app executes a
+procedure that requires Dangerous Permissions, it is necessary to
+check whether or not those permissions have been granted to the app in
+advance; if not, a confirmation window must be displayed in Android OS
+to request permission from the user
+[29]_.If the user grants
+permission from the confirmation window, the permissions are granted
+to the app. However, permissions granted to an app by a user
+(Dangerous Permissions) may be revoked at any time via the Settings
+menu (Figure 5.2‑10). For this reason, appropriate procedures must be
+implemented to ensure that apps cause no irregular behavior even in
+situations in which they cannot access needed information or
+functionality because permission has not been granted.
 
-.. [29] Normal PermissionおよびSignature PermissionはAndroid OSにより自動的に付与されるため、ユーザー確認を行う必要はない。
+.. [29] Because Normal Permissions and Signature Permissions are
+    automatically granted by Android OS, there is no need to obtain user
+    confirmation for these permissions.
 ```
-![](media/image74.png)
+![](media/image67.png)
 ```eval_rst
 .. {width="1.9999628171478565in"
 .. height="3.558266622922135in"}
 ```
 
-図 5.2‑10
+Figure 5.2‑10
 
-##### 権限の付与・取り消しの単位
+##### Units of permission grants and refusals
 
-いくつかのPermissionはその機能や関連する情報の種類に応じて、Permission
-Groupと呼ばれる単位でグループ化されている。例えば、カレンダー情報の読み取りに必要なPermissionであるandroid.permission.READ\_CALENDARと、カレンダー情報の書き込みに必要なPermissionであるandroid.permission.WRITE\_CALENDARは、どちらもandroid.permission-group.CALENDARというPermission
-Groupに属している。
+Multiple Permissions may be grouped together into what is known as a
+Permission Group based on their functions and type of information
+relevant to them. For example, the Permission
+android.permission.READ\_CALENDAR, which is required to read calendar
+information, and the Permission android.permission.WRITE\_CALENDAR,
+which is required to write calendar information, are both affiliated
+with the Permission Group named android.permission-group.CALENDAR.
 
-Android 6.0（API Level
-23）以降のPermissionモデルにおいて、権限の付与や取り消しはこのPermission
-Groupを単位として行われる。ただし、OSとSDKのバージョンの組み合わせによってこの単位が変わるので注意が必要となる（下記参照）。
+In the Permission model for Android 6.0 (API Level 23) and later,
+privileges are granted or denied at the block-unit level of the
+Permission Group, as shown here. However, developers must be careful
+to note that the block unit may vary depending on the combination of
+OS and SDK (see below).
 
--   端末：Android 6.0(API Level
-    23)以降、アプリのtargetSdkVersion：23\~25の場合
+-   For terminals running Android 6.0 (API Level 23) or later and app
+    targetSdkVersion: 23\~25
 
-Manifestにandroid.permission.READ\_CALENDARとandroid.permission.WRITE\_CALENDARが記載されている状態で、アプリの実行時にandroid.permission.READ\_CALENDARの要求が行われ、ユーザーがこれを許可すると、Android
-OSはandroid.permission.READ\_CALENDARとandroid.permission.WRITE\_CALENDARの利用が両方とも許可されたとみなし権限が付与される。
+If android.permission.READ\_CALENDAR and
+android.permission.WRITE\_CALENDAR are listed in the Manifest, then
+when the app is launched a request for
+android.permission.READ\_CALENDAR is issued; if the user grants this
+permission, Android OS determines that both
+android.permission.READ\_CALENDAR and
+android.permission.WRITE\_CALENDAR are permitted for use and thus
+grants the permission.
 
--   端末：Android 8.0（API Level
-    26）以降、アプリのtargetSdkVersion：26以上の場合
+-   For terminals running Android 8.0 (API Level 26） or later and app
+    targetSdkVersion 26 and above:
 
 ```eval_rst
-要求したPermissionの権限のみが付与される。つまりManifestにandroid.permission.READ\_CALENDARとandroid.permission.WRITE\_CALENDARが記載されていても、android.permission.READ\_CALENDARのみを要求しユーザーに許可されたのならandroid.permission.READ\_CALENDARの権限のみが付与される。ただし、その後android.permission.WRITE\_CALENDARが要求された場合は、ユーザーに確認ダイアログが表示されることなく即時に権限が付与される [30]_。
+Only requested Permissions are granted. Thus, even if
+android.permission.READ\_CALENDAR and
+android.permission.WRITE\_CALENDAR are both listed, if only
+android.permission.READ\_CALENDAR has been requested and granted by
+the user, then only android.permission.READ\_CALENDAR will be granted.
+Thereafter, if android.permission.WRITE\_CALENDAR is requested, the
+permission will be granted immediately with no dialog box shown to the
+user
+[30]_.
 
-.. [30] この場合も、アプリによるandroid.permission.READ\_CALENDARとandroid.permission.WRITE\_CALENDARの利用宣言はともに必要である。
+.. [30] In this case as well, the app must declare usage of both
+    android.permission.READ\_CALENDAR and
+    android.permission.WRITE\_CALENDAR.
 ```
-また、権限の付与とは異なり、設定メニューからの権限の取り消しはAndroid
-8.0以降でもPermission Group単位で行われる。
+Also, in contrast to the granting of permissions, cancelling of
+permissions from the settings menu is carried out at the block-unit
+level of the Permission Group on Android 8.0 or later.
 
-Permission Groupの分類についてはDeveloper Reference
-(http://developer.android.com/intl/ja/guide/topics/security/permissions.html\#perm-groups)を参照すること。
+For more information on the classification of Permission Groups, see
+the Developer Reference
+(http://developer.android.com/intl/ja/guide/topics/security/permissions.html\#perm-groups).
 
-##### 仕様変更の影響範囲
+##### The affected range of the revised specifications
 
-アプリの実行時にPermission要求が必要なのは、端末がAndroid 6.0以降で動作していることに加え、アプリのtargetSdkVersionが23以上に設定されている場合に限られる。端末がAndroid 5.1以前で動作している場合や、アプリのtargetSdkVersionが23未満である場合、権限は従来通りアプリのインストール時にまとめて付与される。ただし、アプリのtargetSDKVersionが23未満であっても、端末がAndroid 6.0(API Level 23)以降であれば、インストールされたアプリのPermissionをユーザーが任意のタイミングで取り消すことができるため、意図しないアプリの異常終了が起きる可能性がある。早急に仕様変更に対応するか、アプリのmaxSdkVersionを22以前に設定して、Android 6.0(API Level 23)以降の端末にイントールされないようにするなどの対応が必要である（表 5.2‑1）。
+Cases in which apps require Permission requests at runtime are
+restricted to situations in which the terminal is running Android 6.0
+or later and the app\'s targetSDKVersion is 23 or higher. If the
+terminal is running Android 5.1 or earlier, or if the app\'s
+targetSDKVersion was 23 or lower, permissions are requested and
+granted altogether at the time of installation, as was traditionally
+the case. However, if the terminal is running Android 6.0 or later,
+then---even if the app\'s targetSDKVersion is below 23---permissions
+that were granted by the user at installation may be revoked by the
+user at any time. This creates the possibility of unintended irregular
+app termination. Developers must either comply immediately with the
+modified specifications or set the maxSDKVersion of their app to 22 or
+earlier to ensure that the app cannot be installed on terminals
+running Android 6.0 (API Level 23) or later(Table 5.2‑1).
 
-表 5.2‑1
+Table 5.2‑1
 ```eval_rst
-============================ ========================== ===================================== =========================
-端末のAndroid OSバージョン   アプリのtargetSDKVersion   アプリへの権限付与のタイミング        ユーザーによる権限制御
-============================ ========================== ===================================== =========================
-≧8.0                         | ≧26                      | アプリ実行時(付与はPermission単位)  | あり
-                             | ＜26                     | アプリ実行時(付与はGroup単位)       | あり
-                             | ＜23                     | インストール時                      | あり(早急な対応が必要)
-≧6.0                         | ≧23                      | アプリ実行時(付与はGroup単位)       | あり
-                             | ＜23                     | インストール時                      | あり(早急な対応が必要)
-≦5.1                         | ≧23                      | インストール時                      | なし
-                             | ＜23                     | インストール時                      | なし
-============================ ========================== ===================================== =========================
+============================ ======================= =============================================== =========================
+Terminal Android OS Version   App targetSDKVersion   Times at which app is granted permissions       User has control over permissions?
+============================ ======================= =============================================== =========================
+≧8.0                         | ≧26                   | App execution (granted individually)          | Yes
+                             | ＜26                  | App execution (granted by Permission Group)   | Yes
+                             | ＜23                  | App installation                              | Yes (rapid response required)
+≧6.0                         | ≧23                   | App execution (granted by Permission Group)   | Yes
+                             | ＜23                  | App installation                              | Yes (rapid response required)
+≦5.1                         | ≧23                   | App installation                                | No
+                             | ＜23                  | App installation                                | No
+============================ ======================= =============================================== =========================
 ```
-ただし、maxSdkVersion の効果は限定的であることに注意が必要である。maxSdkVersionを22以前に設定した場合、アプリをGoogle Play経由で配布したときには、Android 6.0(API Level 23)以降の端末が対象アプリのインストール可能端末としてリスト表示されなくなる。一方、Google Play以外のマーケットプレイスではmaxSdkVersionの値がチェックされないことがあるため、Android 6.0(API Level 23)以降の端末に対象アプリをインストールできる場合がある。
+However, it should be noted that the effect of maxSdkVersion is
+limited.　When the value of maxSdkVersion is set 22 or earlier,
+Android 6.0 (API Level 23) and later of the devices are no longer
+listed as an installable device of the target application in Google
+Play. On the other hand, because the value of maxSdkVersion is not
+checked in the marketplace other than Google Play, it may be possible
+to install the target application in the Android 6.0 (API Level 23) or
+later.
 
-このようにmaxSdkVersionの効果は限定的であること、さらにGoogleがmaxSdkVersionの使用を推奨していないことを踏まえ、早急に仕様変更に対応することをお勧めする。
+Because the effect of maxSdkVersion is limited, and further Google
+does not recommend the use of maxSdkVersion, it is recommended that
+developers comply immediately with the modified specifications.
 
-なお、以下のネットワーク通信に関するPermissionは、Android 6.0(API Level 23)以降Protection Levelがdangerousからnormalに変更されている。つまり、これらのPermissionは利用宣言していても、ユーザーの明示的な許可を必要としないため、今回の仕様変更の影響を受けない。
+In Android 6.0 and later versions, permissions for the following
+network communications have their Protection Level changed from
+Dangerous to Normal. Thus, even if apps declare the use of these
+Permissions, there is no need to acquire explicit permission from the
+user, and hence the modified specification has no impact in this case.
 
 -   android.permission.BLUETOOTH
 
