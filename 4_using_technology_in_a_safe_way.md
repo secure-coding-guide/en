@@ -23,13 +23,16 @@ varies according to how the activity is used, we will also explain
 about the implementation of the Activity as well.
 
 Table 4.1‑1 Definition of Activity Types
-
-  Type                Definition
-  ------------------- --------------------------------------------------------------------------------------------------
-  Private Activity    An activity that cannot be launched by another application, and therefore is the safest activity
-  Public Activity     An activity that is supposed to be used by an unspecified large number of applications.
-  Partner Activity    An activity that can only be used by specific applications made by a trusted partner company.
-  In-house Activity   An activity that can only be used by other in-house applications.
+```eval_rst
+=================== ===================================================================================================
+Type                Definition
+=================== ===================================================================================================
+Private Activity    An activity that cannot be launched by another application, and therefore is the safest activity
+Public Activity     An activity that is supposed to be used by an unspecified large number of applications.
+Partner Activity    An activity that can only be used by specific applications made by a trusted partner company.
+In-house Activity   An activity that can only be used by other in-house applications.
+=================== ===================================================================================================
+```
 
 ![](media/image34.png)
 ```eval_rst
@@ -432,7 +435,7 @@ AndroidManifest.xml
 
 ``` xml
         <!-- Private activity -->
-        <!-- \*\*\* POINT 3 \*\*\* Explicitly set the exported attribute to false. -->
+        <!-- *** POINT 3 *** Explicitly set the exported attribute to false. -->
         <activity
             android:name=".PrivateActivity"
             android:label="@string/app_name"
@@ -452,7 +455,7 @@ AndroidManifest.xml(Not recommended)
 
 ``` xml
         <!-- Private activity -->
-        <!-- \*\*\* POINT 3 \*\*\* Explicitly set the exported attribute to false. -->
+        <!-- *** POINT 3 *** Explicitly set the exported attribute to false. -->
         <activity
             android:name=".PictureActivity"
             android:label="@string/picture_name"
@@ -491,12 +494,12 @@ Private Activities.
 AndroidManifest.xml
 
 ``` xml
-    <!-- \*\*\* POINT 1 \*\*\* Do not specify taskAffinity -->
+    <!-- *** POINT 1 *** Do not specify taskAffinity -->
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
 
-        <!-- \*\*\* POINT 1 \*\*\* Do not specify taskAffinity -->
+        <!-- *** POINT 1 *** Do not specify taskAffinity -->
         <activity
             android:name=".PrivateUserActivity"
             android:label="@string/app_name" >
@@ -507,7 +510,7 @@ AndroidManifest.xml
         </activity>
 
         <!-- Private activity -->
-        <!-- \*\*\* POINT 1 \*\*\* Do not specify taskAffinity -->
+        <!-- *** POINT 1 *** Do not specify taskAffinity -->
         <activity
             android:name=".PrivateActivity"
             android:label="@string/app_name"
@@ -547,7 +550,7 @@ Activity declaration and the value should be kept as the default
 AndroidManifest.xml
 
 ``` xml
-        <!-- \*\*\* POINT 2 \*\*\* Do not specify launchMode -->
+        <!-- *** POINT 2 *** Do not specify launchMode -->
         <activity
             android:name=".PrivateUserActivity"
             android:label="@string/app_name" >
@@ -558,7 +561,7 @@ AndroidManifest.xml
         </activity>
 
         <!-- Private activity -->
-        <!-- \*\*\* POINT 2 \*\*\* Do not specify launchMode -->
+        <!-- *** POINT 2 *** Do not specify launchMode -->
         <activity
             android:name=".PrivateActivity"
             android:label="@string/app_name"
@@ -591,7 +594,7 @@ Example of sending an intent
 ``` java
         Intent intent = new Intent();
 
-        // \*\*\* POINT 6 \*\*\* Do not set the FLAG\_ACTIVITY\_NEW\_TASK flag for the intent to start an activity.
+        // *** POINT 6 *** Do not set the FLAG\_ACTIVITY\_NEW\_TASK flag for the intent to start an activity.
 
         intent.setClass(this, PrivateActivity.class);
         intent.putExtra("PARAM", "Sensitive Info");
@@ -655,7 +658,7 @@ Example of returning data.
 ``` java
     public void onReturnResultClick(View view) {
 
-        // \*\*\* POINT 6 \*\*\* Information that is granted to be disclosed to a partner application can be returned.
+        // *** POINT 6 *** Information that is granted to be disclosed to a partner application can be returned.
         Intent intent = new Intent();
         intent.putExtra("RESULT", "Information that is granted to disclose to partner applications");
         setResult(RESULT_OK, intent);
@@ -1501,41 +1504,36 @@ is determined depending on the receivers.
 Table 4.2‑2
 ```eval_rst
 ========================== ======================== =======================================
-..                         Definition method        Characteristic
+..                         | Definition method      | Characteristic
 ========================== ======================== =======================================
-Static Broadcast Receiver  | Define by writing      | - There is a restriction that some
-                           | <receiver> elements    | Broadcasts
-                           |                        | (e.g. ACTION_BATTERY_CHANGED)
-                           | in AndroidManifest.xml | sent by system cannot be received.
-                           |                        | -  Broadcast can be received from
-                           |                        | application's initial boot till
-                           |                        | uninstallation.
-Dynamic Broadcast Receiver | プログラム中で         | ・静的Broadcast Receiverでは受信でき
-                           | registerReceiver()     | ないBroadcastでも受信できる。
-                           | および                 | ・Activityが前面に出ている期間だけ
-                           | unregisterReceiver()   | Broadcastを受信したいなど、
-                           | を呼び出すことにより   | Broadcastの受信可能期間をプログラムで
-                           | 動的にBroadcast        | 制御できる。
-                           | Receiverを登録／       | ・非公開のBroadcast Receiverを作る
-                           | 登録解除する           | ことはできない。
+Static Broadcast Receiver  | Define by writing      | - There is a restriction that some Broadcasts
+                           | <receiver> elements    | (e.g. ACTION_BATTERY_CHANGED) sent by
+                           | in AndroidManifest.xml | system cannot be received.
+                                                    |
+                                                    | - Broadcast can be received from application's
+                                                    | initial boot till uninstallation.
+Dynamic Broadcast Receiver | By calling             | - Broadcasts which cannot be received by
+                           | registerReceiver()     | static Broadcast Receiver can be received.
+                           | and                    |
+                           | unregisterReceiver()   | - The period of receiving Broadcasts can be
+                           | in a program,          | controlled by the program. For example,
+                           | register/unregister    | Broadcasts can be received only while
+                           | Broadcast Receiver     | Activity is on the front side.
+                           | dynamically.           |
+                                                    | - Private Broadcast Receiver cannot be created.
 ========================== ======================== =======================================
 
 ```
 
-#### 非公開Broadcast Receiver - Broadcastを受信する・送信する
+#### Private Broadcast Receiver - Receiving/Sending Broadcasts
 
-非公開Broadcast
-Receiverは、同一アプリ内から送信されたBroadcastだけを受信できるBroadcast
-Receiverであり、もっとも安全性の高いBroadcast
-Receiverである。動的Broadcast
-Receiverを非公開で登録することはできないため、非公開Broadcast
-Receiverでは静的Broadcast Receiverだけで構成される。
+Private Broadcast Receiver is the safest Broadcast Receiver because only Broadcasts sent from within the application can be received. Dynamic Broadcast Receiver cannot be registered as Private, so Private Broadcast Receiver consists of only Static Broadcast Receivers.
 
-ポイント(Broadcastを受信する)：
+Points (Receiving Broadcasts):
 
-1.  exported=\"false\"により、明示的に非公開設定する
-2.  同一アプリ内から送信されたBroadcastであっても、受信Intentの安全性を確認する
-3.  結果を返す場合、送信元は同一アプリ内であるから、センシティブな情報を返送してよい
+1. Explicitly set the exported attribute to false.
+2. Handle the received intent carefully and securely, even though the intent was sent from within the same application.
+3. Sensitive information can be sent as the returned results since the requests come from within the same application.
 
 AndroidManifest.xml
 ```eval_rst
@@ -1544,7 +1542,6 @@ AndroidManifest.xml
    :encoding: shift-jis
 ```
 
-
 PrivateReceiver.java
 ```eval_rst
 .. literalinclude:: CodeSamples/Broadcast PrivateReceiver.PrivateReceiver.java
@@ -1552,14 +1549,13 @@ PrivateReceiver.java
    :encoding: shift-jis
 ```
 
+The sample code for sending Broadcasts to private Broadcast Receiver is shown below.
 
-次に非公開Broadcast ReceiverへBroadcast送信するサンプルコードを示す。
+Points (Sending Broadcasts):
 
-ポイント(Broadcastを送信する)：
-
-4.  同一アプリ内Receiverはクラス指定の明示的IntentでBroadcast送信する
-5.  送信先は同一アプリ内Receiverであるため、センシティブな情報を送信してよい
-6.  同一アプリ内Receiverからの結果情報であっても、受信データの安全性を確認する
+4. Use the explicit Intent with class specified to call a receiver within the same application.
+5. Sensitive information can be sent since the destination Receiver is within the same application.
+6. Handle the received result data carefully and securely, even though the data came from the Receiver within the same application.
 
 PrivateSenderActivity.java
 ```eval_rst
@@ -1568,22 +1564,17 @@ PrivateSenderActivity.java
    :encoding: shift-jis
 ```
 
+#### Public Broadcast Receiver - Receiving/Sending Broadcasts
 
-#### 公開Broadcast Receiver - Broadcastを受信する・送信する
+Public Broadcast Receiver is the Broadcast Receiver that can receive Broadcasts from unspecified large number of applications, so it\'s necessary to pay attention that it may receive Broadcasts from malware.
 
-公開Broadcast
-Receiverは、不特定多数のアプリから送信されたBroadcastを受信できるBroadcast
-Receiverである。マルウェアが送信したBroadcastを受信することがあることに注意が必要だ。
+Points (Receiving Broadcasts):
 
-ポイント(Broadcastを受信する)：
+1. Explicitly set the exported attribute to true.
+2. Handle the received Intent carefully and securely.
+3. When returning a result, do not include sensitive information.
 
-1.  exported=\"true\"により、明示的に公開設定する
-2.  受信Intentの安全性を確認する
-3.  結果を返す場合、センシティブな情報を含めない
-
-公開Broadcast ReceiverのサンプルコードであるPublic
-Receiverは、静的Broadcast Receiverおよび動的Broadcast
-Receiverの両方で利用される。
+Public Receiver which is the sample code for public Broadcast Receiver can be used both in static Broadcast Receiver and Dynamic Broadcast Receiver.
 
 PublicReceiver.java
 ```eval_rst
@@ -1592,9 +1583,7 @@ PublicReceiver.java
    :encoding: shift-jis
 ```
 
-
-静的Broadcast ReceiverはAndroidManifest.xmlで定義する。「表 4.2‑1」のように、端末のバージョンによって暗黙的Broadcst
-Intentの受信に制限があるので注意すること。
+Static Broadcast Receive is defined in AndroidManifest.xml. Note with caution that---depending on the terminal version---reception of implicit Broadcast Intents may be restricted, as in 「Table 4.2‑1」.
 
 AndroidManifest.xml
 ```eval_rst
@@ -1603,12 +1592,7 @@ AndroidManifest.xml
    :encoding: shift-jis
 ```
 
-
-動的Broadcast
-Receiverはプログラム中でregisterReceiver()およびunregisterReceiver()を呼び出すことにより登録／登録解除する。ボタン操作により登録／登録解除を行うためにPublicReceiverActivity上にボタンを配置している。動的Broadcast
-ReceiverインスタンスはPublicReceiverActivityより生存期間が長いためPublicReceiverActivityのメンバー変数として保持することはできない。そのためDynamicReceiverServiceのメンバー変数として動的Broadcast
-Receiverのインスタンスを保持させ、DynamicReceiverServiceをPublicReceiverActivityから開始／終了することにより動的Broadcast
-Receiverを間接的に登録／登録解除している。
+In Dynamic Broadcast Receiver, registration/unregistration is executed by calling registerReceiver() or unregisterReceiver() in the program. In order to execute registration/unregistration by button operations, the button is allocated on PublicReceiverActivity. Since the scope of Dynamic Broadcast Receiver Instance is longer than PublicReceiverActivity, it cannot be kept as the member variable of PublicReceiverActivity. In this case, keep the Dynamic Broadcast Receiver Instance as the member variable of DynamicReceiverService, and then start/end DynamicReceiverService from PublicReceiverActivity to register/unregister Dynamic Broadcast Receiver indirectly.
 
 DynamicReceiverService.java
 ```eval_rst
@@ -1617,7 +1601,6 @@ DynamicReceiverService.java
    :encoding: shift-jis
 ```
 
-
 PublicReceiverActivity.java
 ```eval_rst
 .. literalinclude:: CodeSamples/Broadcast PublicReceiver.PublicReceiverActivity.java
@@ -1625,15 +1608,12 @@ PublicReceiverActivity.java
    :encoding: shift-jis
 ```
 
+Next, the sample code for sending Broadcasts to public Broadcast Receiver is shown. When sending Broadcasts to public Broadcast Receiver, it\'s necessary to pay attention that Broadcasts can be received by malware.
 
-次に公開Broadcast
-ReceiverへBroadcast送信するサンプルコードを示す。公開Broadcast
-ReceiverにBroadcastを送信する場合、送信するBroadcastがマルウェアに受信されることがあることに注意が必要である。
+Points (Sending Broadcasts):
 
-ポイント(Broadcastを送信する)：
-
-4.  センシティブな情報を送信してはならない
-5.  結果を受け取る場合、結果データの安全性を確認する
+4. Do not send sensitive information.
+5. When receiving a result, handle the result data carefully and securely.
 
 PublicSenderActivity.java
 ```eval_rst
@@ -1642,31 +1622,23 @@ PublicSenderActivity.java
    :encoding: shift-jis
 ```
 
+#### In-house Broadcast Receiver - Receiving/Sending Broadcasts
 
-#### 自社限定Broadcast Receiver - Broadcastを受信する・送信する
+In-house Broadcast Receiver is the Broadcast Receiver that will never receive any Broadcasts sent from other than in-house applications. It consists of several in-house applications, and it\'s used to protect the information or functions that in-house application handles.
 
-自社限定Broadcast
-Receiverは、自社以外のアプリから送信されたBroadcastを一切受信しないBroadcast
-Receiverである。複数の自社製アプリでシステムを構成し、自社アプリが扱う情報や機能を守るために利用される。
+Points (Receiving Broadcasts):
 
-ポイント(Broadcastを受信する)：
+1. Define an in-house signature permission to receive Broadcasts.
+2. Declare to use the in-house signature permission to receive results.
+3. Explicitly set the exported attribute to true.
+4. Require the in-house signature permission by the Static Broadcast Receiver definition.
+5. Require the in-house signature permission to register Dynamic Broadcast Receiver.
+6. Verify that the in-house signature permission is defined by an in-house application.
+7. Handle the received intent carefully and securely, even though the Broadcast was sent from an in-house application.
+8. Sensitive information can be returned since the requesting application is in-house.
+9. When Exporting an APK, sign the APK with the same developer key as the sending application.
 
-1.  Broadcast受信用の独自定義Signature Permissionを定義する
-2.  結果受信用の独自定義Signature Permissionを利用宣言する
-3.  exported=\"true\"により、明示的に公開設定する
-4.  静的Broadcast Receiver定義にて、独自定義Signature
-    Permissionを要求宣言する
-5.  動的Broadcast Receiverを登録するとき、独自定義Signature
-    Permissionを要求宣言する
-6.  独自定義Signature
-    Permissionが自社アプリにより定義されていることを確認する
-7.  自社アプリからのBroadcastであっても、受信Intentの安全性を確認する
-8.  Broadcast送信元は自社アプリであるから、センシティブな情報を返送してよい
-9.  Broadcast送信元アプリと同じ開発者鍵でAPKを署名する
-
-自社限定Broadcast
-ReceiverのサンプルコードであるProprietaryReciverは、静的Broadcast
-Receiverおよび動的Broadcast Receiverの両方で利用される。
+In-house Receiver which is a sample code of in-house Broadcast Receiver is to be used both in Static Broadcast Receiver and Dynamic Broadcast Receiver.
 
 InhouseReceiver.java
 ```eval_rst
@@ -1675,9 +1647,7 @@ InhouseReceiver.java
    :encoding: shift-jis
 ```
 
-
-静的Broadcast ReceiverはAndroidManifest.xmlで定義する。「表 4.2‑1」のように、端末のバージョンによって暗黙的Broadcst
-Intentの受信に制限があるので注意すること。
+Static Broadcast Receiver is to be defined in AndroidManifest.xml.Note with caution that---depending on the terminal version---reception of implicit Broadcast Intents may be restricted, as in 「Table 4.2‑1」.
 
 AndroidManifest.xml
 ```eval_rst
@@ -1686,12 +1656,7 @@ AndroidManifest.xml
    :encoding: shift-jis
 ```
 
-
-動的Broadcast
-Receiverはプログラム中でregisterReceiver()およびunregisterReceiver()を呼び出すことにより登録／登録解除する。ボタン操作により登録／登録解除を行うためにProprietaryReceiverActivity上にボタンを配置している。動的Broadcast
-ReceiverインスタンスはProprietaryReceiverActivityより生存期間が長いためProprietaryReceiverActivityのメンバー変数として保持することはできない。そのためDynamicReceiverServiceのメンバー変数として動的Broadcast
-Receiverのインスタンスを保持させ、DynamicReceiverServiceをProprietaryReceiverActivityから開始／終了することにより動的Broadcast
-Receiverを間接的に登録／登録解除している。
+Dynamic Broadcast Receiver executes registration/unregistration by calling registerReceiver() or unregisterReceiver() in the program. In order to execute registration/unregistration by the button operations, the button is arranged on InhouseReceiverActivity. Since the scope of Dynamic Broadcast Receiver Instance is longer than InhouseReceiverActivity, it cannot be kept as the member variable of InhouseReceiverActivity. So, keep Dynamic Broadcast Receiver Instance as the member variable of DynamicReceiverService, and then start/end DynamicReceiverService from InhouseReceiverActivity to register/unregister Dynamic Broadcast Receiver indirectly.
 
 InhouseReceiverActivity.java
 ```eval_rst
@@ -1700,14 +1665,12 @@ InhouseReceiverActivity.java
    :encoding: shift-jis
 ```
 
-
 DynamicReceiverService.java
 ```eval_rst
 .. literalinclude:: CodeSamples/Broadcast InhouseReceiver.DynamicReceiverService.java
    :language: java
    :encoding: shift-jis
 ```
-
 
 SigPerm.java
 ```eval_rst
@@ -1716,7 +1679,6 @@ SigPerm.java
    :encoding: shift-jis
 ```
 
-
 PkgCert.java
 ```eval_rst
 .. literalinclude:: CodeSamples/JSSEC Shared.PkgCert.java
@@ -1724,28 +1686,27 @@ PkgCert.java
    :encoding: shift-jis
 ```
 
+\*\*\* Point 9 \*\*\* When exporting an APK, sign the APK with the same developer key as the sending application.
 
-★ポイント9★APKをExportするときに、Broadcast送信元アプリと同じ開発者鍵でAPKを署名する。
-
-![](media/image34.png)
+![](media/image35.png)
 ```eval_rst
 .. {width="4.647222222222222in"
 .. height="3.2743055555555554in"}
 ```
 
-図 4.2‑2
+Figure 4.2‑2
 
-次に自社限定Broadcast ReceiverへBroadcast送信するサンプルコードを示す。
+Next, the sample code for sending Broadcasts to in-house Broadcast Receiver is shown.
 
-ポイント(Broadcastを送信する)：
+Points (Sending Broadcasts):
 
-10.  結果受信用の独自定義Signature Permissionを定義する
-11.  Broadcast受信用の独自定義Signature Permissionを利用宣言する
-12.  独自定義Signature Permissionが自社アプリにより定義されていることを確認する
-13.  Receiverは自社アプリ限定であるから、センシティブな情報を送信してもよい
-14.  Receiverに独自定義Signature Permissionを要求する
-15.  結果を受け取る場合、結果データの安全性を確認する
-16.  Receiver側アプリと同じ開発者鍵でAPKを署名する
+10. Define an in-house signature permission to receive results.
+11. Declare to use the in-house signature permission to receive Broadcasts.
+12. Verify that the in-house signature permission is defined by an in-house application.
+13. Sensitive information can be returned since the requesting application is the in-house one.
+14. Require the in-house signature permission of Receivers.
+15. Handle the received result data carefully and securely.
+16. When exporting an APK, sign the APK with the same developer key as the destination application.
 
 AndroidManifest.xml
 ```eval_rst
@@ -1754,14 +1715,12 @@ AndroidManifest.xml
    :encoding: shift-jis
 ```
 
-
 InhouseSenderActivity.java
 ```eval_rst
 .. literalinclude:: CodeSamples/Broadcast InhouseSender.InhouseSenderActivity.java
    :language: java
    :encoding: shift-jis
 ```
-
 
 SigPerm.java
 ```eval_rst
@@ -1777,40 +1736,40 @@ PkgCert.java
    :encoding: shift-jis
 ```
 
-★ポイント16★APKをExportするときに、Receiver側アプリと同じ開発者鍵でAPKを署名する。
+\*\*\* Point 16 \*\*\* When exporting an APK, sign the APK with the same developer key as the destination application.
 
-![](media/image34.png)
+![](media/image35.png)
 ```eval_rst
 .. {width="4.647222222222222in"
 .. height="3.2743055555555554in"}
 ```
 
-図 4.2‑3
+Figure 4.2‑3
 
-### ルールブック<!-- 11babdbd -->
+### Rule Book<!-- 11babdbd -->
 
-Broadcastを送受信する際には以下のルールを守ること。
+Follow the rules below to Send or receive Broadcasts.
 
-1.  アプリ内でのみ使用するBroadcast Receiverは非公開設定する （必須）
-2.  受信Intentの安全性を確認する （必須）
-3.  独自定義Signature Permissionは、自社アプリが定義したことを確認して利用する （必須）
-4.  結果情報を返す場合には、返送先アプリからの結果情報漏洩に注意する （必須）
-5.  センシティブな情報をBroadcast送信する場合は、受信可能なReceiverを制限する （必須）
-6.  Sticky Broadcastにはセンシティブな情報を含めない （必須）
-7.  receiverPermissionパラメータの指定なしOrdered Broadcastは届かないことがあることに注意 （必須）
-8.  Broadcast Receiverからの返信データの安全性を確認する （必須）
-9.  資産を二次的に提供する場合には、その資産の従来の保護水準を維持する （必須）
+1. Broadcast Receiver that Is Used Only in an Application Must Be Set as Private (Required)
+2.  Handle the Received Intent Carefully and Securely (Required)
+3.  Use the In-house Defined Signature Permission after Verifying that it\'s Defined by an In-house Application (Required)
+4.  When Returning a Result Information, Pay Attention to the Result Information Leakage from the Destination Application (Required)
+5.  When Sending Sensitive Information with a Broadcast, Limit the Receivable Receiver (Required)
+6.  Sensitive Information Must Not Be Included in the Sticky Broadcast (Required)
+7.  Pay Attention that the Ordered Broadcast without Specifying the receiverPermission May Not Be Delivered (Required)
+8.  Handle the Returned Result Data from the Broadcast Receiver Carefully and Securely (Required)
+9.  When Providing an Asset Secondarily, the Asset should be protected with the Same Protection Level (Required)
 
-#### アプリ内でのみ使用するBroadcast Receiverは非公開設定する （必須）
+#### Broadcast Receiver that Is Used Only in an Application Must Be Set as Private (Required)
 
-アプリ内でのみ使用されるBroadcast Receiverは非公開設定する。これにより、他のアプリから意図せずBroadcastを受け取ってしまうことがなくなり、アプリの機能を利用されたり、アプリの動作に異常をきたしたりするのを防ぐことができる。
+Broadcast Receiver which is used only in the application should be set as private to avoid from receiving any Broadcasts from other applications unexpectedly. It will prevent the application function abuse or the abnormal behaviors.
 
-同一アプリ内からのみ利用されるReceiverではIntent Filterを設置するような設計はしてはならない。Intent Filterの性質上、同一アプリ内の非公開Receiverを呼び出すつもりでも、Intent Filter経由で呼び出したときに意図せず他アプリの公開Receiverを呼び出してしまう場合が存在するからである。
+Receiver used only within the same application should not be designed with setting Intent-filter. Because of the Intent-filter characteristics, a public Receiver of other application may be called unexpectedly by calling through Intent-filter even though a private Receiver within the same application is to be called.
 
-AndroidManifest.xml(非推奨)
+AndroidManifest.xml(Not recommended)
 ``` xml
-        <!-- 外部アプリに非公開とするBroadcast Receiver -->
-        <!-- ポイント1: exported=“false”とする -->
+        <!-- Private Broadcast Receiver -->
+        <!-- *** POINT 1 *** Set the exported attribute to false explicitly. -->
         <receiver android:name=".PrivateReceiver"
             android:exported="false" >
             <intent-filter>
@@ -1819,151 +1778,158 @@ AndroidManifest.xml(非推奨)
         </receiver>
 ```
 
-「4.2.3.1 使用してよいexported 設定とintent-filter設定の組み合わせ(Receiverの場合)」も参照すること。
+Please refer to \"4.2.3.1 Combinations of the exported Attribute and the Intent-filter setting (For Receiver).\"
 
-#### 受信Intentの安全性を確認する （必須）<!-- 5cd46f87 -->
+#### Handle the Received Intent Carefully and Securely (Required)
 
-Broadcast
-Receiverのタイプによって若干リスクは異なるが、受信Intentのデータを処理する際には、まず受信Intentの安全性を確認しなければならない。
+Though risks are different depending on the types of the Broadcast Receiver, firstly verify the safety of Intent when processing received Intent data.
 
-公開Broadcast
-Receiverは不特定多数のアプリからIntentを受け取るため、マルウェアの攻撃Intentを受け取る可能性がある。非公開Broadcast
-Receiverは他のアプリからIntentを直接受け取ることはない。しかし同一アプリ内の公開Componentが他のアプリから受け取ったIntentのデータを非公開Broadcast
-Receiverに転送することがあるため、受信Intentを無条件に安全であると考えてはならない。自社限定Broadcast
-Receiverはその中間のリスクであるため、やはり受信Intentの安全性を確認する必要がある。
+Since Public Broadcast Receiver receives the Intents from unspecified large number of applications, it may receive malware\'s attacking Intents. Private Broadcast Receiver will never receive any Intent from other applications directly, but Intent data which a public Component received from other applications may be forwarded to Private Broadcast Receiver. So don\'t think that the received Intent is totally safe without any qualification. In-house Broadcast Receivers have some degree of the risks, so it also needs to verify the safety of the received Intents.
 
-「3.2入力データの安全性を確認する」を参照すること。
+Please refer to \"3.2 Handling Input Data Carefully and Securely\"
 
-#### 独自定義Signature Permissionは、自社アプリが定義したことを確認して利用する （必須）<!-- bcb6e4c7 -->
+#### Use the In-house Defined Signature Permission after Verifying that it\'s Defined by an In-house Application (Required)
 
-自社のアプリから送信されたBroadcastだけを受信し、それ以外のBroadcastを一切受信しない自社限定Broadcast
-Receiverを作る場合、独自定義Signature
-Permissionにより保護しなければならない。AndroidManifest.xmlでのPermission定義、Permission要求宣言だけでは保護が不十分であるため、「5.2
-PermissionとProtection Level」の「5.2.1.2 独自定義のSignature
-Permissionで自社アプリ連携する方法」を参照すること。また独自定義Signature
-PermissionをreceiverPermissionパラメータに指定してBroadcast送信する場合も同様に確認する必要がある。
+In-house Broadcast Receiver which receives only Broadcasts sent by an In-house application should be protected by in-house-defined Signature Permission. Permission definition/Permission request declarations in AndroidManifest.xml are not enough to protecting, so please refer to \"5.2.1.2 How to Communicate Between In-house Applications with In-house-defined Signature Permission.\" ending Broadcasts by specifying in-house-defined Signature Permission to receiverPermission parameter requires verification in the same way.
 
-#### 結果情報を返す場合には、返送先アプリからの結果情報漏洩に注意する （必須）<!-- c3efd1f9 -->
+#### When Returning a Result Information, Pay Attention to the Result Information Leakage from the Destination Application (Required)
 
-Broadcast
-ReceiverのタイプによってsetResult()により結果情報を返すアプリの信用度が異なる。公開Broadcast
-Receiverの場合は、結果返送先のアプリがマルウェアである可能性もあり、結果情報が悪意を持って使われる危険性がある。非公開Broadcast
-Receiverや自社限定Broadcast
-Receiverの場合は、結果返送先は自社開発アプリであるため結果情報の扱いをあまり心配する必要はない。
+The Reliability of the application which returns result information by setResult() varies depending on the types of the Broadcast Receiver. In case of Public Broadcast Receiver, the destination application may be malware, and there may be a risk that the result information is used maliciously. In case of Private Broadcast Receiver and In-house Broadcast Receiver, the result destination is In-house developed application, so no need to mind the result information handling.
 
-このようにBroadcast
-Receiverから結果情報を返す場合には、返送先アプリからの結果情報の漏洩に配慮しなければならない。
+Need to pay attention to the result information leakage from the destination application when result information is returned from Broadcast Receivers as above.
 
-#### センシティブな情報をBroadcast送信する場合は、受信可能なReceiverを制限する （必須）
+#### When Sending Sensitive Information with a Broadcast, Limit the Receivable Receiver (Required)
 
-Broadcastという名前が表すように、そもそもBroadcastは不特定多数のアプリに情報を一斉送信したり、タイミングを通知したりすることを意図して作られた仕組みである。そのためセンシティブな情報をBroadcast送信する場合には、マルウェアに情報を取得されないような注意深い設計が必要となる。
+Broadcast is the created system to broadcast information to unspecified large number of applications or notify them of the timing at once. So, broadcasting sensitive information requires the careful designing for preventing the illicit obtainment of the information by malware.
 
-センシティブな情報をBroadcast送信する場合、信頼できるBroadcast
-Receiverだけが受信可能であり、他のBroadcast
-Receiverは受信不可能である必要がある。そのためのBroadcast送信方法には以下のようなものがある。
+For broadcasting sensitive information, only reliable Broadcast Receiver can receive it, and other Broadcast Receivers cannot. The following are some examples of Broadcast sending methods.
 
--   明示的IntentでBroadcast送信することで宛先を固定し、意図した信頼できるBroadcast
-    ReceiverだけにBroadcastを届ける方法。この方法には次の2つのパターンがある。
+- The method is to fix the address by Broadcast-sending with an
+  explicit Intent for sending Broadcasts to the intended reliable
+  Broadcast Receivers only. There are 2 patterns in this method.
 
-    -   同一アプリ内Broadcast
-        Receiver宛てであればIntent\#setClass(Context,
-        Class)により宛先を限定する。具体的なコードについてはサンプルコードセクション「4.2.1.1非公開Broadcast
-        Receiver - Broadcast」を参考にすること。
+  - When it\'s addressed to a Broadcast Receiver within the same
+    application, specify the address by Intent\#setClass(Context,
+    Class). Refer to sample code section \"4.2.1.1 Private Broadcast
+    Receiver - Receiving/Sending Broadcast\" for the concrete code.
 
-    -   他のアプリのBroadcast
-        Receiver宛てであればIntent\#setClassName(String,
-        String)により宛先を限定するが、Broadcast送信に先立ち宛先パッケージのAPK署名の開発者鍵をホワイトリストと照合して許可したアプリであることを確認してからBroadcastを送信する。実際には暗黙的Intentを利用できる次の方法が実用的である。
+  - When it\'s addressed to a Broadcast Receiver in other
+    applications, specify the address by
+    Intent\#setClassName(String, String). Confirm the permitted
+    application by comparing the developer key of the APK signature
+    in the destination package with the white list to send
+    Broadcasts. Actually the following method of using implicit
+    Intents is more practical.
 
--   receiverPermissionパラメータに独自定義Signature
-    Permissionを指定してBroadcast送信し、信頼するBroadcast
-    Receiverに当該Signature
-    Permissionを利用宣言してもらう方法。具体的なコードについてはサンプルコードセクション「4.2.1.3自社限定Broadcast
-    Receiver」を参考にすること。またこのBroadcast送信方法を実装するにはルール「4.2.2.3独自定義Signature
-    Permissionは、自社アプリが定義したことを確認して利用する
-    （必須）」も適用しなければならない。
+- The Method is to send Broadcasts by specifying in-house-defined
+  Signature Permission to receiverPermission parameter and make the
+  reliable Broadcast Receiver declare to use this Signature
+  Permission. Refer to the sample code section \"4.2.1.3 In-house
+  Broadcast Receiver - Receiving/Sending Broadcast\" for the concrete
+  code. In addition, implementing this Broadcast-sending method needs
+  to apply the rule \"4.2.2.3 Use the In-house Defined Signature
+  Permission after Verifying that it\'s Defined by an In-house
+  Application (Required).\"
 
-#### Sticky Broadcastにはセンシティブな情報を含めない （必須）
+#### Sensitive Information Must Not Be Included in the Sticky Broadcast (Required)
 
-通常のBroadcastは、Broadcast送信時に受信可能状態にあるBroadcast
-Receiverに受信処理されると、そのBroadcastは消滅してしまう。一方Sticky
-Broadcast（およびSticky Ordered
-Broadcast、以下同様）は、送信時に受信状態にあるBroadcast
-Receiverに受信処理された後もシステム上に存在しつづけ、その後registerReceiver()により受信できることが特徴である。不要になったSticky
-BroadcastはremoveStickyBroadcast()により任意のタイミングで削除できる。
+Usually, the Broadcasts will be disappeared when they are processed to be received by the available Broadcast Receivers. On the other hand, Sticky Broadcasts (hereafter, Sticky Broadcasts including Sticky Ordered Broadcasts), will not be disappeared from the system even when they processed to be received by the available Broadcast Receivers and will be able to be received by registerReceiver(). When Sticky Broadcast becomes unnecessary, it can be deleted anytime arbitrarily with removeStickyBroadcast().
 
-Sticky
-Broadcastは暗黙的Intentによる使用が前提であり、receiverPermissionパラメータを指定したBroadcast送信はできない。そのためSticky
-Broadcastで送信した情報はマルウェアを含む不特定多数のアプリから取得できてしまう。したがってセンシティブな情報をSticky
-Broadcastで送信してはならない。なお、Sticky Broadcastの使用はAndroid
-5.0（API Level 21）において非推奨となっている。
+As it\'s presupposed that Sticky Broadcast is used by the implicit
+Intent. Broadcasts with specified receiverPermission Parameter cannot
+be sent. For this reason, information sent via Sticky Broadcasts can
+be accessed by multiple unspecified apps --- including malware --- and
+thus sensitive information must not be sent in this way. Note that
+Sticky Broadcast is deprecated in Android 5.0 (API Level 21).
 
-#### receiverPermissionパラメータの指定なしOrdered Broadcastは届かないことがあることに注意 （必須）
+####  Pay Attention that the Ordered Broadcast without Specifying the receiverPermission May Not Be Delivered (Required)
 
-receiverPermissionパラメータを指定せずに送信されたOrdered
-Broadcastは、マルウェアを含む不特定多数のアプリが受信可能である。Ordered
-BroadcastはReceiverからの返り情報を受け取るため、または複数のReceiverに順次処理をさせるために利用される。優先度の高いReceiverから順次Broadcastが配送されるため、優先度を高くしたマルウェアが最初にBroadcastを受信しabortBroadcast()すると、後続のReceiverにBroadcastが配信されなくなる。
+Ordered Broadcast without specified receiverPermission Parameter can
+be received by unspecified large number of applications including
+malware. Ordered Broadcast is used to receive the returned information
+from Receiver, and to make several Receivers execute processing one by
+one. Broadcasts are sent to the Receivers in order of priority. So if
+the high- priority malware receives Broadcast first and executes
+abortBroadcast(), Broadcasts won\'t be delivered to the following
+Receivers.
 
-#### Broadcast Receiverからの返信データの安全性を確認する （必須）
+#### Handle the Returned Result Data from the Broadcast Receiver Carefully and Securely (Required)
 
-結果データを送り返してきたBroadcast
-Receiverのタイプによって若干リスクは異なるが、基本的には受信した結果データが攻撃データである可能性を考慮して安全に処理しなければならない。
+Basically the result data should be processed safely considering the
+possibility that received results may be the attacking data though the
+risks vary depending on the types of the Broadcast Receiver which has
+returned the result data.
 
-返信元Broadcast Receiverが公開Broadcast
-Receiverの場合、不特定のアプリから戻りデータを受け取るため、マルウェアの攻撃データを受け取る可能性がある。返信元Broadcast
-Receiverが非公開Broadcast
-Receiverの場合、同一アプリ内からの結果データであるのでリスクはないように考えがちだが、他のアプリから受け取ったデータを間接的に結果データとして転送することがあるため、結果データを無条件に安全であると考えてはならない。返信元Broadcast
-Receiverが自社限定Broadcast
-Receiverの場合、その中間のリスクであるため、やはり結果データが攻撃データである可能性を考慮して安全に処理しなければならない。
+When sender (source) Broadcast Receiver is public Broadcast Receiver,
+it receives the returned data from unspecified large number of
+applications. So it may also receive malware\'s attacking data. When
+sender (source) Broadcast Receiver is private Broadcast Receiver, it
+seems no risk. However the data received by other applications may be
+forwarded as result data indirectly. So the result data should not be
+considered as safe without any qualification. When sender (source)
+Broadcast Receiver is In-house Broadcast Receiver, it has some degree
+of the risks. So it should be processed in a safe way considering the
+possibility that the result data may be an attacking data.
 
-「3.2入力データの安全性を確認する」を参照すること。
+Please refer to \"3.2 Handling Input Data Carefully and Securely\"
 
-#### 資産を二次的に提供する場合には、その資産の従来の保護水準を維持する （必須）<!-- 7c35e628 -->
+####  When Providing an Asset Secondarily, the Asset should be protected with the Same Protection Level (Required)
 
-Permissionにより保護されている情報資産および機能資産を他のアプリに二次的に提供する場合には、提供先アプリに対して同一のPermissionを要求するなどして、その保護水準を維持しなければならない。AndroidのPermissionセキュリティモデルでは、保護された資産に対するアプリからの直接アクセスについてのみ権限管理を行う。この仕様上の特性により、アプリに取得された資産がさらに他のアプリに、保護のために必要なPermissionを要求することなく提供される可能性がある。このことはPermissionを再委譲していることと実質的に等価なので、Permissionの再委譲問題と呼ばれる。「5.2.3.4　Permissionの再委譲問題」を参照すること。
+When information or function assets protected by Permission are
+provided to other applications secondarily, it\'s necessary to keep
+the protection standard by claiming the same Permission of the
+destination application. In the Android Permission security models,
+privileges are managed only for the direct access to the protected
+assets from applications. Because of the characteristics, acquired
+assets may be provided to other applications without claiming
+Permission which is necessary for protection. This is actually same as
+re-delegating Permission, as it is called, Permission re-delegation
+problem. Please refer to \"5.2.3.4 Permission Re-delegation Problem.\"
 
-### アドバンスト<!-- acfc87e9 -->
+### Advanced Topics<!-- acfc87e9 -->
 
-#### 使用してよいexported 設定とintent-filter設定の組み合わせ(Receiverの場合)
+#### Combinations of the exported Attribute and the Intent-filter setting (For Receiver)
 
-表
-4.2‑2は、Receiverを実装するときに使用してもよいexported属性とintent-filter要素の組み合わせを示している。「exported="false"かつintent-filter定義あり」の使用を原則禁止としている理由については以下で説明する。
+Table 4.2-3 represents the permitted combination of export settings
+and Intent-filter elements when implementing Receivers. The reason why
+the usage of exported=\"false\" with Intent-filter definition is
+principally prohibited, is described below.
 
-表 4.2‑2
-exported属性とintent-filter要素の組み合わせの使用可否
+Table 4.2‑3 Usable or not; Combination of exported attribute and intent-filter elements
 ```eval_rst
-+-------------------------+--------------------------+
-|                         | exported属性の値         |
-+                         +------+----------+--------+
-|                         | true | false    | 無指定 |
-+=========================+======+==========+========+
-| intent-filter定義がある | 可   | 原則禁止 | 禁止   |
-+-------------------------+------+----------+--------+
-| intent-filter定義がない | 可   | 可       | 禁止   |
-+-------------------------+------+----------+--------+
++---------------------------+-------------------------------------+
+|                           | Value of exported attribute         |
++                           +------+--------------+---------------+
+|                           | True | False        | Not specified |
++===========================+======+==============+===============+
+| Intent-filter defined     | OK   | (Do not Use) | (Do not Use)  |
++---------------------------+------+--------------+---------------+
+| Intent Filter Not Defined | OK   | OK           | (Do not Use)  |
++---------------------------+------+--------------+---------------+
 
-Receiverのexported属性が無指定である場合にそのReceiverが公開されるか非公開となるかは、intent-filterの定義の有無により決まるが [9]_、本ガイドではReceiverのexported属性を「無指定」にすることを禁止している。前述のようなAPIのデフォルトの挙動に頼る実装をすることは避けるべきであり、exported属性のようなセキュリティ上重要な設定を明示的に有効化する手段があるのであればそれを利用すべきであると考えられるためである。
+When the exported attribute of a Receiver is left unspecified, the
+question of whether or not the Receiver is public is determined by the
+presence or absence of intent filters for that Receiver. [9]_ However,
+in this guidebook it is forbidden to set the exported attribute to
+unspecified. In general, as mentioned previously, it is best to avoid
+implementations that rely on the default behavior of any given API;
+moreover, in cases where explicit methods --- such as the exported
+attribute --- exist for enabling important security-related settings,
+it is always a good idea to make use of those methods.
 
-.. [9] intent-filterが定義されていれば公開Receiver、定義されていなければ非公開Receiverとなる。https://developer.android.com/guide/topics/manifest/receiver-element.html#exported を参照のこと。
+.. [9] If any intent filters are defined then the Receiver is public; otherwise it is private. For more information, see https://developer.android.com/guide/topics/manifest/receiver-element.html#exported.
 ```
 
-intent-filterを定義し、かつ、exported="false"を指定することを原則禁止としているのは、同一アプリ内の非公開Receiverに向けてBroadcastを送信したつもりでも、意図せず他アプリの公開Receiverを呼び出してしまう場合が存在するからである。以下の2つの図で意図せぬ呼び出しが起こる様子を説明する。
+Public Receivers in other applications may be called unexpectedly even
+though Broadcasts are sent to the private Receivers within the same
+applications. This is the reason why specifying exported=\"false\"
+with Intent-filter definition is prohibited. The following 2 figures
+show how the unexpected calls occur.
 
-図
-4.2‑4は、同一アプリ内からしか非公開Receiver(アプリA）を暗黙的Intentで呼び出せない正常な動作の例である。Intent-filter(図中action=\"X\")を定義しているのが、アプリAしかいないので意図通りの動きとなっている。
-
-![](media/image40.png)
-```eval_rst
-.. {width="4.739583333333333in"
-.. height="3.8020833333333335in"}
-```
-
-図 4.2‑4
-
-図
-4.2‑5は、アプリAに加えてアプリBでも同じintent-filter(図中action=\"X\")を定義している場合である。まず、他のアプリ(アプリC)が暗黙的IntentでBroadcastを送信するのは、非公開Receiver(A-1)側は受信をしないので特にセキュリティ的には問題にならない(図の橙色の矢印)。
-
-セキュリティ面で問題になるのは、アプリAによる同一アプリ内の非公開Receiverの呼び出しである。アプリAが暗黙的IntentをBroadcastすると、同一アプリ内の非公開Receiverに加えて、同じIntent-filterを定義したBの持つ公開Receiver(B-1)もそのIntentを受信できてしまうからである(図の赤色の矢印)。AからアプリBに対してセンシティブな情報を送信する可能性が生じてしまう。アプリBがマルウェアであれば、そのままセンシティブな情報の漏洩に繋がる。また、BroadcastがOrdered
-Broadcastであった場合は、意図しない結果情報を受け取ってしまう可能性もある。
+Figure 4.2‑4 is an example of the normal behaviors which a private
+Receiver (application A) can be called by implicit Intent only within
+the same application. Intent-filter (in the figure, action=\"X\") is
+defined only in application A, so this is the expected behavior.
 
 ![](media/image41.png)
 ```eval_rst
@@ -1971,7 +1937,32 @@ Broadcastであった場合は、意図しない結果情報を受け取って�
 .. height="3.8020833333333335in"}
 ```
 
-図 4.2‑5
+Figure 4.2‑4
+
+Figure 4.2‑5 is an example that Intent-filter (see action=\"X\" in the
+figure) is defined in the application B as well as in the application
+A. First of all, when another application (application C) sends
+Broadcasts by implicit Intent, they are not received by a private
+Receiver (A-1) side. So there won\'t be any security problem. (See the
+orange arrow marks in the Figure.)
+
+From security point of view, the problem is application A\'s call to
+the private Receiver within the same application. When the application
+A broadcasts implicit Intent, not only Private Receiver within the
+same application, but also public Receiver (B-1) with the same
+Intent-filter definition can also receive the Intent. (Red arrow marks
+in the Figure). In this case, sensitive information may be sent from
+the application A to B. When the application B is malware, it will
+cause the leakage of sensitive information. When the Broadcast is
+Ordered Broadcast, it may receive the unexpected result information.
+
+![](media/image42.png)
+```eval_rst
+.. {width="4.739583333333333in"
+.. height="3.8020833333333335in"}
+```
+
+Figure 4.2‑5
 
 ただし、システムの送信するBroadcast
 Intentのみを受信するBroadcastReceiverを実装する場合には、「exported="false"かつintent-filter定義あり」を使用すること。かつ、これ以外の組み合わせは使っていけない。これは、システムが送信するBroadcast
