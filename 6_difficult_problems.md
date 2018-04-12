@@ -1,38 +1,35 @@
-難しい問題
-==========
+Difficult Problems
+==================
 
-AndroidにはOSの仕様やOSが提供する機能の仕様上、アプリの実装でセキュリティを担保するのが困難な問題が存在する。これらの機能は悪意を持った第三者に悪用されたり、ユーザーが注意せずに利用したりすることで、情報漏洩を始めセキュリティ上の問題に繋がってしまう危険性を常に抱えている。この章ではそのような機能に対して、開発者が取りうるリスク削減策などを提示しながら注意喚起が必要な話題を記事として取り上げる。
+In Android, there are some problems that it is difficult to assure a security by application implementation due to a specification of Android OS or a function which Android OS provides. By being abused by the malicious third party or used by users carelessly, these functions are always holding risks that may lead to security problems like information leakage. In this chapter, by indicating risk mitigation plans that developers can take against these functions, some topics that needs calling attentions, are picked up as articles.
 
-Clipboardから情報漏洩する危険性
--------------------------------
+Risk of Information Leakage from Clipboard
+------------------------------------------
 
-コピー＆ペーストはユーザーが普段から何気なく使っている機能であろう。例えば、この機能を使って、メールやWebページで気になった情報や忘れたら困る情報をメモ帳に残しておいたり、設定したパスワードを忘れないようにメモ帳に保存しておき、必要な時にコピー＆ペーストして使うというユーザーは少なからず存在する。これらは一見何気ない行為であるが、実はユーザーの扱う情報が盗まれるという危険が潜んでいる。
+Copy & paste are the functions which users often use in a casual manner. For example, not a few users use these functions to store curious information or important information to remember in a mail or a web page into a notepad, or to copy and to paste a password from a notepad in which passwords are stored in order not to forget in advance. These are very casual actions at a glance, but actually there\'s a hidden risk that user handling information may be stolen.
 
-これにはAndroidのコピー＆ペーストの仕組みが関係している。ユーザーやアプリによってコピーされた情報は、一旦Clipboardと呼ばれるバッファに格納される。ユーザーやアプリによってペーストされたときに、このClipboardの内容が各アプリに再配布されるわけである。このClipboardに情報漏洩に結び付く危険性がある。Android端末の仕様では、Clipboardの実体は端末に1つであり、ClipboardManagerを利用することで、どのアプリからでも常時Clipboardの中身が取得できるようになっているからである。このことは、ユーザーがコピー・カットした情報は全て悪意あるアプリに対して筒抜けになることを意味している。
+The risk is related to mechanism of copy & paste in Android system. The information which was copied by user or application, is once stored in the buffer called Clipboard. The information stored in Clipboard is distributed to other applications when it is pasted by a user or an application. So there is a risk which leads to information leakage in this Clipboard function. It is because the entity of Clipboard is single in a system and any application can obtain the information stored in Clipboard at any time by using ClipboardManager. It means that all the information which user copied/cut, is leaked out to the malicious application.
 
-よって、アプリ開発者は、このAndroidの仕様を考慮しながら情報漏洩の可能性を最小限に抑える対策を講じなくてはならない。
+Hence, application developers need to take measures to minimize the possibility of information leakage, considering the Android OS specifications.
 
-### サンプルコード<!-- 1de829ee -->
+### Sample Code<!-- 1de829ee -->
 
-Clipboardから情報漏洩する可能性を抑える対策には、大きく分けて次の2つが考えられる。
+Roughly speaking, there are two outlooks of counter-measures to mitigate the risk of information leakage form Clipboard.
 
-(1) 他アプリから自アプリへコピーする際の対策
+1. Counter-measure when copying from other applications to your application.
 
-(2) 自アプリから他アプリへコピーする際の対策
+2. Counter-measure when copying from your application to other applications.
 
-最初に、1.について説明する。ここでは、ユーザーがメモ帳やWebブラウザ、メーラーアプリなど他アプリから文字列をコピーし、それを自アプリのEditTextに貼り付けるシナリオを想定している。結論だけを言ってしまうと、このシナリオでコピー・カットによってセンシティブな情報が漏洩してしまうことを防ぐ根本的な対策は存在しない。第三者アプリのコピー機能を制御するような機能がAndroidにはないからだ。
+Firstly, let us discuss the countermeasure 1 above. Supposing that a user copies character strings from other applications like note pad, Web browser or mailer application, and then paste it to EditText in your application. As it turns out, there\'s no basic counter-measure to prevent from sensitive information leakage due to copy & paste, in this scenario. Since there\'s no function in Android to control copy operations by the third party application.
 
-よって、1.についてはセンシティブな情報をコピー・カットする危険性をユーザーに説明し、行為自体を減らしていく啓発活動を継続的に行っていくしか対策はない。
+So, regarding the countermeasure 1, there\'s no method other than explaining users the risk of copying & pasting sensitive information, and just continuing to enlighten users to decrease the actions themselves continuously.
 
-次に、2.を説明する。ここでは、自アプリが表示している情報がユーザーによってコピーされるシナリオを想定する。この場合、漏洩に対する確実な対策は、View(TextView,
-EditTextなど)からのコピー・カットを禁止にすることである。個人情報などセンシティブな情報が入力あるいは出力されるViewにコピー・カット機能がなければ、自アプリからのClipboardを介した情報の漏洩もないからだ。
+Next discussion is the countermeasure 2 above, supposing that the scenario that a user copies sensitive information displayed in your application. In this case, the sound counter-measure for leakage is to prohibit copying/cutting operations from View (TextView, EditText etc.). If there are no copy/cut functions in View where the sensitive information (like personal information) is input/output, information leakage will never happen from your application via Clipboard.
 
-コピー・カットを禁止する方法はいくつか考えられるが、ここでは、実装が簡単でかつ効果のある方法として、Viewの長押し無効化の方法と文字列選択時のメニューからコピー・カットの項目を削除する方法を扱う。
+There are several methods to prohibit copying/cutting. This section herein describes the easy and effective methods: One method is to disable long press View and another method is to delete copy/cut items from menu when selecting character string.
 
 ```eval_rst
-対策要否は、:numref:`対策要否の判定フロー` の判定フローによって判定することができる。:numref:`対策要否の判定フロー` において、入力タイプ(Input
-Type)がPassword属性に固定されているとは、入力タイプ(Input
-Type)がアプリの実行時に常に下記のいずれかであることを指す。この場合は、デフォルトでコピー・カットが禁止されているので、特に対策する必要はない。
+Necessary of counter-measure can be determined as per the flow of :numref:`Decision flow of counter-measure is required or not.` . In :numref:`Decision flow of counter-measure is required or not.` , \"Input type is fixed to Password attribute\" means, the input type is necessarily either of the followings three when application is running. In this case, no counter-measures are required since copy/cut are prohibited as default.
 ```
 
 -   InputType.TYPE\_CLASS\_TEXT \|
@@ -45,24 +42,25 @@ Type)がアプリの実行時に常に下記のいずれかであることを指
     InputType.TYPE\_NUMBER\_VARIATION\_PASSWORD
 
 ```eval_rst
-.. figure:: media/image93.png
-   :name: 対策要否の判定フロー
+.. figure:: media/image86.png
+   :name: Decision flow of counter-measure is required or not.
 
-   対策要否の判定フロー
+   Decision flow of counter-measure is required or not.
 ```
 
-以下で、それぞれの対策の詳細を説明し、サンプルコードを示す。
+The following subsections detail each countermeasure with sample codes.
 
-#### 文字列選択時のメニューからコピー・カットを削除する
+#### Delete copy/cut from the menu when character string selection
 
 TextView.setCustomSelectionActionModeCallback()メソッドによって、文字列選択時のメニューをカスタマイズできる。これを用いて、文字列選択時のメニューからコピー・カットのアイテムを削除すれば、ユーザーが文字列をコピー・カットすることはできなくなる。
 
-以下、EditTextの文字列選択時のメニューからコピー・カットの項目を削除するサンプルコードを示す。
+Sample code to delete copy/cut item from menu of character string selection in EditText, is shown as per below.
 
-ポイント：
+Points:
 
-1.  文字列選択時のメニューからandroid.R.id.copyを削除する。
-2.  文字列選択時のメニューからandroid.R.id.cutを削除する。
+1. Delete android.R.id.copy from the menu of character string selection.
+
+2. Delete android.R.id.cut from the menu of character string selection.
 
 UncopyableActivity.java
 ```eval_rst
@@ -71,14 +69,13 @@ UncopyableActivity.java
    :encoding: shift-jis
 ```
 
-#### Viewの長押し(Long Click)を無効にする
+#### Disable Long Click View
 
-コピー・カットを禁止する方法は、Viewの長押し(Long
-Click)を無効にすることでも実現できる。Viewの長押し無効化はレイアウトのxmlファイルで指定することができる。
+Prohibiting copying/cutting can also be realized by disabling Long Click View. Disabling Long Click View can be specified in layout xml file.
 
-ポイント：
+Point:
 
-1.  コピー･カットを禁止するViewはandroid:longClickableをfalseにする。
+1. Set false to android:longClickable in View to prohibit copy/cut.
 
 unlongclickable.xml
 ```eval_rst
@@ -87,53 +84,47 @@ unlongclickable.xml
    :encoding: shift-jis
 ```
 
-### ルールブック<!-- d89ca9b9 -->
+### Rule Book<!-- d89ca9b9 -->
 
-自アプリから他アプリへのセンシティブな情報のコピーが発生する可能性がある場合は、以下のルールを守ること。
+Follow the rule below when copying sensitive information from your application to other applications.
 
-1.  Viewに表示されている文字列のコピー・カットを無効にする (必須)
+1. Disabling Copy/Cut Character Strings that Are Displayed in View (Required)
 
-#### Viewに表示されている文字列のコピー・カットを無効にする (必須)
+#### Disabling Copy/Cut Character Strings that Are Displayed in View (Required)
 
-アプリがセンシティブな情報を表示するViewを持っている場合、それがEditTextのようにコピー・カットが可能なViewならば、Clipboardを介してその情報が漏洩してしまう可能性がある。そのため、センシティブな情報を表示するViewはコピー・カットを無効にしておかなければならない。
+If there\'s a View which displays sensitive information in an application and besides the information is allowed to be copied/cut like EditText in the View, the information may be leaked via Clipboard. Therefore, copy/cut must be disabled in View where sensitive information is displayed.
 
-コピー・カットを無効にする方法には、文字列選択時のメニューからコピー・カットの項目を削除する方法と、Viewの長押しを無効化する方法がある。
+There are two methods to disable copy/cut. One method is to delete items of copy/cut from menu of character string selection, and another method is to disable Long Click View.
 
-「6.1.3.1 ルール適用の際の注意」も参照のこと。
+Please refer to \"6.1.3.1 Precautions When Applying Rules.\"
 
-### アドバンスト<!-- ad4d40cb -->
+### Advanced Topics<!-- ad4d40cb -->
 
-#### ルール適用の際の注意
+#### Precautions When Applying Rules
 
-TextViewはデフォルトでは文字列選択不可であるため、通常は対策不要であるが、アプリの仕様によってはコピーを可能にする場合もある。TextView.setTextIsSelectable()メソッドを使うことで、文字列の選択可否とコピー可否を動的に設定することができる。TextViewをコピー可能とする場合は、そのTextViewにセンシティブな情報が表示される可能性がないかよく検討し、その可能性があるのであれば、コピー可にすべきでない。
+In TextView, selecting character string is impossible as default, so normally no counter-measure is required, but in some cases copying is possible depends on application\'s specifications. The possibility of selecting/copying character strings can be dynamically determined by using TextView.setTextIsSelectable() method. When setting copying possible in TextView, investigate the possibility that any sensitive information is displayed in TextView, and if there are any possibilities, it should not be set as possible to copy.
 
-また、「6.1.1
-サンプルコード」の判定フローにも記載されているように、パスワードの入力を想定した入力タイプ(InputType.TYPE\_CLASS\_TEXT
-\|
-InputType.TYPE\_TEXT\_VARIATION\_PASSWORDなど)のEditTextについては、デフォルトで文字列のコピーが禁止されているため通常は対策不要である。しかし、「5.1.2.2.
-パスワードを平文表示するオプションを用意する
-（必須）」に記載したように「パスワードを平文表示する」オプションを用意している場合は、パスワード平文表示の際に入力タイプが変化し、コピー・カットが有効になってしまうので、同様の対策が必要である。
+In addition, described in the decision flow of \"6.1.1Sample Code\" regarding EditText which is input type (InputType.TYPE\_CLASS\_TEXT \| InputType.TYPE\_TEXT\_VARIATION\_PASSWORD etc.), supposing password input, normally any counter-measures are not required since copying character strings are prohibited as default. However, as described in \"5.1.2.2 Provide the Option to Display Password in a Plain Text (Required),\" when the option to \[display password in a plain text\] is prepared, in case of displaying password in a plain text, input type will change and copy/cut is enabled. So the same counter-measure should be required.
 
-なお、ルールを適用する際には、ユーザビリティの面も考慮する必要があるだろう。例えば、ユーザーが自由にテキストを入力できるViewの場合、センシティブな情報が入力される「可能性がゼロでない」からといってコピー・カットを無効にしてしまったら、ユーザーの使い勝手が悪くなるだろう。もちろん、重要度の高い情報を入出力するViewやセンシティブな情報を単独で入力するようなViewにはルールを無条件で適用するべきであるが、それ以外のViewを扱う場合は、次のことを考慮しながら対応を考えると良い。
+Note that, developers should also take usability of application into consideration when applying rules. For example, in the case of View which user can input text freely, if copy/cut is disabled because there is the slight possibility that sensitive information is input, users may feel inconvenience. Of course, the rule should unconditionally be applied to View which treats highly important information or independent sensitive information, but in the case of View other than those, the following questions will help developers to understand how properly to treat View.
 
--   センシティブな情報の入力や表示を行う専用のコンポーネントを用意できないか
+- Prepare some other component for the exclusive use of sensitive information
 
--   連携先(ペースト先)アプリが分かっている場合は、他の方法で情報を送信できないか
+- Send information with alternative methods when the pasted-to application is obvious
 
--   アプリでユーザーに入出力に関する注意喚起ができないか
+- Call users for cautions about inputting/outputting information
 
--   本当にそのViewが必要か
+- Reconsider the necessity of View
 
-Android
-OSのClipboardとClipboardManagerの仕様にセキュリティに対する考慮がされていないことが情報漏洩の可能性を生む根本的な要因ではあるが、アプリ開発者は、ユーザー保護やユーザビリティ、提供する機能など様々な観点からこうしたClipboardの仕様に対して対応し、質の高いアプリを作成する必要がある。
+The root cause of the information leakage risk is that the specifications of Clipboard and ClipboardManager in Android OS leave the security risk out of consideration. Application developers need to create higher quality applications in terms of user integrity, usability, functions, and so forth.
 
-#### Clipboardに格納されている情報の操作
+#### Operating Information Stored in Clipboard
 
-「6.1 Clipboardから情報漏洩する危険性」で述べたように、ClipboardManagerを利用することでアプリからClipboardに格納された情報を操作することができる。また、ClipboardManagerの利用には特別なPermissionを設定する必要が無いため、アプリはユーザーに知られることなくClipboardManagerを利用できる。
+As mentioned in \"6.1 Risk of Information Leakage from Clipboard,\" an application can manipulate information stored in Clipboard by using ClipboardManager. In addition, there is no need to set particular Permission for using ClipboardManager and thus the application can use ClipboardManager without being recognized by user.
 
-Clipboardに格納されている情報(ClipDataと呼ぶ)は、ClipboardManager.getPrimaryClip()メソッドによって取得できる。タイミングに関しても、OnPrimaryClipChangedListenerを実装してClipboardManager.addPrimaryClipChangedListener()メソッドでClipboardManagerに登録すれば、ユーザーの操作などにより発生するコピー・カットの度にListenerが呼び出されるので、タイミングを逃すことなくClipDataを取得することができる。ここでListenerの呼び出しは、どのアプリでコピー・カットが発生したかに関係なく行われる。
+Information, called ClipData, stored in Clipboard can be obtained with ClipboardManager.getPrimaryClip() method. If a listener is registered to ClipboardManager by ClipboardManager.addPrimaryClipChangedListener() method implementing OnPrimaryClipChangedListener, the listener is called every time copy/cut operations occurred by user. Therefore ClipData can be got without overlooking the timing. Listener call is executed when copy/cut operations occur in any application regardless.
 
-以下、端末内でコピー・カットが発生する度にClipDataを取得し、Toastで表示するServiceのソースコードを示す。下記のような簡単なコードによりClipboardに格納された情報が筒抜けになってしまうことを実感していただきたい。アプリを実装する際は、少なくとも下記のコードによってセンシティブな情報が取得されてしまうことのないように注意する必要がある。
+The following shows the source code of Service, which gets ClipData whenever copy/cut is executed in a device and displays it through Toast. You can realize that information stored in Clipboard is leaked out doe to simple codes as follows. It\'s necessary to pay attention that the sensitive information is not taken at least by the following source code.
 
 ClipboardListeningService.java
 ```eval_rst
@@ -142,7 +133,7 @@ ClipboardListeningService.java
    :encoding: shift-jis
 ```
 
-次に、上記ClipboardListeningServiceを利用するActivityのソースコードの例を示す。
+Next, below shows an example code of Activity which uses ClipboardListeningService touched in the above.
 
 ClipboardListeningActivity.java
 ```eval_rst
@@ -151,6 +142,6 @@ ClipboardListeningActivity.java
    :encoding: shift-jis
 ```
 
-ここまでは、Clipboardに格納された情報を取得する方法について述べたが、ClipboardManager.setPrimaryClip()メソッドによって、Clipboardに新しく情報を格納することも可能である。
+Thus far we have introduced methods for obtaining data stored on the Clipboard. It is also possible to use the ClipboardManager.setPrimaryClip() method to store new data on the Clipboard.
 
-ただし、setPrimaryClip()はClipboardに格納されていた情報を上書きするので、ユーザーが予めコピー・カット操作により格納しておいた情報が失われる可能性がある点に注意が必要である。これらのメソッドを使用して独自のコピー機能あるいはカット機能を提供する場合は、必要に応じて、内容が改変される旨を警告するダイアログを表示するなど、Clipboardに格納されている内容がユーザーの意図しない内容に変更されることのないように設計・実装する必要がある。
+Note that setPrimaryClip() method will overwrite the information stored in Clipboard, therefore the information stored by user\'s copy/cut may be lost. When providing custom copy/cut functions with these methods, it\'s necessary to design/implement in order not that the contents stored in Clipboard are changed to unexpected contents, by displaying a dialogue to notify the contents are to be changed, according the necessity.
