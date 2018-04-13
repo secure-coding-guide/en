@@ -29,30 +29,31 @@ Next discussion is the countermeasure 2 above, supposing that the scenario that 
 There are several methods to prohibit copying/cutting. This section herein describes the easy and effective methods: One method is to disable long press View and another method is to delete copy/cut items from menu when selecting character string.
 
 ```eval_rst
-Necessary of counter-measure can be determined as per the flow of :numref:`Decision flow of counter-measure is required or not.` . In :numref:`Decision flow of counter-measure is required or not.` , \"Input type is fixed to Password attribute\" means, the input type is necessarily either of the followings three when application is running. In this case, no counter-measures are required since copy/cut are prohibited as default.
+Necessary of counter-measure can be determined as per the flow of Figure 6.1. In Figure 6.1, \"Input type is fixed to Password attribute\" means, the input type is necessarily either of the followings three when application is running. In this case, no counter-measures are required since copy/cut are prohibited as default.
 ```
 
--   InputType.TYPE\_CLASS\_TEXT \|
-    InputType.TYPE\_TEXT\_VARIATION\_PASSWORD
+- InputType.TYPE\_CLASS\_TEXT \|
+  InputType.TYPE\_TEXT\_VARIATION\_PASSWORD
 
--   InputType.TYPE\_CLASS\_TEXT \|
-    InputType.TYPE\_TEXT\_VARIATION\_WEB\_PASSWORD
+- InputType.TYPE\_CLASS\_TEXT \|
+  InputType.TYPE\_TEXT\_VARIATION\_WEB\_PASSWORD
 
--   InputType.TYPE\_CLASS\_NUMBER \|
-    InputType.TYPE\_NUMBER\_VARIATION\_PASSWORD
+- InputType.TYPE\_CLASS\_NUMBER \|
+  InputType.TYPE\_NUMBER\_VARIATION\_PASSWORD
 
+![](media/image86.png)
 ```eval_rst
-.. figure:: media/image86.png
-   :name: Decision flow of counter-measure is required or not.
-
-   Decision flow of counter-measure is required or not.
+.. {width="4.739583333333333in"
+.. height="3.8020833333333335in"}
 ```
+
+Figure 6.1: Decision flow of counter-measure is required or not.
 
 The following subsections detail each countermeasure with sample codes.
 
 #### Delete copy/cut from the menu when character string selection
 
-TextView.setCustomSelectionActionModeCallback()メソッドによって、文字列選択時のメニューをカスタマイズできる。これを用いて、文字列選択時のメニューからコピー・カットのアイテムを削除すれば、ユーザーが文字列をコピー・カットすることはできなくなる。
+By TextView.setCustomSelectionActionMODECallback() method, menu when character string selection, can be customized. By using this, if copy/cut item can be deleted from menu when character string selection, user cannot copy/cut character strings any more.
 
 Sample code to delete copy/cut item from menu of character string selection in EditText, is shown as per below.
 
