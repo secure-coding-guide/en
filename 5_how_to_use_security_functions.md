@@ -3462,54 +3462,99 @@ current use
 
 ```
 
-プライバシー情報を扱う
-----------------------
+Handling privacy data
+---------------------
 
-近年、プライバシー情報を守るための世界的な潮流として「プライバシー・バイ・デザイン」が提唱されており、この概念に基づき各国政府においてもプライバシー保護のための法制化を進めているところである。
+In recent years, \"Privacy-by-Design\" concept has been proposed as a
+global trend to protect the privacy data. And based on the concept,
+governments are promoting legislation for privacy protection.
 
-スマ-トフォン内の利用者情報を活用するアプリは、利用者が個人情報やプライバシーの観点から安全・安心にアプリを活用できるように、利用者情報を適切に取り扱うとともに、利用者に対して分かりやすい説明を行い、利用者に利用の可否の選択を促すことが求められる。そのためには、アプリがどのような情報をどのように扱うか等を示したアプリ毎のアプリケーション・プライバシーポリシー（以下、アプリ・プライバシーポリシー）を作成・提示するとともに、慎重な取り扱いが求められる利用者情報の取得・利用については事前にユーザーの同意を得る必要がある。なお、アプリケーション・プライバシーポリシーは従来から存在する「個人情報保護方針」や「利用規約」等とは異なり別途作成を要するものであることに留意すること。
+Applications that make use of user data in smartphones must take steps
+to ensure that users may use the application safely and securely
+without fears regarding privacy and personal data. These steps include
+handling user data appropriately and asking users to choose whether or
+not an application may use certain data. To this end, each application
+must prepare and display an application privacy policy indicating
+which information the application will use and how it will use that
+information; moreover, when fetching and using certain information,
+the application must first ask the user's permission. Note that
+application privacy policies differ from other documents that may have
+been present in the past---such as "Personal Data Protection Policies"
+or "Terms of Use"---and must be created separately from any such
+documents.
 
-プライバシーポリシーの作成や運用に関して、詳しくは総務省が提唱する『スマートフォン
-プライバシー イニシアティブ』及び『スマートフォン プライバシー
-イニシアティブⅡ』（以下 総務省SPIと省略）を参照のこと。
+For details on the creation and execution of privacy policies, see the
+document "Smartphone Privacy Initiative" and "Smartphone Privacy
+Initiative II" (JMIC's SPI) released by Japan's Ministry of Internal
+Affairs and Communications (MIC).
 
-また、本記事で扱う用語については、本文内の解説および「5.5.3.2用語解説」を参照すること。
+The terminology used in this section is defined in the text and in
+Section "5.5.3.2Glossary of Terms".
 
-### サンプルコード<!-- 6a83d758 -->
+### Sample Code<!-- 6a83d758 -->
 ```eval_rst
-アプリ・プライバシーポリシーの作成には、一般に公開されている「アプリケーション・プライバシーポリシー作成支援ツール [49]_」を利用することもできる。このツールの出力はHTML形式およびXML形式となっており、概要版アプリケーション・プライバシーポリシーと詳細版アプリケーション・プライバシーポリシーのそれぞれのファイルが作成される。作成されたXMLファイルには検査用のタグがつくなど、総務省SPIに準拠した形となっている。以下のサンプルコードでは、上記ツールを使って作成したHTMLファイルを利用してアプリ・プライバシーポリシーを提示する例を示す。
+When preparing application privacy policy, you may use the "Tools to
+Assist in Creating Application Privacy Policies
+[47]_. These tools
+output two files---a summary version and a detailed version of the
+application privacy policy ---both in HTML format and XML format. The
+HTML and XML content of these files comports with the recommendations
+of MIC's SPI including features such as search tags. In the sample
+code below, we will demonstrate the use of this tool to present
+application privacy policy using the HTML files prepared by this tool.
 
-.. [49] http://www.kddilabs.jp/tech/public-tech/appgen.html
+.. [47] http://www.kddilabs.jp/tech/public-tech/appgen.html
 ```
 
 ```eval_rst
-.. image:: media/image82.png
+.. image:: media/image75.png
    :width: 50%
 ```
-図 5.5‑1概要版アプリケーション・プライバシーポリシーの例
+Figure 5.5‑1 Sample of Abstract Application Privacy Policy
 
-具体的には、次の判定フローに従うことで利用するサンプルコードを判断できる。
+More specifically, you may use the following flowchart to determine
+which sample code to use.
 
-![](media/image83.png)
-図 5.5‑2　 プライバシー情報を扱うサンプルコードを選択するフローチャート
+![](media/image76.png)
+Figure 5.5‑2　Flow Figure to select sample code of handling privacy data
 
-ここで、包括同意とは、アプリ初回起動時のアプリ・プライバシーポリシーの提示・確認により、アプリがサーバーに送信する利用者情報について包括的に同意を得ることである。
+Here the phrase "broad consent" refers to a broad permission, granted
+by the user to the application upon the first launch of the
+application through display and review of the application privacy
+policy, for the application to transmit user data to servers.
 
-また、個別同意とは、個々の利用者情報について送信の直前に個別の同意を得ることである。
+In contrast, the phrase "specific consent" refers to pre consent
+obtained immediately prior to the transmission of specific user data.
 
-#### \[包括同意・個別同意あり\] アプリ・プライバシーポリシーを組み込んだアプリ
+#### Both broad consent and specific consent are granted: Applications that incorporate application privacy policy
 
-ポイント：(\[包括同意・個別同意あり\] アプリ・プライバシーポリシーを組み込んだアプリ)
+Points: (Both broad consent and specific consent are granted:
+Applications that incorporate application privacy policy)
 
-1.  初回起動時(アップデート時)に、アプリが扱う利用者情報の送信について包括同意を得る
-2.  ユーザーの包括同意が得られていない場合は、利用者情報の送信はしない
-3.  慎重な取り扱いが求められる利用者情報を送信する場合は、個別にユーザーの同意を得る
-4.  ユーザーの個別同意が得られていない場合は、該当情報の送信はしない
-5.  ユーザーがアプリ・プライバシーポリシーを確認できる手段を用意する
-6.  送信した情報をユーザー操作により削除する手段を用意する
-7.  ユーザー操作により利用者情報の送信を停止する手段を用意する
-8.  利用者情報の紐づけにはUUID/cookieを利用する
-9.  アプリ・プライバシーポリシー概要版をassetsフォルダ内に配置しておく
+1.  On first launch (or application update), obtain broad consent to
+    transmit user data that will be handled by the application.
+
+2. If the user does not grant broad consent, do not transmit user data.
+
+3. Obtain specific consent before transmitting user data that requires
+    particularly delicate handling.
+
+4. If the user does not grant specific consent, do not transmit the
+    corresponding data.
+
+5. Provide methods by which the user can review the application privacy
+    policy.
+
+6. Provide methods by which transmitted data can be deleted by user
+    operations.
+
+7. Provide methods by which transmitting data can be stopped by user
+    operations.
+
+8. Use UUIDs or cookies to keep track of user data.
+
+9. Place a summary version of the application privacy policy in the
+    assets folder.
 
 MainActivity.java
 ```eval_rst
@@ -3533,17 +3578,29 @@ WebViewAssetsActivity.java
 ```
 
 
-#### \[包括同意あり\] アプリ・プライバシーポリシーを組み込んだアプリ
+#### Broad consent is granted: Applications that incorporate application privacy policy
 
-ポイント：\[包括同意あり\] アプリ・プライバシーポリシーを組み込んだアプリ
+Points: (Broad consent is granted: Applications that incorporate
+application privacy policy)
 
-1.  初回起動時(アップデート時)に、アプリが扱う利用者情報の送信について包括同意を得る
-2.  ユーザーの包括同意が得られていない場合は、利用者情報の送信はしない
-3.  ユーザーがアプリ・プライバシーポリシーを確認できる手段を用意する
-4.  送信した情報をユーザー操作により削除する手段を用意する
-5.  ユーザー操作により利用者情報の送信を停止する手段を用意する
-6.  利用者情報の紐づけにはUUID/cookieを利用する
-7.  アプリ・プライバシーポリシー概要版をassetsフォルダ内に配置しておく
+1.  On first launch (or application update), obtain broad consent to
+    transmit user data that will be handled by the application.
+
+2.  If the user does not grant broad consent, do not transmit user data.
+
+3. Provide methods by which the user can review the application privacy
+    policy.
+
+4. Provide methods by which transmitted data can be deleted by user
+    operations.
+
+5. Provide methods by which transmitting data can be stopped by user
+    operations.
+
+6. Use UUIDs or cookies to keep track of user data.
+
+7. Place a summary version of the application privacy policy in the
+    assets folder.
 
 MainActivity.java
 ```eval_rst
@@ -3569,15 +3626,24 @@ WebViewAssetsActivity.java
 ```
 
 
-#### \[包括同意なし\] アプリ・プライバシーポリシーを組み込んだアプリ
+#### Broad consent is not needed: Applications that incorporate application privacy policy
 
-ポイント：\[包括同意なし\] アプリ・プライバシーポリシーを組み込んだアプリ
+Points: (Broad consent is not needed: Applications that incorporate
+application privacy policy)
 
-1.  ユーザーがアプリ・プライバシーポリシーを確認できる手段を用意する
-2.  送信した情報をユーザー操作により削除する手段を用意する
-3.  ユーザー操作により利用者情報の送信を停止する手段を用意する
-4.  利用者情報の紐づけにはUUID/cookieを利用する
-5.  アプリ・プライバシーポリシー概要版をassetsフォルダ内に配置しておく
+1.  Provide methods by which the user can review the application privacy
+    policy.
+
+2.  Provide methods by which transmitted data can be deleted by user
+    operations.
+
+3.  Provide methods by which transmitting data can be stopped by user
+    operations
+
+4.  Use UUIDs or cookies to keep track of user data.
+
+5.  Place a summary version of the application privacy policy in the
+    assets folder.
 
 MainActivity.java
 ```eval_rst
@@ -3595,12 +3661,18 @@ WebViewAssetsActivity.java
 ```
 
 
-#### アプリ・プライバシーポリシーを組み込まないアプリ
+#### Applications that do not incorporate an application privacy policy
 
-ポイント：(アプリ・プライバシーポリシーを組み込まないアプリ)
+Points: (Applications that do not incorporate an application privacy
+policy)
 
-1.  取得した情報を端末内部でのみ利用する場合、アプリ・プライバシーポリシーを表示しなくても良い
-2.  マーケットプレイス等のアプリ説明欄に、取得した情報を外部送信しない旨を記載する
+1.  You do not need to display an application privacy policy if your
+    application will only use the information it obtains within the
+    device.
+
+2. In the documentation for marketplace applications or similar
+    applications, note that the application does not transmit the
+    information it obtains to the outside world
 
 MainActivity.java
 ```eval_rst
@@ -3609,56 +3681,91 @@ MainActivity.java
    :encoding: shift-jis
 ```
 
-
-★ポイント2★マーケットプレイス等のアプリ説明欄に、取得した情報を外部送信しない旨を記載する
+Sample description on the marketplace　is below.
 
 ```eval_rst
-.. image:: media/image84.png
+.. image:: media/image77.png
    :width: 50%
 ```
-図 5.5‑3　マーケットプレイス上での説明例
+Figure 5.5‑3　Description on the marketplace
 
-### ルールブック<!-- 68dc21c7 -->
+### Rule Book<!-- 68dc21c7 -->
 
-プライバシー情報を扱う際には以下のルールを守ること。
+When working with private date, obey the following rules.
 
-1.  送信する利用者情報は必要最低限に留める （必須）
+1.  Restrict transmissions of user data to the minimum necessary
+    (Required)
 
-2.  初回起動時(アップデート時)に、ユーザーによる取り換えが困難、または、慎重な取り扱いが求められる利用者情報の送信について包括同意を得る （必須）
+2.  On first launch (or application update), obtain broad consent to
+    transmit user data that requires particularly delicate handling or
+    that may be difficult for users to change (Required)
 
-3.  慎重な取り扱いが求められる利用者情報を送信する場合は、ユーザーに個別同意を得る （必須）
+3.  Obtain specific consent before transmitting user data that requires
+    particularly delicate handling (Required)
 
-4.  ユーザーがアプリ・プライバシーポリシーを確認できる手段を用意する （必須）
+4.  Provide methods by which the user can review the application privacy
+    policy (Required)
 
-5.  アプリ・プライバシーポリシー概要版をassetsフォルダ内に配置しておく （推奨）
+5.  Place a summary version of the application privacy policy in the
+    assets folder (Recommended)
 
-6.  送信した利用者情報をユーザー操作により削除および送信停止する手段を用意する （推奨）
+6.  Provide methods by which transmitted data can be deleted and
+    transmitting data can be stopped by user operations (Recommended)
 
-7.  端末固有IDとUUID/cookieを使い分ける （推奨）
+7.  Separate device-specific IDs from UUIDs and cookies (Recommended)
 
-8.  利用者情報を端末内のみで利用する場合、外部送信しない旨をユーザーに通知する （推奨）
+8.  If you will only be using user data within the device, notify the
+    user that data will not be transmitted externally. (Recommended)
 
-#### 送信する利用者情報は必要最低限に留める （必須）
+#### Restrict transmissions of user data to the minimum necessary (Required)
 
-アプリマニュアルなどの説明を元にユーザーが想起できるアプリの動作および目的以外で利用者情報にアクセスしないよう設計すること。また、アプリの動作および目的に必要な利用者情報であっても、アプリ内部でのみ必要な情報と外部サーバー等に送信すべき情報を精査し、必要最低限の情報のみを送信すること。
+When transmitting usage data to external servers or other
+destinations, restrict transmissions to the bare minimum necessary to
+provide service. In particular, you should design that applications
+have access to only user data of which purpose of use the user can
+imagine on the basis of the application description.
 
-例えば、アラームアプリで、指定した時間にアラームが鳴る機能しか提供していないにもかかわらず位置情報をサーバーに送信している場合、ユーザーは位置情報とアプリの機能を関連付けることは難しい。一方で、このアラームアプリが、ユーザーがいる場所に応じて設定されたアラームを鳴らす機能を持つ場合は、アプリが位置情報を利用する理由を説明することができる。このように、ユーザーが機能と利用者情報との関連を理解できる説明が可能であれば、利用者情報の利用に妥当性があるとみなせる。
+For example, an application that the user can imagine it is an alarm
+application, must not have access location data. On the other hand, if
+an alarm application can sound the alarm depending on the location of
+user and its feature is written on the description of the application,
+the application may have access to location data.
 
-#### 初回起動時(アップデート時)に、ユーザーによる取り換えが困難、または、慎重な取り扱いが求められる利用者情報の送信について包括同意を得る （必須）
+In cases where information need only be accessed within an
+application, avoid transmitting it externally and take other steps to
+minimize the possibility of inadvertent leakage of user data.
 
-ユーザーによる取り換えが困難な利用者情報や慎重な取り扱いが求められる利用者情報を外部サーバーに送信する場合、ユーザーがアプリを使用する前に、アプリがどのような情報をどのような目的でサーバーに送信するか、第三者提供はあるかなどについて、事前にユーザーの同意(オプトイン)を得ることが求められる。具体的には、アプリの初回起動時にアプリ・プライバシーポリシーを提示して、ユーザーの確認と同意を得るようにするべきである。また、アプリケーションのアップデートにより、新たな利用者情報を外部サーバーに送信するようになった時にも、再度ユーザーの確認と同意を得るようにする必要がある。同意が得られない場合は、アプリを終了するなど、情報の送信が必要な機能(処理)を無効にすること。
+#### On first launch (or application update), obtain broad consent to transmit user data that requires particularly delicate handling or that may be difficult for users to change (Required)
 
-これにより、ユーザーが利用者情報の利用状況を理解した上でアプリを使用していることが保証され、ユーザーに安心感を提供するとともにアプリへの信頼感を得ることが期待できる。
+If an application will transmit to external servers any user data that
+may be difficult for users to change, or any user data that requires
+particularly delicate handling, the application must obtain advance
+consent (opt-in) from the user---before the user begins using the
+application---informing the user of what types of information will be
+sent, for what purposes, to servers, and whether or not any
+third-party providers will be involved. More specifically, on first
+launch the application should display its application privacy policy
+and confirm that the user has reviewed it and consented. Also,
+whenever an application is updated in such a way that it now transmits
+new types of user data to external servers, it must again confirm that
+the user has reviewed and consented to these changes. If the user does
+not consent, the application should terminate or otherwise take steps
+to ensure that all functions requiring the transmission of data are
+disabled.
+
+These steps serve to guarantee that users understand how their data
+will be handled when they use an application, providing users with a
+sense of security and enhancing their trust in the application.
 
 MainActivity.java
 ```java
 protected void onStart() {
 		super.onStart();
 		
-		// ～省略～
+		(some portions omitted)
 		if (privacyPolicyAgreed <= VERSION_TO_SHOW_COMPREHENSIVE_AGREEMENT_ANEW) {
-			// ★ポイント★ 初回起動時(アップデート時)に、ユーザーによる取り換えが困難、または、慎重な取り扱いが求められる利用者情報の送信について包括同意を得る
-			// アップデート時については、新しい利用者情報を扱うようになった場合にのみ、再度包括同意を得る必要がある。
+			// *** POINT *** On first launch (or application update), obtain broad consent to transmit user data that will be handled by the application.
+			// When the application is updated, it is only necessary to renew the user’s grant of broad consent if the updated application will handle new types of user data.
 			ConfirmFragment dialog = ConfirmFragment.newInstance(
 					R.string.privacyPolicy, R.string.agreePrivacyPolicy,
 					DIALOG_TYPE_COMPREHENSIVE_AGREEMENT);
@@ -3669,21 +3776,32 @@ protected void onStart() {
 ```
 
 ```eval_rst
-.. image:: media/image85.png
+.. image:: media/image78.png
    :width: 50%
 ```
-図 5.5‑4　包括同意の例
+Figure 5.5‑4　Example of broad consent
 
-#### 慎重な取り扱いが求められる利用者情報を送信する場合は、ユーザーに個別同意を得る （必須）
+#### Obtain specific consent before transmitting user data that requires particularly delicate handling (Required)
 
-慎重な取扱いが求められる利用者情報を外部サーバーに送信する場合は、包括同意に加えて、利用者情報(または利用者情報の送信を伴う機能)毎に、事前にユーザーの同意(オプトイン)を得ることが必要である。ユーザーの同意が得られなかった場合は、外部サーバーへの情報送信は実施してはならない。
+When transmitting to external servers any user data that requires
+particularly delicate handling, an application must obtain advance
+consent (opt-in) from users for each such type of user data (or for
+each feature that involves the transmission of user data); this is in
+addition to the need to obtain general consent. If the user does not
+grant consent, the application must not send the corresponding data to
+the external server.
 
-これにより、ユーザーは包括同意で確認した利用者情報の送信に関して、より具体的なアプリ機能(提供サービス)との関連を知ることができ、アプリ提供者はユーザーのより正確な判断による同意を得ることが期待できる。
+This ensures that users can obtain a more thorough understanding of
+the relationship between an application's features (and the services
+it provides) and the transmission of user data for which the user
+granted general consent; at the same time, application providers can
+expect to obtain user consent on the basis of more precise
+decision-making.
 
 MainActivity.java
 ```java
 	public void onSendToServer(View view) {
-		// ★ポイント★慎重な取り扱いが求められる利用者情報を送信する場合は、個別にユーザーの同意を得る
+		// *** POINT *** Obtain specific consent before transmitting user data that requires particularly delicate handling.
 		ConfirmFragment dialog = ConfirmFragment.newInstance(R.string.sendLocation, R.string.cofirmSendLocation, DIALOG_TYPE_PRE_CONFIRMATION);
 		dialog.setDialogListener(this);
 		FragmentManager fragmentManager = getSupportFragmentManager();
@@ -3692,14 +3810,22 @@ MainActivity.java
 ```
 
 ```eval_rst
-.. image:: media/image86.png
+.. image:: media/image79.png
    :width: 50%
 ```
-図 5.5‑5 個別同意の例
+Figure 5.5‑5 Example of specific consent
 
-#### ユーザーがアプリ・プライバシーポリシーを確認できる手段を用意する （必須）
+#### Provide methods by which the user can review the application privacy policy (Required)
 
-一般に、ユーザーが該当アプリをインストールする前にアプリ・プライバシーポリシーを確認する手段として、Androidアプリのマーケットプレイス上にアプリ・プライバシーポリシーのリンクを表示する機能がある。この機能への対応に加え、アプリを端末にインストールした後でも、ユーザーがアプリ・プライバシーポリシーを参照できる手段を用意すること。特に利用者情報を外部サーバー等に送信する場合の個別同意確認時にはアプリ・プライバシーポリシーを容易に確認できる手段を用意し、ユーザーが正しく判断できるようにすることが望ましい。
+In general, the Android application marketplace will provide links to
+application privacy policies for users to review before choosing to
+install the corresponding application. In addition to supporting this
+feature, it is important for applications to provide methods by which
+users can review application privacy policies after installing
+applications on their devices. It is particularly important to provide
+methods by which users can easily review application privacy policies
+in cases involving consent to transmit user data to external servers
+to assist users in making appropriate decisions.
 
 MainActivity.java
 ```java
@@ -3707,7 +3833,7 @@ MainActivity.java
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.action_show_pp:
-			// ★ポイント★ ユーザーがアプリ・プライバシーポリシーを確認できる手段を用意する
+			// *** POINT *** Provide methods by which the user can review the application privacy policy.
 			Intent intent = new Intent();
 			intent.setClass(this, WebViewAssetsActivity.class);
 			startActivity(intent);
@@ -3715,58 +3841,82 @@ MainActivity.java
 ```
 
 ```eval_rst
-.. image:: media/image87.png
+.. image:: media/image80.png
    :width: 50%
 ```
-図 5.5‑6　プライバシーポリシー表示用メニュー
+Figure 5.5‑6　Context menu to show privacy policy
 
-#### アプリ・プライバシーポリシー概要版をassetsフォルダ内に配置しておく （推奨）
+#### Place a summary version of the application privacy policy in the assets folder (Recommended)
 
-アプリ・プライバシーポリシーの概要版はassetsフォルダ内に配置しておき、必要に応じて閲覧に利用することが望ましい。アプリ・プライバシーポリシーがassetsフォルダにあれば、いつでも容易にアクセス可能であると同時に、悪意のある第三者により、偽造や改造されたアプリ・プライバシーポリシーを参照させられるリスクが回避可能なためである。また、assetsフォルダに配置するファイルは、利用者情報に関する第三者検証が可能であることが望ましい。本節で紹介した「アプリケーション・プライバシーポリシー作成支援ツール」を利用する場合、検査用タグのあるXMLファイルもassetsフォルダに配置することで第三者検証が可能になる。
+It is a good idea to place a summary version of the application
+privacy policy in the assets folder to ensure that users may review it
+as necessary. Ensuring that the application privacy policy is present
+in the assets folder not only allows users to access it easily at any
+time, but also avoids the risk that users may see a counterfeit or
+corrupted version of the application privacy policy prepared by a
+malicious third party.
 
-#### 送信した利用者情報をユーザー操作により削除および送信停止する手段を用意する （推奨）
+#### Provide methods by which transmitted data can be deleted and transmitting data can be stopped by user operations (Recommended)
 
-利用者の求めに応じ、外部サーバー上に送信された利用者情報を削除する機能を提供することが望ましい。同様に、アプリ自身で端末内に利用者情報（もしくはそのコピー）を保存した場合も、その情報を削除する機能をユーザーに提供することが望ましい。また、利用者の求めに応じ、利用者情報の送信を停止する機能を提供することが望ましい。
+It is a good idea to provide methods by which user data that has been
+transmitted to external servers can be deleted at the user's request.
+Similarly, in cases in which the application itself has stored user
+data (or a copy thereof) within the device, it is a good idea to
+provide users with methods for deleting this data. And, it is a good
+idea to provide methods by which transmitting user data can be stopped
+at the user's request.
 
-本ルール（推奨）の内、利用者情報の削除については、EUで提唱されている『忘れられる権利』により定められたものであるが、今後は利用者データ保護に関する個人の権利の強化も提案されているため、特に理由がない限り、本ガイドでは利用者情報の削除機能を用意することを推奨する。また、利用者情報の送信停止については、主にブラウザによる対応が進んでいる『Do
-Not
-Track（追跡拒否）』の観点により定められたものであり、削除同様に送信停止機能を用意することを推奨する。
+This rule (recommendation) is codified by the "right to be forgotten"
+promoted in the EU; more generally, in the future it seems clear that
+various proposals will call for further strengthening the rights of
+users to have their data protected, and for this reason in these
+guidelines we recommend the provision of methods for the deletion of
+user data unless there is some specific reason to do otherwise. And,
+regarding stop transmitting data, it is the one that is defined by the
+point of view \"Do Not Track (deny track)\" of the correspondence by
+the browser is progressing mainly.
 
 MainActivity.java
 ```java
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		// ～省略～
+		(some portions omitted)
 		case R.id.action_del_id:
-			// ★ポイント★ 送信した情報をユーザー操作により削除する手段を用意する
+			// *** POINT *** Provide methods by which transmitted data can be deleted by user operations.
 			new SendDataAsyncTack().execute(DEL_ID_URI, UserId);
 			return true;
 		}
 ```
 
-#### 端末固有IDとUUID/cookieを使い分ける （推奨）
+#### Separate device-specific IDs from UUIDs and cookies (Recommended)
 
-IMEIなどの端末固有IDは、利用者情報と紐付けて送信すべきでない。端末固有IDと利用者情報が紐付いた形で一度でも公開や漏洩してしまうと、後から端末固有IDの変更が不可能なため、IDと利用者情報の紐づけを切ることができない（難しい）ことが、その理由である。この場合、端末固有IDに変わって、UUID/cookieなどの乱数をベースにした都度作成する変更可能なIDを使って、利用者情報との紐づけおよび送信をすると良い。これにより、上記で説明した『忘れられる権利』を考慮した実装とすることができる。
+IMEIs and other device-specific IDs should not be transmitted in ways that are tied to user data.
+Indeed, if a device -specific ID and a piece of user data are bundled together and released or leaked
+to public—even just once—it will be impossible subsequently to change that device -specific ID,
+whereupon it will be impossible (or at least difficult) to sever ties between the ID and the user data. In
+such cases, it is better to use UUIDs or cookies—that is, variable IDs that are regenerated each time
+based on random numbers—in place of device -specific IDs when transmitting together with user
+data. This allows an implementation of the notion, discussed above, of the “right to be forgotten.”
 
 MainActivity.java
 ```java
 		@Override
 		protected String doInBackground(String... params) {
-			// ★ポイント★ 利用者情報の紐づけにはUUID/cookieを利用する
-			// 本サンプルではサーバー側で生成したIDを利用する
+			// *** POINT *** Use UUIDs or cookies to keep track of user data
+			// In this sample we use an ID generated on the server side
 			SharedPreferences sp = getSharedPreferences(PRIVACY_POLICY_PREF_NAME, MODE_PRIVATE);
 			UserId = sp.getString(ID_KEY, null);
 			if (UserId == null) {
-				// SharedPreferences内にトークンが存在しなため、サーバーからIDを取り寄せる。
+				// No token in SharedPreferences; fetch ID from server
 				try {
 					UserId = NetworkUtil.getCookie(GET_ID_URI, "", "id");
 				} catch (IOException e) {
-					// 証明書エラーなどの例外をキャッチする
+					// Catch exceptions such as certification errors
 					extMessage = e.toString();
 				}
 
-				// 取り寄せたIDをSharedPreferencesに保存する。
+				// Store the fetched ID in SharedPreferences
 				sp.edit().putString(ID_KEY, UserId).commit();
 			}
 			return UserId;
@@ -3777,31 +3927,53 @@ MainActivity.java
 
 利用者の端末内部で一時的に利用者情報にアクセスするのみの場合であっても、利用者の理解を助け透明性を高めるために、その旨を伝えることが望ましい。具体的には、アクセスした利用者情報は、ある決まった目的のために端末内部で一時的に使用するのみであり、端末内に保存したり、外部サーバに送信したりしない旨をを利用者に通知すると良い。通知方法としては、マーケットプレイス上でのアプリ説明欄に記載するなどの方法が考えられる。なお、端末内での一時利用のみの場合は、アプリ・プライバシーポリシーへの記載は必須ではない。
 
-![](media/image88.png)
 ```eval_rst
-.. {width="3.1145833333333335in" height="4.875in"}
+.. image:: media/image81.png
+   :width: 50%
 ```
+Figure 5.5‑7 Description on the marketplace
 
-図 5.5‑7　マーケットプレイス上での説明例
+### Advanced Topics<!-- c2199637 -->
 
-### アドバンスト<!-- c2199637 -->
+#### Some background and context regarding privacy policies
 
-#### プライバシーポリシーを取りまく状況
+For cases in which a smartphone application will obtain user data and
+transmit this data externally, it is necessary to prepare and display
+an application privacy policy to inform users of details such as the
+types of data will be collected and the ways in which the data will be
+handled. The content that should be included in an application privacy
+policy is detailed in the Smartphone Privacy Initiative advocated by
+JMIC's SPI. The primary objective of the application privacy policy
+should be to state clearly all types of user data that will be
+accessed by an application, the purposes for which the data will be
+used, where the data will be stored, and to what destinations the data
+will be transmitted.
 
-スマートフォンにおける利用者情報を取得し、外部に送信する場合には、利用者に対してアプリがどのような情報をどのように扱うか等を示したアプリ・プライバシーポリシーを作成・提示する必要がある。アプリ・プライバシーポリシーに記載すべき内容は、総務省SPIにて定義されている。
+A second document, separate from and required in addition to the
+application privacy policy, is the Enterprise Privacy Policy, which
+details how all user data gathered by a corporation from its various
+applications will be stored, managed, and disposed of. This Enterprise
+Privacy Policy corresponds to the privacy policy that would
+traditionally have been prepared to comply with Japan's Personal
+Information Protection Law.
 
-アプリ・プライバシーポリシーは個々のアプリが扱うすべての利用者情報と、その用途や情報の保存先、送信先等を明らかにすることに主眼が置かれている。それとは別に事業者が個々のアプリから収集したすべての利用者情報をどのように保管・管理・廃棄をするかを示す事業者プライバシーポリシーも必要となる。従来、個人情報保護法をもとに作成されているプライバシーポリシーとはこの事業者プライバシーポリシーが相当する。
+A detailed description of proper methods for preparing and displaying
+privacy policies, together with a discussion of the roles played by
+the various different types of privacy policies, may be found in the
+document "A Discussion of the Creation and Presentation of Privacy
+Policies for JSSEC Smartphone Applications", available at this URL:[http://www.jssec.org/event/20140206/03-1\_app\_policy.pdf](http://www.jssec.org/event/20140206/03-1_app_policy.pdf)
+(Japanese only).
 
-プライバシーポリシーの作成・提示方法やそれぞれのプラバシーポリシーの役割分担などは、『JSSEC　スマホ・アプリのプライバシーポリシー作成・開示についての考察』([http://www.jssec.org/event/20140206/03-1\_app\_policy.pdf](http://www.jssec.org/event/20140206/03-1_app_policy.pdf)）
-に詳細説明が記載されているので参照のこと。
+#### Glossary of Terms
 
-#### 用語解説
-
-以下に、本ガイドで使用している用語について、『JSSEC　スマホ・アプリのプライバシーポリシー作成・開示についての考察』
+In the table below we define a number of terms that are used in these
+guidelines; these definitions are taken from the document "A
+Discussion of the Creation and Presentation of Privacy Policies for
+JSSEC Smartphone Applications"
 ([http://www.jssec.org/event/20140206/03-1\_app\_policy.pdf](http://www.jssec.org/event/20140206/03-1_app_policy.pdf))
-に記載されている用語解説を引用しておく。
+(Japanese only).
 
-表 5.5‑1
+Table 5.5‑1
 ```eval_rst
 ======================================= =================================================
 用語                                    解説
@@ -3823,31 +3995,68 @@ MainActivity.java
 ======================================= =================================================
 ```
 
-#### Android IDのバージョンによる違いについて
+#### Version-dependent differences in handling of Android IDs
 
-Android ID(Settings.Secure.ANDROID\_ID)は、ランダムに生成される64ビットの数値を16進数文字列で表現したものであり、(ごく稀に重複する可能性はあるが)端末を個別に識別することができる識別子である。そのため、使用法を間違えるとユーザーのトラッキングに繋がるリスクが大きくなり、使用の際には注意を必要とするが、Android 7.1(API Level 25)以前とAndroid 8.0(API Level26)以降の端末では、生成規則やアクセス可能範囲などが異なるため以下ではその違いについて説明する。
+The Android ID (Settings.Secure.ANDROID\_ID) is a randomly-generated
+64-bit number expressed as a hexadecimal character string that serves
+as an identifier to identify individual terminals (although duplicate
+identifiers are possible in extremely rare cases). For this reason,
+incorrect usage can create serious risks associated with user
+tracking, and thus special care must be taken when using Android IDs.
+However, the rules governing aspects such as ID generation and
+accessible ranges differ for terminals running Android 7.1 (API Level
+25) versus terminals running Android 8.0 (API Level 26). In what
+follows we describe these differences.
 
-**Android 7.1(API Level 25)以前の端末**
+**Terminals running Android 7.1(API Level 25) or earlier**
 
-Android 7.1(API Level
-25)以前の端末では端末内に1つの値を持ちすべてのアプリからアクセス可能となる。ただし、マルチユーザーをサポートする端末ではユーザー毎に別の値が生成される。生成のタイミングとしては、最初は端末の工場出荷後の初回起動時であり、その後は、ファクトリーリセットの度に新しく生成される。
+For terminals running Android 7.1(API Level 25) or earlier, only one
+Android ID value exists in a given terminal; this value may be
+accessed by all apps running on that terminal. However, note that, for
+terminals with multiuser support, separate values are generated for
+each user. Android IDs are generated upon the first startup of a
+terminal after shipping from the factory, and are newly regenerated
+upon each subsequent factory reset.
 
-**Android 8.0(API Level 26)以降の端末**
+**Terminals running Android 8.0 (API Level 26) or later**
 
-Android 8.0(API Level 26)以降の端末ではアプリ(開発者)毎に異なる値を持ち、対象のアプリだけがアクセスできるように変更されている。具体的には、Android 7.1(API Level 25)以前のユーザーおよび端末に加えて、アプリの署名を要素として値が一意に決定される仕組みとなっており、署名の異なるアプリは別の(署名が同じ場合は同じ)Android IDの値を持つことになる。
+For terminals running Android 8.0 (API Level 26) or later, each app
+(developer) has its own distinct value, which may only be accessed by
+the app in question. More specifically, whereas the values used in
+Android 7.1 (API Level 25) and earlier were user-specific and
+terminal-specific but not app-specific, in Android 8.0 (API Level 26)
+and later versions the app signature is added to the list of elements
+used to generate unique values, so that apps with different signatures
+now have different Android ID values. (Apps with identical signatures
+have identical Android ID values.)
 
-値が変更されるタイミングに関しては以前とほぼ変わらないが、いくつか注意する点があるので以下に示す。
+The occasions on which Android ID values are generated or modified
+remain essentially unchanged, but there are a few points to note, as
+discussed below.
 
--   パッケージのアンインストール・再インストール時
 
-Android IDの値は、署名が同じである限り、アプリをアンインストール・再インストールされても変わらない。逆に、署名する鍵が変わった場合は、パッケージ名が同じでも再インストール時にAndroid IDの値が異なることに注意する。
+-   On package uninstallation / reinstallation:
+&nbsp;
+    As long as the signature of the app remains unchanged, its Android
+    ID will be unchanged after uninstalling and reinstalling. On the
+    other hand, note that, if the key used as the signature is modified,
+    the Android ID will be different after re-installation, even if the
+    package name is unchanged.
 
--   Android 8.0(API Level 26)以降の端末へのアップデート時
 
-Android 7.1(API Level 25)以前の端末で既にアプリがインストールされていた場合、端末をAndroid 8.0(API Level 26)以降にアップデートしてもアプリで取得できるAndroid IDの値は変わらない。ただし、アップデート後にアプリがアンインストール・再インストールする場合は除く。
+-   On updates to terminals running Android 8.0 (API Level 26) or later:
+&nbsp;
+    If an app was already installed on a terminal running Android 7.1 (API
+    Level 25) or earlier, the Android ID value that may be obtained by the
+    app remains unchanged after the terminal is updated to Android 8.0
+    (API Level 26) or later. However, this excludes cases in which apps
+    are uninstalled and reinstalled after the update.
 
-なお、いずれのAndroid
-IDでも「5.5.3.2用語解説」における「利用者による取り換えが困難な利用者情報」に分類されるため、冒頭に言及したように使用の際は同様の注意を払うことを推奨する。
+Note that all Android IDs are classified as *User information that is
+difficult for users to exchange* (as described in Section 5.5.3.2,
+*Glossary of Terms*), and thus---as noted at the beginning of this
+discussion---we recommend that similar levels of caution be employed
+when using Android IDs.
 
 暗号技術を利用する
 ------------------
