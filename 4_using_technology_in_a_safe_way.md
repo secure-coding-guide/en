@@ -1964,36 +1964,54 @@ Ordered Broadcast, it may receive the unexpected result information.
 
 Figure 4.2‑5
 
-ただし、システムの送信するBroadcast
-Intentのみを受信するBroadcastReceiverを実装する場合には、「exported="false"かつintent-filter定義あり」を使用すること。かつ、これ以外の組み合わせは使っていけない。これは、システムが送信するBroadcast
-Intentに関してはexported="false"でも受信可能であるという事実にもとづく。システムが送信するBroadcast
-Intentと同じACTIONのIntentを他アプリが送信した場合、それを受信してしまうと意図しない動作を引き起こす可能性があるが、これはexported="false"を指定することによって防ぐことができる。
+However, exported=\"false\" with Intent-filter definition should be
+used when Broadcast Receiver to receive only Broadcast Intent sent by
+the system is implemented. Other combination should not be used. This
+is based on the fact that Broadcast Intent sent by the system can be
+received by exported=\"false\". If other applications send Intent
+which has same ACTION with Broadcast Intent sent by system, it may
+cause an unexpected behavior by receiving it. However, this can be
+prevented by specifying exported=\"false\".
 
-#### Receiverはアプリを起動しないと登録されない
+#### Receiver Won\'t Be Registered before Launching the Application
+
 ```eval_rst
-AndroidManifest.xmlに静的に定義したBroadcast
-Receiverは、インストールしただけでは有効にならないので注意が必要である [10]_。アプリを1回起動することで、それ以降のBroadcastを受信できるようになるため、インストール後にBroadcast受信をトリガーにして処理を起動させることはできない。ただしBroadcastの送信側でIntentにIntent.FLAG\_INCLUDE\_STOPPED_PACKAGES
-を設定してBroadcast送信した場合は、一度も起動していないアプリであってもこのBroadcast
-を受信することができる。
+It is important to note carefully that a Broadcast Receiver defined
+statically in AndroidManifest.xml will not be automatically enabled
+upon installation. [10]_ Apps are able to receive Broadcasts only after
+they have been launched the first time; thus, it is not possible to
+use the receipt of a Broadcast after installation as a trigger to
+initiate operations. However, if the
+Intent.FLAG\_INCLUDE\_STOPPED\_PACKAGES flag set when sending a
+Broadcast, that Broadcast will be received even by apps that have not
+yet been launched for the first time.
 
-.. [10] Android 3.0未満ではアプリのインストールをしただけでReceiverが登録される
+.. [10] In versions prior to Android 3.0, Receivers were registered automatically simply by installing apps.
 ```
-#### 同じUIDを持つアプリから送信されたBroadcastは、非公開Broadcast Receiverでも受信できる
 
-複数のアプリに同じUIDを持たせることができる。この場合、たとえ非公開Broadcast
-Receiverであっても、同じUIDのアプリから送信されたBroadcastは受信してしまう。
+#### Private Broadcast Receiver Can Receive the Broadcast that Was Sent by the Same UID Application
 
-しかしこれはセキュリティ上問題となることはない。同じUIDを持つアプリはAPKを署名する開発者鍵が一致することが保証されており、非公開Broadcast　Receiverが受信するのは自社アプリから送信されたBroadcastに限定されるからである。
+Same UID can be provided to several applications. Even if it\'s
+private Broadcast Receiver, the Broadcasts sent from the same UID
+application can be received.
 
-#### Broadcastの種類とその特徴
+However, it won\'t be a security problem. Since it\'s guaranteed that
+applications with the same UID have the consistent developer keys for
+signing APK. It means that what private Broadcast Receiver receives is
+only the Broadcast sent from In-house applications.
 
-送信するBroadcastはOrderedかそうでないか、Stickyかそうでないかの組み合わせにより4種類のBroadcastが存在する。Broadcast送信用メソッドに応じて、送信するBroadcastの種類が決まる。なお、Sticky
-Broadcastの使用はAndroid 5.0（API Level 21）において非推奨となっている。
+#### Types and Features of Broadcasts
 
-表 4.2‑3
+Regarding Broadcasts, there are 4 types based on the combination of
+whether it\'s Ordered or not, and Sticky or not. Based on Broadcast
+sending methods, a type of Broadcast to send is determined. Note that
+Sticky Broadcast is deprecated in Android 5.0 (API Level 21).
+
+Table 4.2‑4
+
 ```eval_rst
 ========================== ============================== ========== =========
-Broadcastの種類            送信用メソッド                 Ordered?   Sticky?
+Type of Broadcast          Method for sending             Ordered?   Sticky?
 ========================== ============================== ========== =========
 Normal Broadcast           sendBroadcast()                No         No
 Ordered Broadcast          sendOrderedBroadcast()         Yes        No
@@ -2001,78 +2019,85 @@ Sticky Broadcast           sendStickyBroadcast()          No         Yes
 Sticky Ordered Broadcast   sendStickyOrderedBroadcast()   Yes        Yes
 ========================== ============================== ========== =========
 ```
-それぞれのBroadcastの特徴は次のとおりである。
 
-表 4.2‑4
+The feature of each Broad cast is described.
+
+Table 4.2‑5
+
 ```eval_rst
 ========================= ===========================================================
-Broadcastの種類           Broadcastの種類ごとの特徴
+Type of Broadcast         | Features for each type of Broadcast
 ========================= ===========================================================
-Normal Broadcast          | Normal Broadcastは送信時に受信可能な状態にあるBroadcast
-                          | Receiverに配送されて消滅する。Ordered Broadcastと異なり、
-                          | 複数のBroadcast Receiverが同時にBroadcastを受信するのが
-                          | 特徴である。特定のPermissionを持つアプリのBroadcast
-                          | ReceiverだけにBroadcastを受信させることもできる。
-Ordered Broadcast         | Ordered Broadcastは送信時に受信可能な状態にあるBroadcast
-                          | Receiverが一つずつ順番にBroadcastを受信することが特徴で
-                          | ある。よりpriority値が大きいBroadcast Receiverが先に受信
-                          | する。すべてのBroadcast Receiverに配送完了するか、途中の
-                          | Broadcast　ReceiverがabortBroadcast()を呼び出した場合に、
-                          | Broadcastは消滅する。特定のPermissionを利用宣言したアプリ
-                          | のBroadcast ReceiverだけにBroadcastを受信させることもでき
-                          | る。またOrdered Broadcastでは送信元がBroadcast Receiverか
-                          | らの結果情報を受け取ることもできる。SMS受信通知Broadcast
-                          | （SMS_RECEIVED）はOrdered Broadcastの代表例である。
-Sticky Broadcast          | Sticky Broadcastは送信時に受信可能な状態にあるBroadcast
-                          | Receiverに配送された後に消滅することはなくシステムに残り
-                          | 続け、後にregisterReceiver()を呼び出したアプリがSticky
-                          | Broadcastを受信することができることが特徴である。Sticky
-                          | Broadcastは他のBroadcastと異なり自動的に消滅することはな
-                          | いので、Sticky Broadcastが不要になったときに、明示的に
-                          | removeStickyBroadcast()を呼び出してSticky Broadcastを消滅
-                          | させる必要がある。他のBroadcastと異なり、特定のPermission
-                          | を持つアプリのBroadcast ReceiverだけにBroadcastを受信させ
-                          | ることはできない。バッテリー状態変更通知Broadcast
-                          | （ACTION_BATTERY_CHANGED）はSticky Broadcastの代表例
-                          | である。
-Sticky Ordered Broadcast  | Ordered BroadcastとSticky Broadcastの両方の特徴を持った
-                          | Broadcastである。Sticky Broadcastと同様、特定のPermission
-                          | を持つアプリのBroadcast ReceiverだけにBroadcastを受信させ
-                          | ることはできない。
+Normal Broadcast          | Normal Broadcast disappears when it is sent to receivable Broadcast Receiver.
+                          | Broadcasts are received by several Broadcast Receivers simultaneously.
+                          | This is a difference from Ordered Broadcast.
+                          | Broadcasts are allowed to be received by the particular Broadcast Receivers.
+Ordered Broadcast         | Ordered Broadcast is characterized by receiving Broadcasts one by one in order
+                          | with receivable Broadcast Receivers.
+                          | The higher-priority Broadcast Receiver receives earlier.
+                          | Broadcasts will disappear when Broadcasts are delivered to all Broadcast Receivers or
+                          | a Broadcast Receiver in the process calls abortBroadcast().
+                          | Broadcasts are allowed to be received by the Broadcast Receivers which declare
+                          | the specified Permission.
+                          | In addition, the result information sent from Broadcast Receiver can be received
+                          | by the sender with Ordered Broadcasts.
+                          | The Broadcast of SMS-receiving notice (SMS\_RECEIVED) is a representative example
+                          | of Ordered Broadcast.
+Sticky Broadcast          | Sticky Broadcast does not disappear and remains in the system, and then
+                          | the application that calls registerReceiver() can receive Sticky Broadcast later.
+                          | Since Sticky Broadcast is different from other Broadcasts, it will never disappear
+                          | automatically. So when Sticky Broadcast is not necessary, calling
+                          | removeStickyBroadcast() explicitly is required to delete Sticky Broadcast.
+                          | Also, Broadcasts cannot be received by the limited Broadcast Receivers with
+                          | particular Permission. The Broadcast of changing battery-state notice
+                          | (ACTION\_BATTERY\_CHANGED) is the representative example of Sticky Broadcast.
+Sticky Ordered Broadcast  | This is the Broadcast which has both characteristics of Ordered Broadcast and
+                          | Sticky Broadcast. Same as Sticky Broadcast, it cannot allow only Broadcast Receivers
+                          | with the particular Permission to receive the Broadcast.
 ========================= ===========================================================
 ```
-Broadcastの特徴的な振る舞いの視点で、上表を逆引き的に再整理すると下表になる。
 
-表 4.2‑5
+From the Broadcast characteristic behavior point of view, above table
+is conversely arranged in the following one.
+
+Table 4.2‑6
+
 ```eval_rst
-+----------------------+-----------+-----------+-----------+-----------+
-|| Broadcastの         | Normal    | Ordered   | Sticky    | Sticky    |
-|| 特徴的な            | Broadcast | Broadcast | Broadcast | Ordered   |
-|| 振る舞い            |           |           |           | Broadcast |
-+======================+===========+===========+===========+===========+
-|| 受信可能なBroadcast || o        || o        || \-       || \-       |
-|| ReceiverをPermission|           |           |           |           |
-|| により制限する      |           |           |           |           |
-+----------------------+-----------+-----------+-----------+-----------+
-|| Broadcast           || \-       || o        || \-       || o        |
-|| Receiverからの      |           |           |           |           |
-|| 処理結果を取得する  |           |           |           |           |
-+----------------------+-----------+-----------+-----------+-----------+
-|| 順番にBroadcast     || \-       || o        || \-       || o        |
-|| ReceiverにBroadcast |           |           |           |           |
-|| を処理させる        |           |           |           |           |
-+----------------------+-----------+-----------+-----------+-----------+
-|| 既に送信されている  || \-       || \-       || o        || o        |
-|| Broadcastを後から   |           |           |           |           |
-|| 受信する            |           |           |           |           |
-+----------------------+-----------+-----------+-----------+-----------+
++----------------------+------------+------------+------------+------------+
+|| Characteristic      || Normal    || Ordered   || Sticky    || Sticky    |
+|| behavior of         ||           ||           ||           || Ordered   |
+|| Broadcast           || Broadcast || Broadcast || Broadcast || Broadcast |
++======================+============+============+============+============+
+|| Limit Broadcast     || OK        || OK        || \-        || \-        |
+|| Receivers which can |            |            |            |            |
+|| receive Broadcast,  |            |            |            |            |
+|| by Permission       |            |            |            |            |
++----------------------+------------+------------+------------+------------+
+|| Get the results     || \-        || OK        || \-        || OK        |
+|| of process from     |            |            |            |            |
+|| Broadcast Receiver  |            |            |            |            |
++----------------------+------------+------------+------------+------------+
+|| Make Broadcast      || \-        || OK        || \-        || OK        |
+|| Receivers process   |            |            |            |            |
+|| Broadcasts in order |            |            |            |            |
++----------------------+------------+------------+------------+------------+
+|| Receive Broadcasts  || \-        || \-        || OK        || OK        |
+|| later, which have   |            |            |            |            |
+|| been already sent   |            |            |            |            |
++----------------------+------------+------------+------------+------------+
 ```
 
-#### Broadcast送信した情報がLogCatに出力される場合がある
+#### Broadcasted Information May be Output to the LogCat
 
-Broadcastの送受信は基本的にLogCatに出力されない。しかし、受信側のPermission不足によるエラーや、送信側のPermission不足によるエラーの際にLogCatにエラーログが出力される。エラーログにはBroadcastで送信するIntent情報も含まれるので、エラー発生時にはBroadcast送信する場合はLogCatに表示されることに注意してほしい。
+Basically sending/receiving Broadcasts is not output to LogCat.
+However, the error log will be output when lacking Permission causes
+errors in receiver/sender side. Intent information sent by Broadcast
+is included in the error log, so after an error occurs it\'s necessary
+to pay attention that Intent information is displayed in LogCat when
+Broadcast is sent.
 
-送信側のPermission不足時のエラー
+Erorr of lacking Permission in sender side
+
 ```
 W/ActivityManager(266): Permission Denial: broadcasting Intent {
 act=org.jssec.android.broadcastreceiver.creating.action.MY_ACTION }
@@ -2081,7 +2106,8 @@ org.jssec.android.permission.MY_PERMISSION due to receiver
 org.jssec.android.broadcastreceiver.creating/org.jssec.android.broadcastreceiver.creating.CreatingType3Receiver
 ```
 
-受信側のPermission不足時のエラー
+Erorr of lacking Permission in receiver side
+
 ```
 W/ActivityManager(275): Permission Denial: receiving Intent {
 act=org.jssec.android.broadcastreceiver.creating.action.MY_ACTION } to
@@ -2090,71 +2116,112 @@ org.jssec.android.permission.MY_PERMISSION due to sender
 org.jssec.android.broadcast.sending (uid 10158)
 ```
 
-#### ホーム画面（アプリ）にショートカットを配置する際の注意点
+#### Items to Keep in Mind When Placing an App Shortcut on the Home Screen
 
-ホーム画面にアプリを起動するためのショートカットボタンやWebブラウザのブックマークのようなURLショートカットを作成する場合の注意点について説明する。例として、以下のような実装を考えてみる。
+In what follows we discuss a number of items to keep in mind when
+creating a shortcut button for launching an app from the home screen
+or for creating URL shortcuts such as bookmarks in web browsers. As an
+example, we consider the implementation shown below.
 
-ホーム画面（アプリ）にショートカットを配置する
+Place an app shortcut on the home screen
+
 ``` java
         Intent targetIntent = new Intent(this, TargetActivity.class);
 
-       // ショートカット作成依頼のためのIntent
+        // Intent to request shortcut creation
         Intent intent = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
 
-        // ショートカットのタップ時に起動するIntentを指定
+        // Specify an Intent to be launched when the shortcut is tapped
         intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, targetIntent);
         Parcelable icon = Intent.ShortcutIconResource.fromContext(context, iconResource);
         intent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, icon);
         intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, title);
         intent.putExtra("duplicate", false);
 
-        // BroadCastを使って、システムにショートカット作成を依頼する
+        // Use Broadcast to send the system our request for shortcut creation
         context.sendBroadcast(intent);
 ```
 
-上記で送信しているBroadcastは、受け手がホーム画面アプリであり、パッケージ名を特定することが難しいため、暗黙的Intentによる公開Receiverへの送信となっていることに注意が必要である。つまり、上記で送信したBroadcastはマルウェアを含めた任意のアプリが受信することができ、そのため、Intentにセンシティブな情報が含まれていると情報漏洩の被害につながる可能性がある。URLを基にしたショートカットを作成する場合、URLに秘密の情報が含まれていることもあるため、特に注意が必要である。
+In the Broadcast sent by the above code snippet, the receiver is the
+home-screen app, and it is difficult to identify the package name; one
+must take care to remember that this is a transmission to a public
+receiver with an implicit intent. Thus the Broadcast sent by this
+snippet could be received by any arbitrary app, including malware; for
+this reason, the inclusion of sensitive information in the Intent may
+create the risk of a damaging leak of information. It is particularly
+important to note that, when creating a URL-based shortcut, secret
+information may be contained in the URL itself.
 
-対策方法としては、「4.2.1.2公開Broadcast Receiver -
-Broadcastを受信する・送信する」に記載されているポイントに従い、送信するIntentにセンシティブな情報が含まないようにすることが必要である。
+As countermeasures, it is necessary to follow the points listed in
+"4.2.1.2 Public Broadcast Receiver - Receiving/Sending Broadcasts" and
+to ensure that the transmitted Intent does not contain sensitive
+information.
 
-Content Providerを作る・利用する
+Creating/Using Content Providers
 --------------------------------
 
-ContentResolverとSQLiteDatabaseのインターフェースが似ているため、Content
-ProviderはSQLiteDatabaseと密接に関係があると勘違いされることが多い。しかし実際にはContent
-Providerはアプリ間データ共有のインターフェースを規定するだけで、データ保存の形式は一切問わないことに注意が必要だ。作成するContent
-Provider内部でデータの保存にSQLiteDatabaseを使うこともできるし、XMLファイルなどの別の保存形式を使うこともできる。なお、ここで紹介するサンプルコードにはデータを保存する処理を含まないので、必要に応じて追加すること。
+Since the interface of ContentResolver and SQLiteDatabase are so much
+alike, it\'s often misunderstood that Content Provider is so closely
+related to SQLiteDatabase. However, actually Content Provider simply
+provides the interface of inter-application data sharing, so it\'s
+necessary to pay attention that it does not interfere each data saving
+format. To save data in Content Provider, SQLiteDatabase can be used,
+and other saving formats, such as an XML file format, also can be
+used. Any data saving process is not included in the following sample
+code, so please add it if needed.
 
-### サンプルコード<!-- 45c21b70 -->
+### Sample Code<!-- 45c21b70 -->
 
-Content Providerがどのように利用されるかによって、Content
-Providerが抱えるリスクや適切な防御手段が異なる。次の判定フローによって作成するContent
-Providerがどのタイプであるかを判断できる。
+The risks and countermeasures of using Content Provider differ
+depending on how that Content Provider is being used. In this section,
+we have classified 5 types of Content Provider based on how the
+Content Provider is being used. You can find out which type of Content
+Provider you are supposed to create through the following chart shown below.
 
-![](media/image42.png)
+Table 4.3‑1 Definition of content provider types
+
+```eval_rst
+=========================== ===================================
+| Type                      | Definition
+=========================== ===================================
+| Private Content Provider  | A content provider that cannot be used by another application,
+                            | and therefore is the safest content provider
+| Public Content Provider   | A content provider that is supposed to be used by an unspecified
+                            | large number of applications
+| Partner Content Provider  | A content provider that can be used by specific applications
+                            | made by a trusted partner company.
+| In-house Content Provider | A content provider that can only be used by other in-house applications
+| Temporary permit          | A content provider that is basically private content provider,
+| Content Provider          | but permits specific applications to access the particular URI.
+=========================== ===================================
+```
+
+![](media/image43.png)
 ```eval_rst
 .. {width="6.889763779527559in"
 .. height="3.0866141732283463in"}
 ```
 
-図 4.3‑1
+Figure 4.3‑1
 
-#### 非公開Content Providerを作る・利用する
+#### Creating/Using Private Content Providers
+
 ```eval_rst
-非公開Content Providerは、同一アプリ内だけで利用されるContent Providerであり、
-もっとも安全性の高いContent Providerである [11]_。
+Private Content Provider is the Content Provider which is used only in
+the single application, and the safest Content Provider [11]_.
 
-.. [11] ただし、Content Providerの非公開設定はAndroid 2.2 (API Level 8)
-    以前では機能しない。
+.. [11] However, non-public settings for Content Provider are not functional in Android 2.2 (API Level 8) and previous versions.
 ```
 
-以下、非公開Content Providerの実装例を示す。
+Sample code of how to implement a private Content Provider is shown below.
 
-ポイント(Content Providerを作る）：
+Points (Creating a Content Provider):
 
-1.  exported=\"false\"により、明示的に非公開設定する
-2.  同一アプリ内からのリクエストであっても、パラメータの安全性を確認する
-3.  利用元アプリは同一アプリであるから、センシティブな情報を返送してよい
+1.  Explicitly set the exported attribute to false.
+2.  Handle the received request data carefully and securely, even though
+    the data comes from the same application.
+3.  Sensitive information can be sent since it is sending and receiving
+    all within the same application.
 
 AndroidManifest.xml
 ```eval_rst
@@ -2170,12 +2237,15 @@ PrivateProvider.java
    :encoding: shift-jis
 ```
 
-次に、非公開Content Providerを利用するActivityの例を示す。
+Next is an example of Activity which uses Private Content Provider.
 
-ポイント(Content Providerを利用する)：
+Points (Using a Content Provider):
 
-4.  同一アプリ内へのリクエストであるから、センシティブな情報をリクエストに含めてよい
-5.  同一アプリ内からの結果情報であっても、受信データの安全性を確認する
+4. Sensitive information can be sent since the destination provider is
+   in the same application.
+
+5. Handle received result data carefully and securely, even though the
+   data comes from the same application.
 
 PrivateUserActivity.java
 ```eval_rst
@@ -2184,26 +2254,29 @@ PrivateUserActivity.java
    :encoding: shift-jis
 ```
 
-#### 公開Content Providerを作る・利用する
+#### Creating/Using Public Content Providers
 
-公開Content
-Providerは、不特定多数のアプリに利用されることを想定したContent
-Providerである。クライアントを限定しないことにより、マルウェアからselect()によって保持しているデータを抜き取られたり、update()によってデータを書き換えられたり、insert()/delete()によって偽のデータの挿入やデータの削除といった攻撃を受けたりして改ざんされ得ることに注意が必要だ。
+Public Content Provider is the Content Provider which is supposed to
+be used by unspecified large number of applications. It\'s necessary
+to pay attention that since this doesn\'t specify clients, it may be
+attacked and tampered by Malware. For example, a saved data may be
+taken by select(), a data may be changed by update(), or a fake data
+may be inserted/deleted by insert()/delete().
 
-また、Android OS既定ではない独自作成の公開Content
-Providerを利用する場合、その公開Content
-Providerに成り済ましたマルウェアにリクエストパラメータを受信されることがあること、および、攻撃結果データを受け取ることがあることに注意が必要である。Android
-OS既定のContactsやMediaStore等も公開Content
-Providerであるが、マルウェアはそれらContent
-Providerに成り済ましできない。
+In addition, when using a custom Public Content Provider which is not
+provided by Android OS, it\'s necessary to pay attention that request
+parameter may be received by Malware which masquerades as the custom
+Public Content Provider, and also the attack result data may be sent.
+Contacts and MediaStore provided by Android OS are also Public Content
+Providers, but Malware cannot masquerades as them.
 
-以下、公開Content Providerの実装例を示す。
+Sample code to implement a Public Content Provider is shown below.
 
-ポイント(Content Providerを作る)：
+Points (Creating a Content Provider):
 
-1.  exported=\"true\"により、明示的に公開設定する
-2.  リクエストパラメータの安全性を確認する
-3.  センシティブな情報を返送してはならない
+1.  Explicitly set the exported attribute to true.
+2.  Handle the received request data carefully and securely.
+3.  When returning a result, do not include sensitive information.
 
 AndroidManifest.xml
 ```eval_rst
@@ -2219,12 +2292,13 @@ PublicProvider.java
    :encoding: shift-jis
 ```
 
-次に、公開Content Providerを利用するActivityの例を示す。
+Next is an example of Activity which uses Public Content Provider.
 
-ポイント(Content Providerを利用する)：
+Points (Using a Content Provider):
 
-4.  センシティブな情報をリクエストに含めてはならない
-5.  結果データの安全性を確認する
+4. Do not send sensitive information.
+
+5. When receiving a result, handle the result data carefully and securely.
 
 PublicUserActivity.java
 ```eval_rst
@@ -2233,19 +2307,25 @@ PublicUserActivity.java
    :encoding: shift-jis
 ```
 
-#### パートナー限定Content Providerを作る・利用する
+#### Creating/Using Partner Content Providers
 
-パートナー限定Content Providerは、特定のアプリだけから利用できるContent
-Providerである。パートナー企業のアプリと自社アプリが連携してシステムを構成し、パートナーアプリとの間で扱う情報や機能を守るために利用される。
+Partner Content Provider is the Content Provider which can be used
+only by the particular applications. The system consists of a partner
+company\'s application and In-house application, and it is used to
+protect the information and features which are handled between a
+partner application and an In-house application.
 
-以下、パートナー限定Content Providerの実装例を示す。
+Sample code to implement a partner-only Content Provider is shown below.
 
-ポイント(Content Providerを作る)：
+Points (Creating a Content Provider):
 
-1.  exported=\"true\"により、明示的に公開設定する
-2.  利用元アプリの証明書がホワイトリストに登録されていることを確認する
-3.  パートナーアプリからのリクエストであっても、パラメータの安全性を確認する
-4.  パートナーアプリに開示してよい情報に限り返送してよい
+1. Explicitly set the exported attribute to true.
+2. Verify if the certificate of a requesting application has been
+   registered in the own white list.
+3. Handle the received request data carefully and securely, even though
+   the data comes from a partner application.
+4. Information that is granted to disclose to partner applications can
+   be returned.
 
 AndroidManifest.xml
 ```eval_rst
@@ -2261,13 +2341,18 @@ PartnerProvider.java
    :encoding: shift-jis
 ```
 
-次に、パートナー限定Content Providerを利用するActivityの例を示す。
+Next is an example of Activity which use partner only Content Provider.
 
-ポイント(Content Providerを利用する)：
+Points (Using a Content Provider):
 
-5.  利用先パートナー限定Content Providerアプリの証明書がホワイトリストに登録されていることを確認する
-6.  パートナー限定Content Providerアプリに開示してよい情報に限りリクエストに含めてよい
-7.  パートナー限定Content Providerアプリからの結果であっても、結果データの安全性を確認する
+5. Verify if the certificate of the target application has been
+   registered in the own white list.
+
+6. Information that is granted to disclose to partner applications can
+   be sent.
+
+7. Handle the received result data carefully and securely, even though
+   the data comes from a partner application.
 
 PartnerUserActivity.java
 ```eval_rst
@@ -2290,24 +2375,26 @@ PkgCert.java
    :encoding: shift-jis
 ```
 
+#### Creating/Using In-house Content Providers
 
-#### 自社限定Content Providerを作る・利用する
+In-house Content Provider is the Content Provider which prohibits to
+be used by applications other than In house only applications.
 
-自社限定Content
-Providerは、自社以外のアプリから利用されることを禁止するContent
-Providerである。複数の自社製アプリでシステムを構成し、自社アプリが扱う情報や機能を守るために利用される。
+Sample code of how to implement an In house only Content Provider is shown below.
 
-以下、自社限定Content Providerの実装例を示す。
+Points (Creating a Content Provider):
 
-ポイント(Content Providerを作る)：
-
-1.  独自定義Signature Permissionを定義する
-2.  独自定義Signature Permissionを要求宣言する
-3.  exported=\"true\"により、明示的に公開設定する
-4.  独自定義Signature Permissionが自社アプリにより定義されていることを確認する
-5.  自社アプリからのリクエストであっても、パラメータの安全性を確認する
-6.  利用元アプリは自社アプリであるから、センシティブな情報を返送してよい
-7.  利用元アプリと同じ開発者鍵でAPKを署名する
+1.  Define an in-house signature permission.
+2.  Require the in-house signature permission.
+3.  Explicitly set the exported attribute to true.
+4.  Verify if the in-house signature permission is defined by an
+    in-house application.
+5.  Verify the safety of the parameter even if it\'s a request from In
+    house only application.
+6.  Sensitive information can be returned since the requesting
+    application is in-house.
+7.  When exporting an APK, sign the APK with the same developer key as
+    that of the requesting application.
 
 AndroidManifest.xml
 ```eval_rst
@@ -2323,14 +2410,12 @@ InhouseProvider.java
    :encoding: shift-jis
 ```
 
-
 SigPerm.java
 ```eval_rst
 .. literalinclude:: CodeSamples/JSSEC Shared.SigPerm.java
    :language: java
    :encoding: shift-jis
 ```
-
 
 PkgCert.java
 ```eval_rst
@@ -2339,27 +2424,31 @@ PkgCert.java
    :encoding: shift-jis
 ```
 
+\*\*\* Point 7 \*\*\* When exporting an APK, sign the APK with the
+same developer key as the requesting application.
 
-★ポイント7★　APKをExportするときに、利用元アプリと同じ開発者鍵でAPKを署名する。
-
-![](media/image34.png)
+![](media/image35.png)
 ```eval_rst
 .. {width="4.647222222222222in"
 .. height="3.2743055555555554in"}
 ```
 
-図 4.3‑2
+Figure 4.3‑2
 
-次に、自社限定Content Providerを利用するActivityの例を示す。
+Next is the example of Activity which uses In house only Content Provider.
 
-ポイント(Content Providerを利用する)：
+Point (Using a Content Provider):
 
-8.  独自定義Signature Permissionを利用宣言する
-9.  独自定義Signature Permissionが自社アプリにより定義されていることを確認する
-10.  利用先Content Providerアプリの証明書が自社の証明書であることを確認する
-11.  自社限定Content Providerアプリに開示してよい情報に限りリクエストに含めてよい
-12.  自社限定Content Providerアプリからの結果であっても、結果データの安全性を確認する
-13.  利用先アプリと同じ開発者鍵でAPKを署名する
+8.  Declare to use the in-house signature permission.
+9.  Verify if the in-house signature permission is defined by an
+    in-house application.0
+10. Verify if the destination application is signed with the in-house certificate.
+11. Sensitive information can be sent since the destination application
+    is in-house one.
+12. Handle the received result data carefully and securely, even though
+    the data comes from an in-house application.
+13. When exporting an APK, sign the APK with the same developer key as
+    that of the destination application.
 
 AndroidManifest.xml
 ```eval_rst
@@ -2368,14 +2457,12 @@ AndroidManifest.xml
    :encoding: shift-jis
 ```
 
-
 InhouseUserActivity.java
 ```eval_rst
 .. literalinclude:: CodeSamples/Provider InhouseUser.InhouseUserActivity.java
    :language: java
    :encoding: shift-jis
 ```
-
 
 SigPerm.java
 ```eval_rst
@@ -2384,7 +2471,6 @@ SigPerm.java
    :encoding: shift-jis
 ```
 
-
 PkgCert.java
 ```eval_rst
 .. literalinclude:: CodeSamples/JSSEC Shared.PkgCert.java
@@ -2392,37 +2478,43 @@ PkgCert.java
    :encoding: shift-jis
 ```
 
+\*\*\* Point 13 \*\*\* When exporting an APK, sign the APK with the
+same developer key as that of the destination application.
 
-★ポイント13★APKをExportするときに、利用先アプリと同じ開発者鍵でAPKを署名する。
-
-![](media/image34.png)
+![](media/image35.png)
 ```eval_rst
 .. {width="4.647222222222222in"
 .. height="3.2743055555555554in"}
 ```
 
-図 4.3‑3
+Figure 4.3‑3
 
-#### 一時許可Content Providerを作る・利用する
+#### Creating/Using Temporary permit Content Providers
 
-一時許可Content Providerは、基本的には非公開のContent
-Providerであるが、特定のアプリに対して一時的に特定URIへのアクセスを許可するContent
-Providerである。特殊なフラグを指定したIntentを対象アプリに送付することにより、そのアプリに一時的なアクセス権限が付されるようになっている。Content
-Provider側アプリが能動的に他のアプリにアクセス許可を与えることもできるし、一時的なアクセス許可を求めてきたアプリにContent
-Provider側アプリが受動的にアクセス許可を与えることもできる。
+Temporary permit Content Provider is basically a private Content
+Provider, but this permits the particular applications to access the
+particular URI. By sending an Intent which special flag is specified
+to the target applications, temporary access permission is provided to
+those applications. Contents provider side application can give the
+access permission actively to other applications, and it can also give
+access permission passively to the application which claims the
+temporary access permission.
 
-以下、一時許可Content Providerの実装例を示す。
+Sample code of how to implement a temporary permit Content Provider is shown below.
 
-ポイント(Content Providerを作る)：
+Points (Creating a Content Provider):
 
-1.  exported=\"false"により、一時許可するPath以外を非公開設定する
-2.  grant-uri-permissionにより、一時許可するPathを指定する
-3.  一時的に許可したアプリからのリクエストであっても、パラメータの安全性を確認する
-4.  一時的に許可したアプリに開示してよい情報に限り返送してよい
-5.  一時的にアクセスを許可するURIをIntentに指定する
-6.  一時的に許可するアクセス権限をIntentに指定する
-7.  一時的にアクセスを許可するアプリに明示的Intentを送信する
-8.  一時許可の要求元アプリにIntentを返信する
+1.  Explicitly set the exported attribute to false.
+2.  Specify the path to grant access temporarily with the
+    grant-uri-permission.
+3.  Handle the received request data carefully and securely, even though
+    the data comes from the application granted access temporarily.
+4.  Information that is granted to disclose to the temporary access
+    applications can be returned.
+5.  Specify URI for the intent to grant temporary access.
+6.  Specify access rights for the intent to grant temporary access.
+7.  Send the explicit intent to an application to grant temporary access.
+8.  Return the intent to the application that requests temporary access.
 
 AndroidManifest.xml
 ```eval_rst
@@ -2431,14 +2523,12 @@ AndroidManifest.xml
    :encoding: shift-jis
 ```
 
-
 TemporaryProvider.java
 ```eval_rst
 .. literalinclude:: CodeSamples/Provider TemporaryProvider.TemporaryProvider.java
    :language: java
    :encoding: shift-jis
 ```
-
 
 TemporaryActiveGrantActivity.java
 ```eval_rst
@@ -2447,7 +2537,6 @@ TemporaryActiveGrantActivity.java
    :encoding: shift-jis
 ```
 
-
 TemporaryPassiveGrantActivity.java
 ```eval_rst
 .. literalinclude:: CodeSamples/Provider TemporaryProvider.TemporaryPassiveGrantActivity.java
@@ -2455,13 +2544,12 @@ TemporaryPassiveGrantActivity.java
    :encoding: shift-jis
 ```
 
+Next is the example of temporary permit Content Provider.
 
-次に、一時許可Content Providerを利用するActivityの例を示す。
+Points (Using a Content Provider):
 
-ポイント(Content Providerを利用する)：
-
-9.  センシティブな情報をリクエストに含めてはならない
-10.  結果データの安全性を確認する
+9. Do not send sensitive information.
+10. When receiving a result, handle the result data carefully and securely.
 
 TemporaryUserActivity.java
 ```eval_rst
@@ -2470,86 +2558,121 @@ TemporaryUserActivity.java
    :encoding: shift-jis
 ```
 
-### ルールブック<!-- f7f5d0a0 -->
+### Rule Book<!-- f7f5d0a0 -->
 
-Content Providerの実装時には以下のルールを守ること。
+Be sure to follow the rules below when Implementing or using a content provider.
 
-1.  アプリ内でのみ使用するContent Providerは非公開設定する （必須）
+1.  Content Provider that Is Used Only in an Application Must Be Set as Private (Required)
+2.  Handle the Received Request Parameter Carefully and Securely (Required)
+3.  Use an In-house Defined Signature Permission after Verifying that it
+    is Defined by an In-house Application (Required)
+4.  When Returning a Result, Pay Attention to the Possibility of
+    Information Leakage of that Result from the Destination Application (Required)
+5.  When Providing an Asset Secondarily, the Asset should be Protected
+    with the Same Level of Protection (Required)
 
-2.  リクエストパラメータの安全性を確認する （必須）
+And user side should follow the below rules, too.
 
-3.  独自定義Signature Permissionは、自社アプリが定義したことを確認して利用する （必須）
+6.  Handle the Returned Result Data from the Content Provider Carefully and Securely (Required)
 
-4.  結果情報を返す場合には、返送先アプリからの結果情報漏洩に注意する （必須）
+#### Content Provider that Is Used Only in an Application Must Be Set as Private (Required)
 
-5.  資産を二次的に提供する場合には、その資産の従来の保護水準を維持する （必須）
-
-また、利用側は、以下のルールも守ること。
-
-1.  Content Providerの結果データの安全性を確認する （必須）
-
-#### アプリ内でのみ使用するContent Providerは非公開設定する （必須）
-
-同一アプリ内からのみ利用されるContent
-Providerは他のアプリからアクセスできる必要がないだけでなく、開発者もContent
-Providerを攻撃するアクセスを考慮しないことが多い。Content
-Providerはデータ共有するための仕組みであるため、デフォルトでは公開扱いになってしまう。同一アプリ内からのみ利用されるContent
-Providerは明示的に非公開設定し、非公開Content Providerとすべきである。
+Content Provider which is used only in a single application is not
+necessary to be accessed by other applications, and the access which
+attacks the Content Provider is not often considered by developers. A
+Content Provider is basically the system to share data, so it\'s
+handled as public by default. A Content Provider which is used only in
+a single application should be set as private explicitly, and it
+should be a private Content Provider. In Android 2.3.1 (API Level 9)
+or later, a Content Provider can be set as private by specifying
+android:exported=\"false\" in provider element.
 
 AndroidManifest.xml
 ```xml
-        <!-- ★ポイント2★ exported="false"により、明示的に非公開設定する -->
+        <!-- *** POINT 1 *** Set false for the exported attribute explicitly. -->
         <provider
             android:name=".PrivateProvider"
             android:authorities="org.jssec.android.provider.privateprovider"
             android:exported="false" />
 ```
 
-#### リクエストパラメータの安全性を確認する （必須）
+#### Handle the Received Request Parameter Carefully and Securely (Required)
 
-Content
-Providerのタイプによって若干リスクは異なるが、リクエストパラメータを処理する際には、まずその安全性を確認しなければならない。
+Risks differ depending on the types of Content Providers, but when
+processing request parameters, the first thing you should do is input
+validation.
 
-Content
-Providerの各メソッドはSQL文の構成要素パラメータを受け取ることを想定したインターフェースになってはいるものの、仕組みの上では単に任意の文字列を受け渡すだけのものであり、Content
-Provider側では想定外のパラメータが与えられるケースを想定しなければならないことに注意が必要だ。
+Although each method of a Content Provider has the interface which is
+supposed to receive the component parameter of SQL statement, actually
+it simply hands over the arbitrary character string in the system, so
+it\'s necessary to pay attention that Contents Provider side needs to
+suppose the case that unexpected parameter may be provided.
 
-公開Content
-Providerは不特定多数のアプリからリクエストを受け取るため、マルウェアの攻撃リクエストを受け取る可能性がある。非公開Content
-Providerは他のアプリからリクエストを直接受け取ることはない。しかし同一アプリ内の公開Activityが他のアプリから受け取ったIntentのデータを非公開Content
-Providerに転送するといったケースも考えられるため、リクエストを無条件に安全であると考えてはならない。その他のContent
-Providerについても、やはりリクエストの安全性を確認する必要がある。
+Since Public Content Providers can receive requests from untrusted
+sources, they can be attacked by malware. On the other hand, Private
+Content Providers will never receive any requests from other
+applications directly, but it is possible that a Public Activity in
+the targeted application may forward a malicious Intent to a Private
+Content Provider so you should not assume that Private Content
+Providers cannot receive any malicious input.
 
-「3.2入力データの安全性を確認する」を参照すること。
+Since other Content Providers also have the risk of a malicious intent
+being forwarded to them as well, it is necessary to perform input
+validation on these requests as well.
 
-#### 独自定義Signature Permissionは、自社アプリが定義したことを確認して利用する （必須）<!-- 24dcfd7e -->
+Please refer to \"3.2 Handling Input Data Carefully and Securely\"
 
-自社アプリだけから利用できる自社限定Content
-Providerを作る場合、独自定義Signature
-Permissionにより保護しなければならない。AndroidManifest.xmlでのPermission定義、Permission要求宣言だけでは保護が不十分であるため、「5.2
-PermissionとProtection Level」の「5.2.1.2 独自定義のSignature
-Permissionで自社アプリ連携する方法」を参照すること。
+#### Use an In-house Defined Signature Permission after Verifying that it is Defined by an In-house Application (Required) <!-- 24dcfd7e -->
 
-#### 結果情報を返す場合には、返送先アプリからの結果情報漏洩に注意する （必須）<!-- a9a47c42 -->
+Make sure to protect your in-house Content Providers by defining an
+in-house signature permission when creating the Content Provider.
+Since defining a permission in the AndroidManifest.xml file or
+declaring a permission request does not provide adequate security,
+please be sure to refer to \"5.2.1.2 How to Communicate Between
+In-house Applications with In-house-defined Signature Permission.\"
 
-query()やinsert()ではリクエスト要求元アプリに結果情報としてCursorやUriが返送される。結果情報にセンシティブな情報が含まれる場合、返送先アプリから情報漏洩する可能性がある。またupdate()やdelete()では更新または削除されたレコード数がリクエスト要求元アプリに結果情報として返送される。まれにアプリ仕様によっては更新または削除されたレコード数がセンシティブな意味を持つ場合があるので注意すべきだ。
+#### When Returning a Result, Pay Attention to the Possibility of Information Leakage of that Result from the Destination Application (Required) <!-- a9a47c42 -->
 
-#### 資産を二次的に提供する場合には、その資産の従来の保護水準を維持する （必須）<!-- 2db21801 -->
+In case of query() or insert(), Cursor or Uri is returned to the
+request sending application as a result information. When sensitive
+information is included in the result information, the information may
+be leaked from the destination application. In case of update() or
+delete(), number of updated/deleted records is returned to the request
+sending application as a result information. In rare cases, depending
+on some application specs, the number of updated/deleted records has
+the sensitive meaning, so please pay attention to this.
 
-Permissionにより保護されている情報資産および機能資産を他のアプリに二次的に提供する場合には、提供先アプリに対して同一のPermissionを要求するなどして、その保護水準を維持しなければならない。AndroidのPermissionセキュリティモデルでは、保護された資産に対するアプリからの直接アクセスについてのみ権限管理を行う。この仕様上の特性により、アプリに取得された資産がさらに他のアプリに、保護のために必要なPermissionを要求することなく提供される可能性がある。このことはPermissionを再委譲していることと実質的に等価なので、Permissionの再委譲問題と呼ばれる。「5.2.3.4　Permissionの再委譲問題」を参照すること。
+#### When Providing an Asset Secondarily, the Asset should be Protected with the Same Level of Protection (Required) <!-- 2db21801 -->
 
-#### Content Providerの結果データの安全性を確認する （必須）
+When an information or function asset, which is protected by a
+permission, is provided to another application secondhand, you need to
+make sure that it has the same required permissions needed to access
+the asset. In the Android OS permission security model, only an
+application that has been granted proper permissions can directly
+access a protected asset. However, there is a loophole because an
+application with permissions to an asset can act as a proxy and allow
+access to an unprivileged application. Substantially this is the same
+as re-delegating a permission, so it is referred to as the
+\"Permission Re-delegation\" problem. Please refer to \"5.2.3.4
+Permission Re-delegation Problem.\"
 
-Content
-Providerのタイプによって若干リスクは異なるが、結果データを処理する際には、まず結果データの安全性を確認しなければならない。
+#### Handle the Returned Result Data from the Content Provider Carefully and Securely (Required)
 
-利用先Content Providerが公開Content Providerの場合、公開Content
-Providerに成り済ましたマルウェアが攻撃結果データを返送してくる可能性がある。利用先Content
-Providerが非公開Content
-Providerの場合、同一アプリ内から結果データを受け取るのでリスクは少ないが、結果データを無条件に安全であると考えてはならない。その他のContent
-Providerについても、やはり結果データの安全性を確認する必要がある。
+Risks differ depending on the types of Content Provider, but when
+processing a result data, the first thing you should do is input
+validation.
 
-「3.2入力データの安全性を確認する」を参照すること。
+In case that the destination Content Provider is a public Content
+Provider, Malware which masquerades as the public Content Provider may
+return the attack result data. On the other hand, in case that the
+destination Content Provider is a private Content Provider, it is less
+risk because it receives the result data from the same application,
+but you should not assume that private Content Providers cannot
+receive any malicious input. Since other Content Providers also have
+the risk of a malicious data being returned to them as well, it is
+necessary to perform input validation on that result data as well.
+
+Please refer to \"3.2 Handling Input Data Carefully and Securely\"
 
 Serviceを作る・利用する
 -----------------------
