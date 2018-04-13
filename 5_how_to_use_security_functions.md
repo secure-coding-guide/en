@@ -1688,11 +1688,10 @@ user, and hence the modified specification has no impact in this case.
 
 Add In-house Accounts to Account Manager
 ----------------------------------------
-```eval_rst
+
 Account Manager is the Android OS\'s system which centrally manages
 account information (account name, password) which is necessary for
-applications to access to online service and authentication token
-[31]_.
+applications to access to online service and authentication token.
 A user needs to register the account information to Account Manager in
 advance, and when an application tries to access to online service,
 Account Manager will automatically provide application authentication
@@ -1700,8 +1699,6 @@ token after getting user\'s permission. The advantage of Account
 Manager is that an application doesn\'t need to handle the extremely
 sensitive information, password.
 
-.. [31] Account Managerはオンラインサービスとの同期の仕組みも提供するが、本節では扱っていない。
-```
 The structure of account management function which uses Account
 Manager is as per below Figure 5.3‑1. \"Requesting application\" is
 the application which accesses the online service, by getting
@@ -2249,10 +2246,10 @@ Next, account information for Authenticators that declare the use of
 WRITE\_CONTACTS Permission may be read by other apps with READ\_CONTACTS
 Permission, regardless of signature. This is not a bug, but is rather
 the way the framework is designed
-[32]_.Note again that this behavior
+[31]_.Note again that this behavior
 may differ depending on the Authenticator-side implementation.
 
-.. [32] It is assumed that Authenticators that declare the use of
+.. [31] It is assumed that Authenticators that declare the use of
     WRITE\_CONTACTS Permission will write account information to
     ContactsProvider, and that apps with READ\_CONTACTS Permission will
     be granted permission to obtain account information.
@@ -2279,101 +2276,154 @@ setAccountVisibility method; the above modification ensures that
 account information is not provided even in cases where
 targetSdkVersion \<= 25 or READ\_CONTACTS permission is present.
 
-HTTPSで通信する
----------------
+Communicating via HTTPS
+-----------------------
 ```eval_rst
-スマートフォンアプリはインターネット上のWebサーバーと通信するものが多い。その通信方式として当ガイドではHTTPとHTTPSの2方式に着目する。この2方式のうち、セキュリティの観点ではHTTPSによる通信が望ましい。近年GoogleやFacebookなど大手のWebサービスはHTTPSによる接続を基本とするように変わってきた。ただし、HTTPSによる接続の中でもSSLv3を用いた接続に関しては脆弱性の存在(通称POODLE)が知られており、極力使用しないことを推奨する [33]_。
+Most of smartphone applications communicate with Web servers on the
+Internet. As methods of communications, here we focus on the 2 methods
+of HTTP and HTTPS. From the security point of view, HTTPS
+communication is preferable. Lately, major Web services like Google or
+Facebook have been coming to use HTTPS as default. However, among
+HTTPS connection methods, those that use SSLv3 are known to be
+susceptible to a vulnerability (commonly known as POODLE), and we
+strongly recommend against the use of such methods
+[32]_.
 
-.. [33] Android 8.0(API Level 26)以降ではプラットフォームレベルでSSLv3を用いた接続が非サポートになっている。
+.. [32] In Android 8.0 (API Level 26) and later versions, connections
+    using SSLv3 are unsupported at the platform level.
 ```
 
-2012年以降AndroidアプリのHTTPS通信の実装方法における欠陥が多く指摘されている。これは信頼できる第三者認証局から発行されたサーバー証明書ではなく、私的に発行されたサーバー証明書（以降、プライベート証明書と呼ぶ）により運用されているテスト用Webサーバーに接続するために実装された欠陥であると推察される。
+Since 2012, many defects in implementation of HTTPS communication have
+been pointed out in Android applications. These defects might have
+been implemented for accessing testing Web servers operated by server
+certificates that are not issued by trusted third party certificate
+authorities, but issued privately (hereinafter, called private
+certificates).
 
-この記事では、HTTPおよびHTTPS通信の方法について説明する。HTTPS通信の方法には、プライベート証明書で運用されているWebサーバーに安全に接続する方法も含む。
+In this section, communication methods of HTTP and HTTPS are explained
+and the method to access safely with HTTPS to a Web server operated by
+a private certificate is also described.
 
-### サンプルコード<!-- 628700df -->
+### Sample Code<!-- 628700df -->
 
-開発しているアプリの通信処理の特性を踏まえ、図
-5.4‑1に従いサンプルコードを選択すること。
+You can find out which type of HTTP/HTTPS communication you are
+supposed to implement through the following chart (Figure 5.4‑1) shown
+below.
 
-![](media/image78.png)
+![](media/image71.png)
 ```eval_rst
 .. {width="6.900393700787402in"
 .. height="4.751968503937008in"}
 ```
 
-図 5.4‑1
-HTTP/HTTPSのサンプルコードを選択するフローチャート
+Figure 5.4‑1 Flow Figure to select sample code of HTTP/HTTPS
 
-センシティブな情報を送受信する場合はSSL/TLSで通信経路が暗号化されるHTTPS通信を用いる。HTTPS通信を用いたほうが良いセンシティブな情報としては以下のようなものがある。
+When sensitive information is sent or received, HTTPS communication is
+to be used because its communication channel is encrypted with
+SSL/TLS. HTTPS communication is required for the following sensitive
+information.
 
--   WebサービスへのログインID、パスワード
+-   Login ID/Password for Web services.
 
--   認証状態を維持するための情報（セッションID、トークン、Cookieの情報など）
+-   Information for keeping authentication state (session ID, token,
+    Cookie etc.)
 
--   その他Webサービスの特性に応じた重要情報・秘密情報（個人情報やクレジットカード情報など）
+-   Important/confidential information depending on Web services
+    (personal information, credit card information etc.)
 
-ここで対象となっているスマートフォンアプリは、サーバーと通信を行うことで連携し、構築されるシステムの一部を担っている。従って、通信のどの部分をHTTPもしくはHTTPSとするのかについては、システム全体を考慮して適切なセキュア設計・セキュアコーディングを施すこと。HTTPとHTTPSの通信方式の違いは表
-5.4‑1を参考にすること。またサンプルコードの違いについては表
-5.4‑2を参考にすること。
+A smartphone application with network communication is a part of
+\"system\" as well as a Web server. And you have to select HTTP or
+HTTPS for each communication based on secure design and coding
+considering the whole \"system\". Table 5.4‑1 is for a comparison
+between HTTP and HTTPS. And Table 5.4‑2 is for the differences in
+sample codes.
 
-表 5.4‑1 HTTP通信方式、HTTPS通信方式の比較
+Table 5.4‑1 Comparison between HTTP communication method and HTTPS
+communication method
 ```eval_rst
-+--------+--------------------------------+-----------------+------------------+
-|        | HTTP                           | HTTPS           |                  |
-+========+================================+=================+==================+
-| 特徴   | URL                            | http://で始まる | https://で始まる |
-|        |                                |                 |                  |
-|        | 通信内容の暗号化               | なし            | あり             |
-|        |                                |                 |                  |
-|        | 通信内容の改ざん検知           | 不可            | 可               |
-|        |                                |                 |                  |
-|        | 接続先サーバーの認証           | 不可            | 可               |
-+--------+--------------------------------+-----------------+------------------+
-| 被害\  | 攻撃者による通信内容の読み取り | 高              | 低               |
-| リスク |                                |                 |                  |
-|        | 攻撃者による通信内容の書き換え | 高              | 低               |
-|        |                                |                 |                  |
-|        | アプリの偽サーバーへの接続     | 高              | 低               |
-+--------+--------------------------------+-----------------+------------------+
++-----------------+---------------------------------------+-----------------------+------------------------+
+|                 |                                       | HTTP                  | HTTPS                  |
++=================+=======================================+=======================+========================+
+| Characteristics | URL                                   | Starting with http:// | Starting with https:// |
+|                 |                                       |                       |                        |
+|                 | Encrypting contents                   | Not available         | Available              |
+|                 |                                       |                       |                        |
+|                 | Tampering detection of contents       | Impossible            | Possible               |
+|                 |                                       |                       |                        |
+|                 | Authenticating a server               | Impossible            | Possible               |
++-----------------+---------------------------------------+-----------------------+------------------------+
+|| Damage         | Reading contents by attackers         | High                  | Low                    |
+|| Risk           |                                       |                       |                        |
+|                 | Modifying contents by attackers       | High                  | Low                    |
+|                 |                                       |                       |                        |
+|                 | Application's access to a fake server | High                  | Low                    |
++-----------------+---------------------------------------+-----------------------+------------------------+
 ```
-表 5.4‑2 HTTP/HTTPS通信のサンプルコードの説明
+Table 5.4‑2 Explanation of HTTP/HTTPS communication Sample code
 ```eval_rst
-+-----------------------+-------+-----------------+-----------------------+
-|| サンプルコード       | 通信  || センシティブな || サーバー証明書       |
-|                       |       || 情報の送受信   |                       |
-+=======================+=======+=================+=======================+
-|| HTTP通信する         | HTTP  || X              || \-                   |
-+-----------------------+-------+-----------------+-----------------------+
-|| HTTPS通信する        | HTTPS || o              || CybertrustやVeriSign |
-|                       |       |                 || 等の第三者認証局によ |
-|                       |       |                 || り発行されたサーバー |
-|                       |       |                 || 証明書               |
-+-----------------------+-------+-----------------+-----------------------+
-|| プライベート証明書で | HTTPS || o              || プライベート証明書   |
-|| HTTPS通信する        |       |                 ||                      |
-|                       |       |                 || ※イントラサーバーや  |
-|                       |       |                 || テストサーバーで良く |
-|                       |       |                 || みられる運用形態     |
-+-----------------------+-------+-----------------+-----------------------+
++-----------------------+-----------+------------------------+--------------------------------+
+|| Sample code          || Communi- || Sending/Receiving     || Server certificate            |
+||                      || cation   || sensitive information |                                |
++=======================+===========+========================+================================+
+|| Communicating        || HTTP     || Not applicable        || \-                            |
+|| via HTTP             |           |                        |                                | 
++-----------------------+-----------+------------------------+--------------------------------+
+|| Communicating        || HTTPS    || OK                    || Server certificates issued    |
+|| via HTTPS            |           |                        || by trusted third party's      |
+|                       |           |                        || certificate authorities like  |
+|                       |           |                        || Cybertrust and VeriSign etc.  |
++-----------------------+-----------+------------------------+--------------------------------+
+|| Communicating        || HTTPS    || OK                    || Private certificate           |
+|| via HTTPS with       |           |                        ||                               |
+|| private certificate  |           |                        || * Operation mode which can be |
+|                       |           |                        || often seen in intra server    |
+|                       |           |                        || or in test server.            |
++-----------------------+-----------+------------------------+--------------------------------+
 ```
-なおAndroidがサポートし現在広く使われているHTTP/HTTPS通信用APIは、Java
-SDK由来のjava.net.HttpURLConnection/javax.net.ssl.HttpsURLConnectionである。Apache
-HTTPComponent由来のApache HttpClientライブラリについては、Android
-6.0（API Level 23)でサポートが打ち切られている。
+Android supports
+java.net.HttpURLConnection/javax.net.ssl.HttpsURLConnection as
+HTTP/HTTPS communication APIs. Support for the Apache HttpClient,
+which is another HTTP client library, is removed at the release of the
+Android 6.0(API Level 23).
 
-#### HTTP通信する
+#### Communicating via HTTP
 
-HTTP通信で送受信する情報はすべて攻撃者に盗聴・改ざんされる可能性があることを前提としなければならない。また接続先サーバーも攻撃者が用意した偽物のサーバーに接続することがあることも前提としなければならない。このような前提においても被害が生じない、または許容範囲に収まる用途のアプリにおいてのみ、HTTP通信を利用できる。こうした前提を受け入れられないアプリについては「5.4.1.2 HTTPS通信する」や「5.4.1.3 プライベート証明書でHTTPS通信する」を参照すること。
+It is based on two premises that all contents sent/received through
+HTTP communications may be sniffed and tampered by attackers and your
+destination server may be replaced with fake servers prepared by
+attackers. HTTP communication can be used only if no damage is caused
+or the damage is within the permissible extent even under the
+premises. If an application cannot accept the premises, please refer
+to \"5.4.1.2 Communicating via HTTPS\" and \"5.4.1.3 Communicating via
+HTTPS with private certificate.\"
 ```eval_rst
-以下のサンプルコードは、Webサーバー上で画像検索を行い、検索画像を取得して表示するアプリである。1回の検索でサーバーとHTTP通信を2回行う。1回目の通信で画像検索を実施し、2回目の通信で画像を取得する。UIスレッドでの通信を避けるために、AsyncTaskを利用して通信処理用のワーカースレッドを作成している。Webサーバーとの通信で送受信する情報は、画像の検索文字列、画像のURL、画像データだが、どれもセンシティブな情報はないとみなしている。そのため、受信データである画像のURLと画像データは、攻撃者が用意した攻撃用のデータである可能性がある。簡単のため、サンプルコードでは受信データが攻撃データであっても許容されるとして対策を施していない。同様の理由により、JSONパース時や画像データを表示する時に発生する可能性のある例外に対する例外処理を省略している。アプリの仕様に応じて適切に処理を実装する必要があることに注意すること [34]_。
+The following sample code shows an application which performs an image
+search on a Web server, gets the result image and shows it. HTTP
+communication with the server is performed twice a search. The first
+communication is for searching image data and the second is for
+getting it. The worker thread for communication process using
+AsyncTask is created to avoid the communications performing on the UI
+thread. Contents sent/received in the communications with the server
+are not considered as sensitive (e.g. the character string for
+searching, the URL of the image, or the image data) here. So, the
+received data such as the URL of the image and the image data may be
+provided by attackers. To show the sample code simply, any
+countermeasures are not taken in the sample code by considering the
+received attacking data as tolerable. Also, the handlings for possible
+exceptions during JSON purse or showing image data are omitted. It is
+necessary to handle the exceptions properly depending on the
+application specs
+[33]_.
 
-.. [34] 本サンプルコード内で画像検索APIとして利用している Google Image Search API は2016年2月15日をもって正式にサービス提供を終了している。そのため、サンプルコードをそのまま動作させるには同等のサービスに置き換える必要がある。
+.. [33] The Google Image Search API used as an image-search API in this
+    sample code officially ceased to provide service on February 15,
+    2016. Thus, to execute the sample code as is requires switching to
+    an equivalent service.
 ```
 ポイント：
 
-1.  送信データにセンシティブな情報を含めない
-2.  受信データが攻撃者からの送信データである場合を想定する
+1.  Sensitive information must not be contained in send data.
+2.  Suppose that received data may be sent from attackers.
 
 HttpImageSearch.java
 ```eval_rst
@@ -2399,39 +2449,75 @@ AndroidManifest.xml
 ```
 
 
-#### HTTPS通信する
+#### Communicating via HTTPS
 
-HTTPS通信では送受信するデータが暗号化されるだけでなく、接続先サーバーが本物かどうかの検証も行われる。そのためにHTTPS通信開始時のハンドシェイク処理において、サーバーから送られてくるサーバー証明書に対して、AndroidのHTTPSライブラリ内部で次のような観点で検証が行われる。
+In HTTPS communication, a server is checked whether it is trusted or
+not as well as data transferred is encrypted. To authenticate the
+server, Android HTTPS library verifies \"server certificate\" which is
+transmitted from the server in the handshake phase of HTTPS
+transaction with following points:
 
--   第三者認証局により署名されたサーバー証明書であること
+-   The server certificate is signed by a trusted third party
+    certificate authority
 
--   サーバー証明書の期限等が有効であること
+-   The period and other properties of the server certificate are valid
 
--   サーバー証明書のSubjectのCN（Common Name）またはSAN（Subject
-    Altername
-    Names）のDNS名が接続先サーバーのホスト名と一致していること
+-   The server\'s host name matches the CN (Common Name) or SAN (Subject
+    Alternative Names) in the Subject field of the server certificate
 
 ```eval_rst
-これらの検証に失敗するとサーバー証明書検証エラー（SSLException）が発生する。サーバー証明書に不備がある場合、もしくは攻撃者が中間者攻撃 [35]_ をしている場合にこのエラーが発生する。エラーが発生した場合には、アプリの仕様に応じて適切な処理を実行する必要がある点に注意すること。
+SSLException (server certificate verification exception) is raised if
+the above verification is failed. This possibly means
+man-in-the-middle attack or just server certificate defects. Your
+application has to handle the exception with an appropriate sequence
+based on the application specifications.
 
-.. [35] 中間者攻撃については次のページを参照。http://www.ipa.go.jp/about/press/20140919_1.html
+The next a sample code is for HTTPS communication which connects to a
+Web server with a server certificate issued by a trusted third party
+certificate authority. For HTTPS communication with a server
+certificate issued privately, please refer to \"5.4.1.3 Communicating
+via HTTPS with private certificate.\"
 
-ここでは第三者認証局から発行されたサーバー証明書で運用されているWebサーバーに接続するHTTPS通信のサンプルコードを示す。第三者認証局から発行されたサーバー証明書ではなく、私的に発行したサーバー証明書でHTTPS通信を実現したい場合には「5.4.1.3
-プライベート証明書でHTTPS通信する」を参照すること。
+The following sample code shows an application which performs an image
+search on a Web server, gets the result image and shows it. HTTPS
+communication with the server is performed twice a search. The first
+communication is for searching image data and the second is for
+getting it. The worker thread for communication process using
+AsyncTask is created to avoid the communications performing on the UI
+thread. All contents sent/received in the communications with the
+server are considered as sensitive (e.g. the character string for
+searching, the URL of the image, or the image data) here. To show the
+sample code simply, no special handling for SSLException is performed.
+It is necessary to handle the exceptions properly depending on the
+application specifications.
+[34]_. Also, the sample code below allows communication using SSLv3
+[35]_. In general we recommend configuring
+settings on remote servers to disable SSLv3 in order to avoid attacks
+targeting a vulnerability in SSLv3 (known as POODLE).
 
-以下のサンプルコードは、Webサーバー上で画像検索を行い、検索画像を取得して表示するアプリである。1回の検索でサーバーとHTTPS通信を2回行う。1回目の通信で画像検索を実施し、2回目の通信で画像を取得する。UIスレッドでの通信を避けるために、AsyncTaskを利用して通信処理用のワーカースレッドを作成している。Webサーバーとの通信で送受信する情報は、画像の検索文字列、画像のURL、画像データで、全てセンシティブな情報とみなしている。なお、簡単のため、SSLExceptionに対してはユーザーへの通知などの例外処理を行っていないが、アプリの仕様に応じて適切な処理を実装する必要がある [36]_。また、以下のサンプルコードではSSLv3を用いた通信が許容されている [37]_。SSLv3の脆弱性（通称 POODLE）に対する攻撃を回避するためには、接続先サーバーにおいてSSLv3を無効化する設定を施すことをお勧めする。
+.. [34] The Google Image Search API used as an image-search API in this
+    sample code officially ceased to provide service on February 15,
+    2016. Thus, to execute the sample code as is requires switching to
+    an equivalent service.
 
-.. [36] 本サンプルコード内で画像検索APIとして利用している Google Image Search API は2016年2月15日をもって正式にサービス提供を終了している。そのため、サンプルコードをそのまま動作させるには同等のサービスに置き換える必要がある。
-
-.. [37] Android 8.0(API Level 26)以降ではプラットフォームレベルで禁止しているためSSLv3での接続は起こらないが、サーバー側でのSSLv3無効化対策は行うことをお勧めする。
+.. [35] Connections via SSLv3 will not arise, as these are prohibited at
+    the platform level in Android 8.0 (API Level 26) and later versions;
+    however, we recommend that steps to disable SSLv3 be taken on the
+    server side.
 ```
 
-ポイント：
+Points:
 
-1.  URIはhttps://で始める
-2.  送信データにセンシティブな情報を含めてよい
-3.  HTTPS接続したサーバーからのデータであっても、受信データの安全性を確認する
-4.  SSLExceptionに対してアプリに適した例外処理を行う
+1.  URI starts with https://.
+
+2.  Sensitive information may be contained in send data.
+
+3.  Handle the received data carefully and securely, even though the
+    data was sent from the server connected by HTTPS.
+
+4.  SSLException should be handled with an appropriate sequence in an
+    application.
+
 
 HttpsImageSearch.java
 ```eval_rst
@@ -2441,22 +2527,43 @@ HttpsImageSearch.java
 ```
 
 
-サンプルコードの他のファイルについては「5.4.1.1　HTTP通信する」と共用しているので「5.4.1.1　HTTP通信する」も参照すること。
+Other sample code files are the same as \"5.4.1.1 Communicating via
+HTTP,\" so please refer to \"5.4.1.1 Communicating via HTTP.\"
 
-#### プライベート証明書でHTTPS通信する
+#### Communicating via HTTPS with private certificate
 
-ここでは第三者認証局から発行されたサーバー証明書ではなく、私的に発行したサーバー証明書（プライベート証明書）でHTTPS通信をするサンプルコードを示す。プライベート認証局のルート証明書とプライベート証明書の作成方法およびWebサーバーのHTTPS設定については「5.4.3.1
-プライベート証明書の作成方法とサーバー設定」を参考にすること。またサンプルプログラムのassets中のcacert.crtファイルはプライベート認証局のルート証明書ファイルである。
+This section shows a sample code of HTTPS communication with a server
+certificate issued privately (private certificate), but not with that
+issued by a trusted third party authority. Please refer to \"5.4.3.1
+How to Create Private Certificate and Configure Server Settings\" for
+creating a root certificate of a private certificate authority and
+private certificates and setting HTTPS settings in a Web server. The
+sample program has a cacert.crt file in assets. It is a root
+certificate file of private certificate authority.
 
-以下のサンプルコードは、Webサーバー上の画像を取得して表示するアプリである。WebサーバーとはHTTPSを用いた通信を行う。UIスレッドでの通信を避けるために、AsyncTaskを利用して通信処理用のワーカースレッドを作成している。Webサーバーとの通信で送受信する情報は画像のURLと画像データで、このサンプルではどちらもセンシティブな情報とみなしている。また、簡単のため、SSLExceptionに対してはユーザーへの通知などの例外処理を行っていないが、アプリの仕様に応じて適切な処理を実装する必要がある。
+The following sample code shows an application which gets an image on
+a Web server and shows it. HTTPS is used for the communication with
+the server. The worker thread for communication process using
+AsyncTask is created to avoid the communications performing on the UI
+thread. All contents (the URL of the image and the image data)
+sent/received in the communications with the server are considered as
+sensitive here. To show the sample code simply, no special handling
+for SSLException is performed. It is necessary to handle the
+exceptions properly depending on the application specifications.
 
-ポイント：
+Points:
 
-1.  プライベート認証局のルート証明書でサーバー証明書を検証する
-2.  URIはhttps://で始める
-3.  送信データにセンシティブな情報を含めてよい
-4.  受信データを接続先サーバーと同じ程度に信用してよい
-5.  SSLExceptionに対しユーザーに通知する等の適切な例外処理をする
+1.  Verify a server certificate with the root certificate of a private
+    certificate authority.
+
+2.  URI starts with https://.
+
+3.  Sensitive information may be contained in send data.
+
+4.  Received data can be trusted as same as the server.
+
+5.  SSLException should be handled with an appropriate sequence in an
+    application.
 
 PrivateCertificateHttpsGet.java
 ```eval_rst
@@ -2510,7 +2617,7 @@ public class KeyStoreUtil {
             String alias = x509.getSubjectDN().getName();
             ks.setCertificateEntry(alias, x509);
         } finally {
-            try { is.close(); } catch (IOException e) { /* 例外処理は割愛 */ }
+            try { is.close(); } catch (IOException e) { /* This is sample, so omit the exception process */ }
         }
     }
 }
@@ -2524,66 +2631,129 @@ PrivateCertificateHttpsActivity.java
 ```
 
 
-### ルールブック<!-- fcae0be8 -->
+### Rule Book<!-- fcae0be8 -->
 
-HTTP通信、HTTPS通信する場合には以下のルールを守ること。
+Follow the rules below to communicate with HTTP/HTTPS.
 
-1.  センシティブな情報はHTTPS通信で送受信する （必須）
+1.  Sensitive Information Must Be Sent/Received over HTTPS Communication
+    (Required)
 
-2.  HTTP通信では受信データの安全性を確認する （必須）
+2.  Received Data over HTTP Must be Handled Carefully and Securely
+    (Required)
 
-3.  SSLExceptionに対しユーザーに通知する等の適切な例外処理をする （必須）
+3.  SSLException Must Be Handled Appropriately like Notification to User
+    (Required)
 
-4.  独自のTrustManagerを作らない （必須）
+4.  Custom TrustManager Must Not Be Created (Required)
 
-5.  独自のHostnameVerifierは作らない （必須）
+5.  Custom HostnameVerifier Must Not Be Created (Required)
 
+#### Sensitive Information Must Be Sent/Received over HTTPS Communication (Required)
 
+In HTTP transaction, sent and received information might be sniffed or
+tampered and the connected server might be masqueraded. Sensitive
+information must be sent/ received by HTTPS communication.
 
-#### センシティブな情報はHTTPS通信で送受信する （必須）
+#### Received Data over HTTP Must be Handled Carefully and Securely (Required)
 
-HTTPを使った通信では、送受信する情報の盗聴・改ざん、または、接続先サーバーのなりすましが起こる可能性がある。センシティブな情報はHTTPS通信で送受信すること。
+Received data in HTTP communications might be generated by attackers
+for exploiting vulnerability of an application. So you have to suppose
+that the application receives any values and formats of data and then
+carefully implement data handlings for processing received data so as
+not to put any vulnerabilities in. Furthermore you should not blindly
+trust the data from HTTPS server too. Because the HTTPS server may be
+made by the attacker or the received data may be made in other place
+from the HTTPS server. Please refer to \"3.2 Handling Input Data
+Carefully and Securely\"
 
-#### HTTP通信では受信データの安全性を確認する （必須）
+#### SSLException Must Be Handled Appropriately like Notification to User (Required)
 
-HTTP通信における受信データは攻撃者が制御可能であるため、コード脆弱性を狙った攻撃データを受信する可能性がある。あらゆる値、形式のデータを受信することを想定して、受信データを処理するコードに脆弱性がないように気を付けてコーディングする必要がある。また、HTTPS通信における受信データについても、受信データを無条件に安全であると考えてはならない。HTTPS接続先のサーバーが攻撃者によって用意されたものである場合や、受信データが接続先サーバーとは別の場所で生成されたデータである場合もあるためである。「3.2
-入力データの安全性を確認する」も参照すること。
+In HTTPS communication, SSLException occurs as a verification error
+when a server certificate is not valid or the communication is under
+the man-in-the-middle attack. So you have to implement an appropriate
+exception handling for SSLException. Notifying the user of the
+communication failure, logging the failure and so on can be considered
+as typical implementations of exception handling. On the other hand,
+no special notice to the user might be required in some case. Like
+this, because how to handle SSLException depends on the application
+specs and characteristics you need to determine it after first
+considering thoroughly.
 
-#### SSLExceptionに対しユーザーに通知する等の適切な例外処理をする （必須）
+As mentioned above, the application may be attacked by
+man-in-the-middle attack when SSLException occurs, so it must not be
+implemented like trying to send/receive sensitive information again
+via non secure protocol such as HTTP.
 
-HTTPS通信ではサーバー証明書の検証時にSSLExceptionが発生することがある。SSLExceptionはサーバー証明書の不備が原因となって発生する。証明書の不備は攻撃者による中間者攻撃によって発生している可能性があるので、SSLExceptionに対しては適切な例外処理を実装することが必要である。例外処理の例としては、SSLExceptionによる通信失敗をユーザーに通知すること、あるいはログに記録することが考えられる。その一方で、アプリによってはユーザーに対する特別な通知は必要とされないこともありうる。このように、実装すべき処理はアプリの仕様や特性によって異なるので、それらを十分に検討した上で決定しなければならない。
+#### Custom TrustManager Must Not Be Created (Required)
 
-加えて、SSLExceptionが発生した場合には中間者攻撃を受けている可能性があるので、HTTPなどの非暗号化通信によってセンシティブな情報の送受信を再度試みるような実装してはならない。
+Just Changing KeyStore which is used for verifying server certificates
+is enough to communicate via HTTPS with a private certificate like
+self-signed certificate. However, as explained in \"5.4.3.3 Risky Code
+that Disables Certificate Verification,\" there are so many dangerous
+TrustManager implementations as sample codes for such purpose on the
+Internet. An Application implemented by referring to these sample
+codes may have the vulnerability.
 
-#### 独自のTrustManagerを作らない （必須）
+When you need to communicate via HTTPS with a private certificate,
+refer to the secure sample code in \"5.4.1.3 Communicating via HTTPS
+with private certificate.\"
 
-自己署名証明書などのプライベート証明書でHTTPS通信するためには、サーバー証明書検証に使うKeyStoreを変更するだけで済む。しかしながら「5.4.3.3　証明書検証を無効化する危険なコード」で説明しているように、インターネット上で公開されているサンプルコードには、危険なTrustManagerを実装する例を紹介しているものが多くある。これらのサンプルを参考にして実装されたアプリは、脆弱性を作りこむ可能性がある。
+Of course, custom TrustManager can be implemented securely, but enough
+knowledge for encryption processing and encryption communication is
+required so as not to implement vulnerable codes. So this rule dare be
+ (Required).
 
-プライベート証明書でHTTPS通信をしたい場合には「5.4.1.3　プライベート証明書でHTTPS通信する」の安全なサンプルコードを参照すること。
+#### Custom HostnameVerifier Must Not Be Created (Required)
 
-本来ならば独自のTrustManagerを安全に実装することも可能であるが、暗号処理や暗号通信に十分な知識をもった技術者でなければミスを作り込む危険性があるため、このルールはあえて必須とした。
+Just Changing KeyStore which is used for verifying server certificates
+is enough to communicate via HTTPS with a private certificate like
+self-signed certificate. However, as explained in \"5.4.3.3 Risky Code
+that Disables Certificate Verification,\" there are so many dangerous
+HostnameVerifier implementations as sample codes for such purpose on
+the Internet. An Application implemented by referring to these sample
+codes may have the vulnerability.
 
-#### 独自のHostnameVerifierは作らない （必須）
+When you need to communicate via HTTPS with a private certificate,
+refer to the secure sample code in \"5.4.1.3 Communicating via HTTPS
+with private certificate.\"
 
-自己署名証明書などのプライベート証明書でHTTPS通信するためには、サーバー証明書検証に使うKeyStoreを変更するだけで済む。しかしながら「5.4.3.3　証明書検証を無効化する危険なコード」で説明しているように、インターネット上で公開されているサンプルコードには、危険なHostnameVerifierを利用する例を紹介しているものが多くある。これらのサンプルを参考にして実装したアプリは、脆弱性を作りこむ可能性がある。
+Of course, custom HostnameVerifier can be implemented securely, but
+enough knowledge for encryption processing and encryption
+communication is required so as not to implement vulnerable codes. So
+this rule dare be (Required).
 
-プライベート証明書でHTTPS通信をしたい場合には「5.4.1.3　プライベート証明書でHTTPS通信する」の安全なサンプルコードを参照すること。
+### Advanced Topics<!-- b1dc5346 -->
 
-本来ならば独自のHostnameVerifierを安全に実装することも可能であるが、暗号処理や暗号通信に十分な知識をもった技術者でなければミスを作り込む危険性があるため、このルールはあえて必須とした。
+#### How to Create Private Certificate and Configure Server Settings
 
-### アドバンスト<!-- b1dc5346 -->
+In this section, how to create a private certificate and configure
+server settings in Linux such as Ubuntu and CentOS is described.
+Private certificate means a server certificate which is issued
+privately and is told from server certificates issued by trusted third
+party certificate authorities like Cybertrust and VeriSign.
 
-#### プライベート証明書の作成方法とサーバー設定
+##### Create private certificate authority
 
-ここではUbuntuやCentOSなどのLinux環境におけるプライベート証明書の作成方法とサーバー設定について説明する。プライベート証明書は私的に発行されたサーバー証明書のことである。CybertrustやVeriSignなどの第三者認証局から発行されたサーバー証明書と区別してプライベート証明書と呼ばれる。
+First of all, you need to create a private certificate authority to
+issue a private certificate. Private certificate authority means a
+certificate authority which is created privately as well as private
+certificate. You can issue plural private certificates by using the
+single private certificate authority. PC in which the private
+certificate authority is stored should be limited strictly to be
+accessed just by trusted persons.
 
-##### プライベート認証局の作成
+To create a private certificate authority, you have to create two
+files such as the following shell script newca.sh and the setting file
+openssl.cnf and then execute them. In the shell script, CASTART and
+CAEND stand for the valid period of certificate authority and CASUBJ
+stands for the name of certificate authority. So these values need to
+be changed according to a certificate authority you create. While
+executing the shell script, the password for accessing the certificate
+authority is asked for 3 times in total, so you need to input it every
+time.
 
-まずプライベート証明書を発行するためのプライベート認証局を作成する。CybertrustやVeriSignなどの第三者認証局と区別してプライベート認証局と呼ばれる。1つのプライベート認証局で複数のプライベート証明書を発行できる。プライベート認証局を作成したPCは、限られた信頼できる人物しかアクセスできないように厳重に管理されなければならない。
+newca.sh -- Shell Script to create certificate authority
 
-プライベート認証局を作成するには、下記のシェルスクリプトnewca.shおよび設定ファイルopenssl.cnfを作成し実行する。シェルスクリプト中のCASTARTおよびCAENDは認証局の有効期間、CASUBJは認証局の名称であるので、作成する認証局に合わせて変更すること。シェルスクリプト実行の際には認証局アクセスのためのパスワードが合計3回聞かれるので、同じパスワードを入力すること。
-
-newca.sh -- プライベート認証局を作成するシェルスクリプト
 ```shell
 #!/bin/bash
 
@@ -2616,29 +2786,30 @@ openssl ca -selfsign -md sha256 -create_serial -batch \
 openssl x509 -in ${CATOP}/${CACERT} -outform DER -out ${CATOP}/${CAX509}
 ```
 
-openssl.cnf - 2つのシェルスクリプトが共通に参照するopensslコマンドの設定ファイル
+openssl.cnf - Setting file of openssl command which 2 shell scripts
+refers in common.
 ```shell
 [ ca ]
-default_ca      = CA_default            # The default ca section
+default_ca      = CA_default             # The default ca section
 
 [ CA_default ]
-dir             = ./CA                  # Where everything is kept
-certs           = $dir/certs            # Where the issued certs are kept
-crl_dir         = $dir/crl              # Where the issued crl are kept
-database        = $dir/index.txt        # database index file.
-#unique_subject = no                    # Set to 'no' to allow creation of
-                                        # several ctificates with same subject.
-new_certs_dir   = $dir/newcerts         # default place for new certs.
-certificate     = $dir/cacert.pem       # The CA certificate
-serial          = $dir/serial           # The current serial number
-crlnumber       = $dir/crlnumber        # the current crl number
-                                        # must be commented out to leave a V1 CRL
-crl             = $dir/crl.pem          # The current CRL
-private_key     = $dir/private/cakey.pem# The private key
-RANDFILE        = $dir/private/.rand    # private random number file
-x509_extensions = usr_cert              # The extentions to add to the cert
-name_opt        = ca_default            # Subject Name options
-cert_opt        = ca_default            # Certificate field options
+dir             = ./CA                   # Where everything is kept
+certs           = $dir/certs             # Where the issued certs are kept
+crl_dir         = $dir/crl               # Where the issued crl are kept
+database        = $dir/index.txt         # database index file.
+#unique_subject = no                     # Set to 'no' to allow creation of
+                                         # several ctificates with same subject.
+new_certs_dir   = $dir/newcerts          # default place for new certs.
+certificate     = $dir/cacert.pem        # The CA certificate
+serial          = $dir/serial            # The current serial number
+crlnumber       = $dir/crlnumber         # the current crl number
+                                         # must be commented out to leave a V1 CRL
+crl             = $dir/crl.pem           # The current CRL
+private_key     = $dir/private/cakey.pem # The private key
+RANDFILE        = $dir/private/.rand     # private random number file
+x509_extensions = usr_cert               # The extentions to add to the cert
+name_opt        = ca_default             # Subject Name options
+cert_opt        = ca_default             # Certificate field options
 policy          = policy_match
 
 [ policy_match ]
@@ -2666,15 +2837,31 @@ DNS.1=${ENV::HOSTNAME}
 DNS.2=*.${ENV::HOSTNAME}
 ```
 
-上記シェルスクリプトを実行すると、作業ディレクトリ直下にCAというディレクトリが作成される。このCAディレクトリがプライベート認証局である。CA/cacert.crtファイルがプライベート認証局のルート証明書であり、「5.4.1.3
-プライベート証明書でHTTPS通信する」のassetsに使用されたり、「5.4.3.2　Android
-OSの証明書ストアにプライベート認証局のルート証明書をインストールする」でAndroid端末にインストールされたりする。
+After executing the above shall script, a directory named CA is
+created just under the work directory. This CA directory is just a
+private certificate authority. CA/cacert.crt file is the root
+certificate of the private certificate authority. And it\'s stored in
+assets directory of an application as described in \"5.4.1.3
+Communicating via HTTPS with private certificate,\" or it\'s installed
+in Android device as described in \"5.4.3.2 Install Root Certificate
+of Private Certificate Authority to Android OS\'s Certification
+Store.\"
 
-##### プライベート証明書の作成
+##### Create private certificate
 
-プライベート証明書を作成するには、下記のシェルスクリプトnewsv.shを作成し実行する。シェルスクリプト中のSVSTARTおよびSVENDはプライベート証明書の有効期間、SVSUBJはWebサーバーの名称であるので、対象Webサーバーに合わせて変更すること。特にSVSUBJの/CNで指定するWebサーバーのホスト名はタイプミスがないように気を付けること。シェルスクリプトを実行すると認証局アクセスのためのパスワードが聞かれるので、プライベート認証局を作成するときに指定したパスワードを入力すること。その後、合計2回のy/nを聞かれるのでyを入力すること。
+To create a private certificate, you have to create a shell script
+like the following newca.sh and execute it. In the shell script,
+SVSTART and SVEND stand for the valid period of private certificate,
+and SVSUBJ stands for the name of Web server, so these values need to
+be changed according to the target Web server. Especially, you need to
+make sure not to set a wrong host name to /CN of SVSUBJ with which the
+host name of Web server is to be specified. While executing the shell
+script, the password for accessing the certificate authority is asked,
+so you need to input the password which you have set when creating the
+private certificate authority. After that, y/n is asked 2 times in
+total and you need to input y every time.
 
-newsv.sh - プライベート証明書を発行するシェルスクリプト
+newsv.sh - Shell script which issues private certificate
 ```shell
 #!/bin/bash
 
@@ -2702,77 +2889,111 @@ openssl ca -md sha256 \
 openssl x509 -in ${SVCERT} -outform DER -out ${SVX509}
 ```
 
-上記シェルスクリプトを実行すると、作業ディレクトリ直下にWebサーバー用のプライベートキーファイルsvkey.pemおよびプライベート証明書ファイルsvcert.pemが生成される。
+After executing the above shell script, both svkey.pem (private key
+file) and svcert.pem (private certificate file) for Web server are
+generated just under work directory.
 
-WebサーバーがApacheである場合には、設定ファイル中に上で作成したprikey.pemとcert.pemを次のように指定するとよい。
+When Web server is Apache, you will specify prikey.pem and cert.pem in
+the configuration file as follows.
+
 ``` shell
 SSLCertificateFile "/path/to/svcert.pem"
 SSLCertificateKeyFile "/path/to/svkey.pem"
 ```
 
-#### Android OSの証明書ストアにプライベート認証局のルート証明書をインストールする
+#### Install Root Certificate of Private Certificate Authority to Android OS\'s Certification Store
 
-「5.4.1.3
-プライベート証明書でHTTPS通信する」のサンプルコードは、1つのアプリにプライベート認証局のルート証明書を持たせることで、プライベート証明書で運用するWebサーバーにHTTPS接続する方法を紹介した。ここではAndroid
-OSにプライベート認証局のルート証明書をインストールすることで、すべてのアプリがプライベート証明書で運用するWebサーバーにHTTPS接続する方法を紹介する。インストールしてよいのは、信頼できる認証局の発行した証明書に限ることに注意すること。
+In the sample code of \"5.4.1.3 Communicating via HTTPS with private
+certificate,\" the method to establish HTTPS sessions to a Web server
+from one application using a private certificate by installing the
+root certificate into the application is introduced. In this section,
+the method to establish HTTPS sessions to Web servers from all
+applications using private certificates by installing the root
+certificate into Android OS is to be introduced. Note that all you
+install should be certificates issued by trusted certificate
+authorities including your own certificate authorities.
 
-まずプライベート認証局のルート証明書ファイルcacert.crtをAndroid端末の内部ストレージにコピーする。なおサンプルコードで使用しているルート証明書ファイルは[https://selfsigned.jssec.org/cacert.crt](https://selfsigned.jssec.org/cacert.crt)からも取得できる。
+First of all, you need to copy the root certificate file
+\"cacert.crt\" to the internal storage of an Android device. You can
+also get the root certificate file used in the sample code from
+[https://selfsigned.jssec.org/cacert.crt](https://selfsigned.jssec.org/cacert.crt).
 
-次にAndroidの設定メニューのセキュリティを開き、下図のような手順を進めることでAndroid
-OSにルート証明書をインストールすることができる。
+And then, you will open Security page from Android Settings and you
+can install the root certificate in an Android device by doing as
+follows.
 
-![](media/image79.png)
+![](media/image72.png)
 ```eval_rst
 .. {width="6.624409448818898in"
 .. height="3.771259842519685in"}
 ```
 
-図 5.4‑2　プライベート認証局のルート証明書のインストール手順
+Figure 5.4‑2 Steps to install root certificate of private certificate
+authority
 
-![](media/image80.png)
+![](media/image73.png)
 ```eval_rst
 .. {width="6.448031496062992in"
 .. height="3.665748031496063in"}
 ```
 
-図 5.4‑3 ルート証明書がインストールされていることの確認
+Figure 5.4‑3 Checking if root certificate is installed or not
 
 Android
-OSにプライベート認証局のルート証明書をインストールすると、その認証局から発行されたプライベート証明書をすべてのアプリで正しく証明書検証できるようになる。下図はChromeブラウザで[https://selfsigned.jssec.org/droid\_knight.png](https://selfsigned.jssec.org/droid_knight.png)を表示した場合の例である。
+Once the root certificate is installed in Android OS, all applications
+can correctly verify every private certificate issued by the
+certificate authority. The following figure shows an example when
+displaying
+[https://selfsigned.jssec.org/droid\_knight.png](https://selfsigned.jssec.org/droid_knight.png)
+in Chrome browser.
 
-![](media/image81.png)
+![](media/image74.png)
 ```eval_rst
 .. {width="6.3082677165354335in"
 .. height="4.186220472440945in"}
 ```
 
-図
-5.4‑4ルート証明書のインストール後はプライベート証明書を正しく検証できるようになる
+Figure 5.4‑4 Once root certificate installed, private certificates can
+be verified correctly.
 
-この方法を使えば「5.4.1.2
-HTTPS通信する」のサンプルコードでもプライベート証明書で運用するWebサーバーにHTTPS接続できるようになる。
+By installing the root certificate this way, even applications using
+the sample code \"5.4.1.2 Communicating via HTTPS\" can correctly
+connect via HTTPS to a Web server which is operated with a private
+certificate.
 
-#### 証明書検証を無効化する危険なコード
+#### Risky Code that Disables Certificate Verification
 
-インターネット上にはサーバー証明書検証エラーを無視してHTTPS通信をするサンプルコードが多数掲載されている。これらのサンプルコードはプライベート証明書を使ってHTTPS通信を実現する方法として紹介されているため、そうしたサンプルコードをコピー＆ペーストして利用しているアプリが多数存在している。残念ながらこうしたサンプルコードは中間者攻撃に脆弱なものであることが多く、この記事の冒頭で「2012年にはAndroidアプリのHTTPS通信の実装方法における欠陥が多く指摘された。」と述べたように、こうしたインターネット上の脆弱なサンプルコードを利用してしまったと思われる多くの脆弱なAndroidアプリが報告されている。
+A lot of incorrect samples (code snippets), which allow applications
+to continue to communicate via HTTPS with Web servers even after
+certificate verification errors occur, are found on the Internet.
+Since they are introduced as the way to communicate via HTTPS with a
+Web server using a private certificate, there have been so many
+applications created by developers who have used those sample codes by
+copy and paste. Unfortunately, most of them are vulnerable to
+man-in-the-middle attack. As mentioned in the top of this article,
+\"In 2012, many defects in implementation of HTTPS communication were
+pointed out in Android applications\", many Android applications which
+would have implemented such vulnerable codes have been reported.
 
-ここではこうした脆弱なHTTPS通信のサンプルコードの断片を紹介する。こうしたサンプルコードを見かけた場合には「5.4.1.3
-プライベート証明書でHTTPS通信する」のサンプルコードに置き換えるなどしていただきたい。
+Several code snippets to cause vulnerable HTTPS communication are
+shown below. When you find this type of code snippets, it\'s highly
+recommended to replace the sample code of \"5.4.1.3 Communicating via
+HTTPS with private certificate.\"
 
-危険：空っぽのTrustManagerを作るケース
+Risk:Case which creates empty TrustManager
 ```java
         TrustManager tm = new X509TrustManager() {
             
             @Override
             public void checkClientTrusted(X509Certificate[] chain,
                     String authType) throws CertificateException {
-                // 何もしない → どんな証明書でも受付ける
+                // Do nothing -> accept any certificates
             }
 
             @Override
             public void checkServerTrusted(X509Certificate[] chain,
                     String authType) throws CertificateException {
-                // 何もしない → どんな証明書でも受付ける
+                // Do nothing -> accept any certificates
             }
 
             @Override
@@ -2782,31 +3003,39 @@ HTTPS通信する」のサンプルコードでもプライベート証明書で
         };
 ```
 
-危険：空っぽのHostnameVerifierを作るケース
+Risk:Case which creates empty HostnameVerifier
 ```java
         HostnameVerifier hv = new HostnameVerifier() {
             @Override
             public boolean verify(String hostname, SSLSession session) {
-                // 常にtrueを返す → どんなホスト名でも受付ける
+                // Always return true -> Accespt any host names
                 return true;
             }
         };
 ```
-危険：ALLOW\_ALL\_HOSTNAME\_VERIFIERを使っているケース
+Risk:Case that ALLOW\_ALL\_HOSTNAME\_VERIFIER is used.
 ```java
         SSLSocketFactory sf;
-        // …
+        [...]
         sf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 ```
 
-#### HTTPリクエストヘッダを設定する際の注意点
+#### A note regarding the configuration of HTTP request headers
 
-HTTPおよびHTTPS通信において、独自のHTTPリクエストヘッダを設定したい場合は、URLConnectionクラスのsetRequestProperty()メソッド、もしくはaddRequestProperty()メソッドを使用する。これらメソッドの引数に外部からの入力データを用いる場合は、HTTPヘッダ・インジェクションの対策が必要となる。HTTPヘッダ・インジェクションによる攻撃の最初のステップとなるのは、HTTPヘッダの区切り文字である改行コードを入力データに含めることであるため、入力データから改行コードを排除するようにしなければならない。
+If you wish to specify your own individual HTTP request header for
+HTTP or HTTPS communication, use the `setRequestProperty(``)` or
+`addRequestProperty()` methods in the `URLConnection` class. If you
+will be using input data received from external sources as parameters
+for these methods, you must implement HTTP header-injection
+protections. The first step in attacks based on HTTP header injection
+is to include carriage-return codes---which are used as separators in
+HTTP headers---in input data. For this reason, all carriage-return
+codes must be eliminated from input data.
 
-HTTPリクエストヘッダを設定する
+Configure HTTP request header
 ```java
 public byte[] openConnection(String strUrl, String strLanguage, String strCookie) {
-        // HttpURLConnection はURLConnectionの派生クラス
+        // HttpURLConnection is a class derived from URLConnection
         HttpURLConnection connection;
 
         try {
@@ -2814,54 +3043,111 @@ public byte[] openConnection(String strUrl, String strLanguage, String strCookie
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
 
-            // ★ポイント★ HTTPリクエストヘッダに入力値を使用する場合は、アプリケーション要件に従って
-            // 入力データをチェックする(「3.2 入力データの安全性を確認する」を参照)
+            // *** POINT *** When using input values in HTTP request headers,
+            // check the input data in accordance with the application's requirements
+            // (see Section 3.2: Handling Input Data Carefully and Securely)
             if (strLanguage.matches("^[a-zA-Z ,-]+$")) {
                 connection.addRequestProperty("Accept-Language", strLanguage);
             } else {
                 throw new IllegalArgumentException("Invalid Language : " + strLanguage);
             }
-            // ★ポイント★ もしくは入力データをURLエンコードする(というアプリケーション要件にする)
+            // *** POINT *** Or URL-encode the input data (as appropriate for the purposes of the app in queestion)
             connection.setRequestProperty("Cookie", URLEncoder.encode(strCookie, "UTF-8"));
 
             connection.connect();
             
-            // ～省略～
+            [...]
 ```
 
-#### ピンニングによる検証の注意点と実装例
+#### Notes and sample implementations for pinning
 
-アプリがHTTPS通信を行う際は、通信開始時のハンドシェイク処理において、接続先サーバーから送られてくる証明書が第三者認証局により署名されているかどうかの検証が行われる。しかし、攻撃者が第三者認証局から不正な証明書を入手したり、認証局の署名鍵を入手して不正な証明書を作成したりした場合、その攻撃者により不正なサーバーへの誘導や中間者攻撃が行われても、アプリはそれらの攻撃をハンドシェイク処理で検出することができず、結果として被害につながってしまう可能性がある。
+When an app uses HTTPS communication, one step in the handshake
+procedure carried out at the start of the communication is to check
+whether or not the certificate sent from the remote server is signed
+by a third-party certificate authority. However, attackers may acquire
+improper certificates from third-party authentication agents, or may
+acquire signed keys from a certificate authority to construct improper
+certificates. In such cases, apps will be unable to detect the attack
+during the handshake process---even in the event of a lure to an
+improper server established by the attacker, or of an
+man-in-the-middle attack ---and, as a result, there is a possibility
+that damage may be done.
 
-このような不正な第三者認証局の証明書を用いた中間者攻撃に対しては「ピンニングによる検証」が有効である。これは、あらかじめ接続先サーバーの証明書や公開鍵をアプリ内に保持しておき、それらの情報をハンドシェイク処理で用いたり、ハンドシェイク処理後に再検証したりする方法である。
+The technique of *pinning* is an effective strategy for preventing
+man-in-the-middle attacks using these types of certificates from
+improper third-party certificate authorities. In this method,
+certificates and public keys for remote servers are stored in advance
+within an app, and this information is used for handshake processing
+and re-testing after handshake processing has completed.
 
-ピンニングによる検証は、公開鍵基盤（PKI）の基礎である第三者認証局の信頼性が損なわれた場合に備え、通信の安全性を補填する目的で用いられる。開発者は自身のアプリが扱う資産レベルに応じて、この検証を行うかどうか検討してほしい。
+Pinning may be used to restore the security of communications in cases
+where the credibility of a third-party certificate authority---the
+foundation of public-key infrastructure---has been tarnished. App
+developers should assess the asset level handled by their own apps and
+decide whether or not to implement these tests.
 
-##### アプリ内に保持した証明書・公開鍵をハンドシェイク処理で使用する
+##### Use certificates and public keys stored within an app during the handshake procedure
 
-アプリ内に保持しておいた接続先サーバーの証明書や公開鍵の情報をハンドシェイク処理で用いるためには、それらの情報を含めた独自のKeyStoreを作成して通信に用いる。これにより、上記のような不正な第三者認証局の証明書を用いた中間者攻撃が行われても、ハンドシェイク処理において不正を検出することができるようになる。独自のKeyStoreを設定してHTTPS通信を行う具体的な方法は「5.4.1.3
-プライベート証明書でHTTPS通信する」で紹介したサンプルコードを参照すること。
+To use information contained in remote-server certificates or public
+keys stored within an app during the handshake procedure, an app must
+create its own KeyStore containing this information and use it when
+communicating. This will allow the app to detect improprieties during
+the handshake procedure even in the event of a man-in-the-middle
+attack using a certificate from an improper third-party certificate
+authority, as described above. Consult the sample code presented in
+the section titled \"5.4.1.3 Communicating via HTTPS with private
+certificate\" for detailed methods of establishing your app\'s own
+KeyStore to conduct HTTPS communication.
 
-##### アプリ内に保持した証明書・公開鍵を用いてハンドシェイク処理後に再検証する
+##### Use certificates and public-key information stored within an app for re-testing after the handshake procedure is complete
 
-ハンドシェイク処理が行われた後に接続先を再検証するためには、まずハンドシェイク処理で検証されシステムに信頼された証明書チェーンを取得し、その証明書チェーンを、あらかじめアプリ内に保持しておいた情報と照合する。照合の結果、保持しておいた情報と一致するものが含まれていれば通信を許可し、含まれていなければ通信処理を中断させればよい。
+To re-test the remote server after the handshake procedure has
+completed, an app first obtains the certificate chain that was tested
+and trusted by the system during the handshake, then compares this
+certificate chain against the information stored in advance within the
+app. If the result of this comparison indicates agreement with the
+information stored within the app, the communication may be permitted
+to proceed; otherwise, the communication procedure should be aborted.
 ```eval_rst
-ただし、ハンドシェイク処理でシステムに信頼された証明書チェーンを取得する際に以下のメソッドを使用すると、期待通りの証明書チェーンが得られず、結果としてピンニングによる検証が正常に機能しなくなってしまう危険がある [38]_。
+However, if an app uses the methods listed below in an attempt to
+obtain the certificate chain that the system trusted during the
+handshake, the app may not obtain the expected certificate chain,
+posing a risk that the pinning may not function properly
+[36]_.
 
-.. [38] この危険性については以下の記事で詳しく説明されている https://www.cigital.com/blog/ineffective-certificate-pinning-implementations/
+.. [36] The following article explains this risk in detail:
+
+ https://www.cigital.com/blog/ineffective-certificate-pinning-implementations/
 ```
 -   javax.net.ssl.SSLSession.getPeerCertificates()
 
 -   javax.net.ssl.SSLSession.getPeerCertificateChain()
 
-これらのメソッドが返すのは、ハンドシェイク処理でシステムに信頼された証明書チェーンではなく、アプリが通信相手から受け取った証明書チェーンそのものである。そのため、中間者攻撃により不正な第三者認証局の証明書が証明書チェーンに付け加えられても、上記のメソッドはハンドシェイク処理でシステムが信用した証明書だけでなく、本来アプリが接続しようとしていたサーバーの証明書も一緒に返してしまう。この「本来アプリが接続しようとしていたサーバーの証明書」は、ピンニングによる検証のためアプリ内にあらかじめ保持しておいたものと同等の証明書なので、再検証を行っても不正を検出することができない。このような理由から、ハンドシェイク処理後の再検証を実装する際に上記のメソッドを使用することは避けるべきである。
+What these methods return is not the certificate chain that was
+trusted by the system during the handshake, but rather the very
+certificate chain that the app received from the communication partner
+itself. For this reason, even if an man-in-the-middle attack has
+resulted in a certificate from an improper certificate authority being
+appended to the certificate chain, the above methods will not return
+the certificate that was trusted by the system during the handshake;
+instead, the certificate of the server to which the app was originally
+attempting to connect will also be returned at the same time. This
+certificate---the certificate of the server to which the app was
+originally attempting to connect---will, because of pinning, be
+equivalent to the certificate pre-stored within the app; thus
+re-testing it will not detect any improprieties. For this and other
+similar reasons, it is best to avoid using the above methods when
+implementing re-testing after the handshake.
 
-Android 4.2（API Level
-17）以上であれば、上記のメソッドの代わりにnet.http.X509TrustManagerExtensionsのcheckServerTrusted()を使用することで、ハンドシェイク処理でシステムに信頼された証明書チェーンのみを取得することができる。
+On Android versions 4.2 (API Level 17) and later, using the
+`checkServerTrusted(``)` method within
+`net.http.X509TrustManagerExtensions` will allow the app to obtain
+only the certificate chain that was trusted by the system during the
+handshake.
 
-X509TrustManagerExtensionsを用いたピンニング検証の例
+An example illustrating pinning using X509TrustManagerExtensions
 ```java
-// 正しい通信先サーバーの証明書に含まれる公開鍵のSHA-256ハッシュ値を保持（ピンニング）
+// Store the SHA-256 hash value of the public key included in the correct certificate for the remote server (pinning)
 private static final Set<String> PINS = new HashSet<>(Arrays.asList(
         new String[] {
                 "d9b1a68fceaa460ac492fb8452ce13bd8c78c6013f989b76f186b1cbba1315c1",
@@ -2869,33 +3155,33 @@ private static final Set<String> PINS = new HashSet<>(Arrays.asList(
         }
 ));
 
-// AsyncTaskのワーカースレッドで通信する
+// Communicate using AsyncTask work threads
 protected Object doInBackground(String... strings) {
 
-    // ～省略～
+    [...]
 
-   // ハンドシェイク時の検証によりシステムに信頼された証明書チェーンを取得する
+   // Obtain the certificate chain that was trusted by the system by testing during the handshake
    X509Certificate[] chain = (X509Certificate[]) connection.getServerCertificates();
    X509TrustManagerExtensions trustManagerExt = new X509TrustManagerExtensions((X509TrustManager) (trustManagerFactory.getTrustManagers()[0]));
    List<X509Certificate> trustedChain = trustManagerExt.checkServerTrusted(chain, "RSA", url.getHost());
 
-   // 公開鍵ピンニングを用いて検証する
+   // Use public-key pinning to test
    boolean isValidChain = false;
    for (X509Certificate cert : trustedChain) {
        PublicKey key = cert.getPublicKey();
        MessageDigest md = MessageDigest.getInstance("SHA-256");
        String keyHash = bytesToHex(md.digest(key.getEncoded()));
 
-       // ピンニングしておいた公開鍵のハッシュ値と比較する
+       // Compare to the hash value stored by pinning
        if(PINS.contains(keyHash)) isValidChain = true;
    }
    if (isValidChain) {
-       // 処理を継続する
+       // Proceed with operation
    } else {
-       // 処理を継続しない
+       // Do not proceed with operation
    }
 
-    // ～省略～
+    [...]
 }
 
 private String bytesToHex(byte[] bytes) {
@@ -2909,32 +3195,50 @@ private String bytesToHex(byte[] bytes) {
 
 ```
 
-#### Google Play開発者サービスを利用したOpenSSLの脆弱性対策
+#### Strategies for addressing OpenSSL vulnerabilities using Google Play Services
 
-Google Play開発者サービス（バージョン5.0以降）では、Provider
-Installerという仕組みが提供されている。これは、OpenSSLを含む暗号関連技術の実装であるSecurity
-Providerの脆弱性対策に利用できる。詳しくは「5.6.3.5 Google
-Play開発者サービスによるSecurity Providerの脆弱性対策」を参照のこと。
+Google Play Services (version 5.0 and later) provides a framework
+known as Provider Installer. This may be used to address
+vulnerabilities in Security Provider, an implementation of OpenSSL and
+other encryption-related technologies. For details, see Section
+\"5.6.3.5 Addressing Vulnerabilities with Security Provider from
+Google Play Services\".
 
 #### Network Security Configuration
 ```eval_rst
-Android 7.0（API Level 24）において、ネットワーク通信時のセキュリティ設定をアプリ毎に行うことができるNetwork
-Security Configurationが導入された。この仕組みを利用することにより、プライベート証明書でのHTTPS通信やピンニングによる証明書検証のほか、非暗号化（HTTP）通信の抑制、デバッグ時のみ有効なプライベート証明書の導入など、アプリのセキュリティを向上させる種々の施策をアプリに簡単に取り入れることができる [39]_。
+Android 7.0 (API Level 24) introduced a framework known as Network
+Security Configuration that allows individual apps to configure their
+own security settings for network communication. Using this framework
+makes it easy for apps to incorporate a variety of techniques for
+improving app security, including not only HTTPS communication with
+private certificates and public key pinning but also prevention of
+unencrypted (HTTP) communication and the use of private certificates
+enabled only during debugging
+[37]_.
 
-.. [39] Network Security Configurationの詳細については以下を参照すること
+.. [37] For more information on Network Security Configuration, see
+
     https://developer.android.com/training/articles/security-config.html
 ```
-Network Security
-Configurationの各種機能はxmlファイルの設定を行うだけで使用でき、アプリが行うHTTPおよびHTTPS通信全てに適用することができる。その結果、アプリのコードに修正や追加処理を行う必要がなくなるため、実装がシンプルになりバグや脆弱性の作り込み防止に効果があると考えられる。
+The various types of functionality offered by Network Security
+Configuration may be accessed simply by configuring settings in xml
+files, which may be applied to the entirety of an app\'s HTTP and
+HTTPS communications. This eliminates the need for modifying an app\'s
+code or carrying out any additional processing, simplifying
+implementation and providing an effective protection against
+Incorporating bugs or vulnerabilities.
 
-##### プライベート証明書でHTTPS通信する
+##### Communicating via HTTPS with private certificates
 
-「5.4.1.3プライベート証明書でHTTPS通信する」で、私的に発行したサーバー証明書（プライベート証明書）でHTTPS通信をするためのサンプルコードを示した。Network
-Security
-Configurationを用いれば、開発者がプライベート証明書の検証処理を明示的に実装しなくても、「5.4.1.2
-HTTPS通信する」のサンプルコードで示した通常のHTTPS通信と同じ実装でプライベート証明書を用いることができる。
+Section "5.4.1.3 Communicating via HTTPS with private certificate**"**
+presents sample code that performs HTTPS communication with private
+certificates (e.g. self-signed certificates or intra-company
+certificates). However, by using Network Security Configuration,
+developers may use private certificates without implementation
+presented in the sample code of Section "5.4.1.2 Communicating via
+HTTPS**"**.
 
-特定ドメインへの通信時にプライベート証明書を用いる
+Use private certificates to communicate with specific domains
 
 ```xml
     <?xml version="1.0" encoding="utf-8"?>
@@ -2948,9 +3252,16 @@ HTTPS通信する」のサンプルコードで示した通常のHTTPS�
     </network-security-config>
 ```
 
-上記の例では、通信で使用するプライベート証明書（private\_ca）をアプリ内にリソースとして保持しておき、それらを利用する条件や適用範囲をxmlファイルに記述している。\<domain-config\>タグを使用することで特定のドメインに対してのみプライベート証明書が適用される。アプリが行う全てのHTTPS通信に対してプライベート証明書を用いるためには、以下のように\<base-config\>タグを用いればよい。
+In the example above, the private certificates (`private_ca`) used for
+communication may be stored as resources within the app, with the
+conditions for their use and their range of applicability described in
+`.xml` files. By using the `<domain-config>` tag, it is possible to
+apply private certificates to specific domains only. To use private
+certificates for all HTTPS communications performed by the app, use
+the `<base-config>` tag, as shown below.
 
-アプリが行う全てのHTTPS通信時にプライベート証明書を用いる
+Use private certificates for all HTTPS communications performed by the
+app
 ```xml
     <?xml version="1.0" encoding="utf-8"?>
     <network-security-config>
@@ -2962,14 +3273,16 @@ HTTPS通信する」のサンプルコードで示した通常のHTTPS�
     </network-security-config>
 ```
 
-##### ピンニングによる検証
+##### Pinning
 
-「5.4.3.5
-ピンニングによる検証の注意点と実装例」でピンニングによる証明書の検証について説明した。Network
-Security
-Configurationを用い以下のように設定すれば、コード上の検証処理が不要となり、xmlの記述だけで検証を行うことができる。
+We mentioned public key pinning in Section "5.4.3.5 Notes and sample
+implementations for pinning**"** By using Network Security
+Configuration to configure settings as in the example below, you
+eliminate the need to implement the authentication process in your
+code; instead, the specifications in the `xml` file suffice to ensure
+proper authentication.
 
-HTTPS通信時にピンニングによる検証を行う
+Use public key pinning for HTTPS communication
 ```xml
     <?xml version="1.0" encoding="utf-8"?>
     <network-security-config>
@@ -2977,21 +3290,23 @@ HTTPS通信時にピンニングによる検証を行う
             <domain includeSubdomains="true">jssec.org</domain>
             <pin-set expiration="2018-12-31">
                 <pin digest="SHA-256">e30Lky+iWK21yHSls5DJoRzNikOdvQUOGXvurPidc2E=</pin>
-                <!-- バックアップ用 -->
+                <!-- for backup -->
                 <pin digest="SHA-256">fwza0LRMXouZHRC8Ei+4PyuldPDcf3UKgO/04cDM1oE=</pin>
             </pin-set>
         </domain-config>
     </network-security-config>
 ```
 
-上記の\<pin\>タグに記述するのは、ピンニング検証の対象となる公開鍵のハッシュ値をbase64でエンコードしたものである。また、ハッシュ関数はSHA-256のみサポートされている。
+The quantity described by the `<pin>` tag above is the base64-encoded
+hash value of the public key used for pinning. The only supported hash
+function is SHA-256.
 
-##### 非暗号化（HTTP）通信の抑制
+##### Prevent unencrypted (HTTP) communication
 
-Network Security
-Configurationを用いて、アプリのHTTP通信（非暗号化通信）を抑制することができる。
+Using Network Security Configuration allows you to prevent HTTP
+communication (unencrypted communication) from apps.
 
-非暗号化通信を抑制する
+Prevent unencrypted (HTTP) communication
 ```xml
     <?xml version="1.0" encoding="utf-8"?>
     <network-security-config>
@@ -3001,19 +3316,40 @@ Configurationを用いて、アプリのHTTP通信（非暗号化通信）を
     </network-security-config>
 ```
 ```eval_rst
-上記のように、\<domain-config\>タグに cleartextTrafficPermitted=\"false\" を属性値として設定することにより、特定ドメインとのHTTP通信が抑制され、HTTPS通信を用いることが強制される。同様の属性値を\<base-config\>タグに設定すると、全てのドメインに対するHTTP通信が抑制される [40]_。また、この設定はAndroid 8.0（API Level 26）以降ではWebViewにも適用されるが、Android 7.0(API
-Level 25)以前ではWebViewには適用されないことに注意する必要がある。
+In the example above we specified the attribute
+`cleartextTrafficPermitted="false"` in the `<domain-config>` tag. This
+prevents HTTP communication with the specified domain, forcing the use
+of HTTPS communication. Including this attribute setting in the
+`<base-config>` tag will prevent HTTP communication to all
+domains
+[38]_. Also, in Android 8.0 (API Level 26) and later these
+settings may also be applied to WebView; however, note with caution
+that these settings may *not* be applied to WebView in Android 7.0
+(API Level 25) or earlier versions.
 
-.. [40] HTTP以外の通信方式に対してどのような制御が行われるかについては、以下を参照すること https://developer.android.com/reference/android/security/NetworkSecurityPolicy.html#isCleartextTrafficPermitted
+.. [38] See the following API reference about how the Network Security
+    Configuration works for non-HTTP connections.
+
+    https://developer.android.com/reference/android/security/NetworkSecurityPolicy.html\#isCleartextTrafficPermitted()
+
 ```
-##### デバッグ専用のプライベート証明書
+##### Private certificates exclusively for debugging purposes
 
-アプリ開発時にデバッグ目的でプライベート証明書を用いた開発用サーバーとのHTTPS通信を行う場合、開発者は「5.4.3.3
-証明書検証を無効化する危険なコード」で述べたような、証明書検証を無効化させる危険な実装をアプリに組み込んでしまわないよう注意する必要がある。Network
-Security
-Configurationで以下のような設定を行えば、デバッグ時にのみ（AndroidManifest.xml内のandroid:debuggableが\"true\"である場合のみ）使用する証明書を指定することができるため、前述のような危険なコードを製品版に残してしまう危険性がなくなり、脆弱性の作り込み防止に役立てることができる。
+For purposes of debugging during app development, developers may wish
+to use private certificates to communicate with certain HTTPS servers
+that exist for app-development purposes. In this case, developers must
+be careful to ensure that no dangerous implementations---including
+code that disables certificate authentication---are incorporated into
+the app; this is discussed in Section "5.4.3.3 Risky Code that
+Disables Certificate Verification". In Network Security Configuration,
+settings may be configured as in the example below to specify a set of
+certificates to be used only when debugging (only if
+`android``:debuggable` is set to "`true”` in the file
+`AndroidManifest.xml`). This eliminates the risk that dangerous code
+may inadvertently be retained in the release version of an app, thus
+constituting a useful means of preventing vulnerabilities.
 
-デバッグ時にのみプライベート証明書を用いる
+Use private certificates only when debugging
 ```xml
     <?xml version="1.0" encoding="utf-8"?>
     <network-security-config>
@@ -3025,65 +3361,104 @@ Configurationで以下のような設定を行えば、デバック�
     </network-security-config>
 ```
 
-#### （コラム）　セキュア接続のTLS1.2への移行について
+#### (Column): Transitioning to TLS1.2 for secure connections
 
 ``` eval_rst
 
-米国立標準技術研究所(NIST) [41]_ では、SSLとTLS
-1.0についてセキュリティ上の問題を報告しておりサーバーでの利用が非推奨となっている。特に
-2014年から2015 年には　Heartbleed（2014年4月） [42]_,
-POODLE（2014年10月） [43]_,
-FREAK（2015年3月） [44]_ 等の脆弱性が発表されており、特にOpenSSL(暗号ソフトウェアライブラリ)上で発見された脆弱性
+The U.S. National Institute of Standards and Technology (NIST)
+[39]_ has
+reported security issues in SSL and TLS 1.0, and these protocols have
+been deprecated for use in servers. In particular, several
+vulnerabilities were announced in 2014 and 2015, including
 Heartbleed
-では、日本の企業でも不正アクセスを受け顧客データを閲覧されるなどの被害が出ている。[45]_
+[40]_ (April 2014), POODLE
+[41]_ (October 2014), and FREAK
+[42]_ (March 2015); of these, the Heartbleed vulnerability, discovered in
+OpenSSL (a software library for encryption), was used to target Japanese
+companies, yielding improper accesses that led to leakage of customer
+data and other harmful consequences.
+[43]_
 
-このような背景から米国の政府調達においては、これらの使用を禁止しているが、商用においては影響範囲の大きさから(特にTLS
-1.0はセキュリティバッチを施しながら)現在においてもインターネットの暗号化技術として広く使われているのが現状である。しかし、ここ数年のセキュリティ騒動や新しいバージョンのTLSの普及から「SSLやTLSの古いバージョン」のサポートを取りやめるサイトやサービスも増えており、TLS1.2への移行が確実に進みつつある。[46]_
+Because of this history, the use of these technologies is prohibited for
+U.S. government procurement; however, the breadth of their influence in
+commercial settings ensures that the techniques widely used today as
+Internet encryption methods (with security patches applied to TLS 1.0 in
+particular). However, given the rash of security incidents in recent
+years and the availability of new TLS versions, an increasing number of
+sites and services are discontinuing support for "old versions of SSL or
+TLS," and the transition to TLS 1.2 is well underway.
+[44]_
 
-例えば、移行の一例としてPCI SSC(Payment Card Industry Security Standards
-Council)によって策定された「ペイメントカード業界データセキュリティ基準(PCI
-DSS: Payment Card Industry Data Security
-Standard)」と呼ばれるセキュリティ基準がある。[47]_
+For example, one manifestation of this transition is a new security
+standard known as the Payment Card Industry Data Security Standard (PCI
+DSS), established by the Payment Card Industry Security Standards
+Council (PCI SSC).
+[45]_
 
-.. [41] 米国立標準技術研究所, NIST (https://www.nist.gov/)
+.. [39] US National Institute of Standards and Technology (NIST) (https://www.nist.gov/)
 
-.. [42] Heartbleed（CVE-2014-0160）, IPA (https://www.ipa.go.jp/security/ciadr/vul/20140408-openssl.html)
+.. [40] Heartbleed(CVE-2014-0160), IPA (https://www.ipa.go.jp/security/ciadr/vul/20140408-openssl.html)
 
-.. [43] POODLE（CVE-2014-3566）, IPA 
-    (https://www.ipa.go.jp/security/announce/20141017-ssl.html)
+.. [41] POODLE（CVE-2014-3566）, IPA (https://www.ipa.go.jp/security/announce/20141017-ssl.html)
 
-.. [44] FREAK（CVE-2015-0204）, NIST
-    (https://nvd.nist.gov/vuln/detail/CVE-2015-0204)
+.. [42] FREAK（CVE-2015-0204）, NIST (https://nvd.nist.gov/vuln/detail/CVE-2015-0204)
 
-.. [45] TLS/SSL  既知の脆弱性, Wiki
- `(https://ja.wikipedia.org/wiki/Transport_Layer_Security#TLS/SSLの既知の脆弱性) <https://ja.wikipedia.org/wiki/Transport_Layer_Security#TLS/SSL%E3%81%AE%E6%97%A2%E7%9F%A5%E3%81%AE%E8%84%86%E5%BC%B1%E6%80%A7>`_
+.. [43] TLS/SSL Known vulnerabilities, Wiki (https://ja.wikipedia.org/wiki/Transport_Layer_Security#TLS/SSL%E3%81%AE%E6%97%A2%E7%9F%A5%E3%81%AE%E8%84%86%E5%BC%B1%E6%80%A7)
 
-.. [46] SSL/TLS 暗号設定ガイドライン, IPA (https://www.ipa.go.jp/files/000045645.pdf)
 
-.. [47] ペイメントカード業界データセキュリティ基準(PCI DSS), PCI SSC (https://ja.pcisecuritystandards.org/minisite/env2/)
+.. [44] SSL/TLS Encryption Design Guidelines, IPA (https://www.ipa.go.jp/files/000045645.pdf)
 
-現在Eコマースはスマートフォンやタブレットでも広く利用されており、決済にはクレジットカードを利用する事が普通であろう。本書（Androidアプリのセキュア設計・セキュアコーディングガイド）を利用するユーザーにおいても、アプリケーションを介してクレジットカード情報などをサーバサイドに送信するサービスを企画するケースも多いと予想するが、ネットワークでクレジットカードを利用する際にはその経路の安全性を確保することが必要で、PCI
-DSSは、このようなサービスにおける会員データを取り扱う際の基準であり、カードの不正利用や情報漏えいなどを防止する目的で定められている。このセキュリティ基準の中で、インターネット上でのクレジットカードの処理にTLS
-1.0の使用は非推奨とされ、TLS
-1.2（ハッシュ関数SHA-2(SHA-256やSHA-384)の利用、認証付暗号利用モードが利用可能な暗号スイートのサポートなど、より強力な暗号アルゴリズムの利用が可能になっている）などに対応することが求められている。
+.. [45] Payment Card Industry Data Security Standard (PCI DSS), PCI SSC, (https://ja.pcisecuritystandards.org/minisite/env2/)
 
-スマートフォンとサーバー間の通信において、経路上の安全を確保することは、クレジット情報の取り扱いに限らずプライバシー情報のやりとりやその他情報のやりとりにおいても非常に重要な点であると言えるため、サービスを提供する(サーバー)側がTLS1.2を利用したセキュア接続へ移行する事は差し迫った課題であるといえる。
+Smartphones and tablets are also widely used for E-commerce today, with
+credit cards typically used for payment. Indeed, we expect that many
+users of this document (Android Application Secure Design / Secure
+Coding Guide) will offer services that send credit-card information and
+other data to the server side; when using credit cards in networked
+environments, it is essential to ensure the security of the data
+pathway, and PCI DSS is a standard that governs the handling of member
+data in services of this type, designed with the objective of preventing
+improper card use, information leaks, and other harmful consequences.
+Among these security standards, the use of TLS 1.0 is deprecated for
+credit-card handling on the Internet; instead, apps should support
+standards such as TLS 1.2 \[which allows the use of stronger encryption
+algorithms, including SHA-2 hash functions (SHA-256 or SHA-384) and
+support for encryption suites that offer usage modes with authenticated
+encryption\].
 
-一方、クライアント側であるAndroidにおいてTLS
-1.1以降に対応できるWebView機能はAndroid 4.3( Jelly
-Bean後期)以降であり、HTTP通信を直接行う場合は多少追加実装を伴うがAndroid
-4.1(Jelly Bean前期)からとなる。
+In communication between smartphones and servers, the need to ensure the
+security of data pathways is not restricted to handling of credit-card
+information, but is also an extremely important aspect of operations
+involving the handling of private data or other sensitive information.
+Thus, the need to transition to secure connections using TLS 1.2 on the
+service-provision (server) side may now be said to be an urgent
+requirement.
 
-サービス開発者の中には、TLS 1.2を採用するとAndroid
-4.3以前のユーザーを切り捨てることになり、少なからず影響があると思われる向きがあるかもしれない。しかしながら、下図の通り、最新のデータ（2018年1月現在） [48]_ によると現在利用されているAndroid
-OSのシェアは4.3以降が94.3%と圧倒的であるため、扱う資産などの安全性を考慮して、TLS
-1.2への移行を真剣に検討されることをお薦めする。
+On the other hand, in Android---which runs on the client side---WebView
+functionality supporting TLS 1.1 and later versions has been available
+since Android 4.3 (late Jelly Bean), and for direct HTTP communication
+since Android 4.1 (early Jelly Bean), although some additional
+implementation is needed in this case.
+
+Among service developers, the adoption of TLS 1.2 means cutting off
+access to users of Android 4.3 and earlier versions, so it might seem
+that such a step would have significant repercussions. However, as shown
+in the figure below, the most recent data
+[46]_ (current as of January
+2018) show that Android versions 4.3 and later account for the
+overwhelming majority---94.3%---of all Android systems currently in use.
+In view of this fact, and considering the importance of guaranteeing the
+security of assets handled by apps, we recommend that serious
+consideration be paid to transitioning to TLS 1.2.
 
 .. image:: media/android_os_share.png
 
-図 5.4‑5 Android OSのシェア (Andorid Developpersサイトより引用)
+Figure 5.4‑5 Distribution of OS versions among Android systems in
+current use
+(Source: Android Developers site)
 
-.. [48] Android OSのシェア, Andorid Developpersダッシュボード (https://developer.android.com/about/dashboards/index.html)
+.. [46] Android OS platform versions, Android Developers dashboard
+    (https://developer.android.com/about/dashboards/index.html)
 
 ```
 
