@@ -18,10 +18,9 @@ terms of security, are described here. Only what is related to
 password input is mentioned, here. Regarding how to save password,
 another articles is planned to be published is future edition.
 
-![](media/image57.png)
 ```eval_rst
-.. {width="2.0in"
-.. height="3.345138888888889in"}
+.. image:: media/image57.png
+   :width: 50%
 ```
 
 Figure 5.1‑1
@@ -451,10 +450,9 @@ Setting > Security > Make passwords visible
 There is a setting in Android\'s setting menu, called \"Make passwords
 visible.\" In case of Android 4.4, it\'s shown as below.
 
-![](media/image59.png)
 ```eval_rst
-.. {width="1.6598425196850393in"
-.. height="2.7598425196850394in"}
+.. image:: media/image59.png
+   :width: 50%
 ```
 
 Figure 5.1‑3
@@ -525,11 +523,11 @@ appears
     Android versions 6.0 and later".
 ```
 
-![](media/image61.png)
 ```eval_rst
-.. {width="1.8645833333333333in"
-.. height="3.34375in"}
+.. image:: media/image61.png
+   :width: 50%
 ```
+
 
 Figure 5.2‑1
 
@@ -738,12 +736,9 @@ Certificate fingerprint:
 Without installing JDK7 or later, you can easily verify the
 certificate hash value by using JSSEC Certificate Hash Value Checker.
 
-![C:\\Users\\0025110063\\AppData\\Local\\Microsoft\\Windows\\Temporary
-Internet
-Files\\Content.Word\\Screenshot\_2012-04-24-13-01-57.png](media/image63.png)
 ```eval_rst
-.. {width="3.93125in"
-.. height="2.2180555555555554in"}
+.. image:: media/image63.png
+   :width: 50%
 ```
 
 Figure 5.2‑5
@@ -777,11 +772,11 @@ whether or not to grant the Permission in question. If the user allows
 the use of the Permission, the app may execute whatever operations
 require that Permission.
 
-![](media/image64.png)
 ```eval_rst
-.. {width="2.0072648731408576in"
-.. height="3.571259842519685in"}
+.. image:: media/image64.png
+   :width: 50%
 ```
+
 
 Figure 5.2‑6
 
@@ -858,11 +853,11 @@ application is trying to use. When the user taps \"install,\" the
 application will be granted the permission and then it will be
 installed.
 
-![](media/image61.png)
 ```eval_rst
-.. {width="1.6666666666666667in"
-.. height="2.7736111111111112in"}
+.. image:: media/image61.png
+   :width: 50%
 ```
+
 
 Figure 5.2‑7
 
@@ -1558,10 +1553,9 @@ functionality because permission has not been granted.
     automatically granted by Android OS, there is no need to obtain user
     confirmation for these permissions.
 ```
-![](media/image67.png)
 ```eval_rst
-.. {width="1.9999628171478565in"
-.. height="3.558266622922135in"}
+.. image:: media/image67.png
+   :width: 50%
 ```
 
 Figure 5.2‑10
