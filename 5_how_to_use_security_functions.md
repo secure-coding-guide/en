@@ -3969,24 +3969,35 @@ JSSEC Smartphone Applications"
 
 Table 5.5‑1
 ```eval_rst
-======================================= =================================================
-用語                                    解説
-======================================= =================================================
-事業者プライバシーポリシー              | 事業者における個人情報保護方針を記したプライバ
-                                        | シーポリシー。個人情報保護法に基づき作成。
-アプリ・プライバシーポリシー            | アプリケーション向けプライバシーポリシー。総務
-                                        | 省SPIの指針に基づき作成。概要版と詳細版での解り
-                                        | やすい説明が望まれる。
-概要版アプリ・プライバシーポリシー      | アプリが取得する利用者情報、取得目的、第三者提
-                                        | 供の有無などを簡潔に記述した文書。
-詳細版アプリ・プライバシーポリシー      | 総務省SPIの定める８項目に準拠した詳細な内容を記
-                                        | 述した文書。
-利用者による取り換えが容易な利用者情報  | cookie、UUIDなど。
-利用者による取り換えが困難な利用者情報  | IMEI、IMSI、ICCID、MACアドレス、OSが生成する
-                                        | IDなど。
-慎重な取り扱いが求められる利用者情報    | 位置情報、アドレス帳、電話番号、メールアドレス
-                                        | など。
-======================================= =================================================
++---------------------------------------------+------------------------------------------------------------------------+
+| Term                                        | Description                                                            |
++=============================================+========================================================================+
+|| Enterprise Privacy Policy                  || A privacy policy that defines a corporation's policies for protecting |
+|                                             || personal data. Created in accordance with Japan's Personal            |
+|                                             || Information Protection Law.                                           |
++---------------------------------------------+------------------------------------------------------------------------+
+|| Application Privacy Policy                 || An application-specific privacy policy.                               |
+|                                             || Created in accordance with the guidelines of the Smartphone           |
+|                                             || Privacy Initiative (SPI) of Japan's Ministry of Internal Affairs and  |
+|                                             || detailed versions containing easily understandable explanations.      |
++---------------------------------------------+------------------------------------------------------------------------+
+|| Summary version of the Application         || A brief document that concisely summarizes what user information      |
+|| Privacy Policy                             || an application will use, for what purpose, and whether or not this    |
+|                                             || information will be provided to third parties.                        |
++---------------------------------------------+------------------------------------------------------------------------+
+|| Detailed version of the Application        || A detailed document that complies with the 8 items specified by the   |
+|| Privacy Policy                             || Smartphone Privacy Initiative (SPI) and the Smartphone Privacy        |
+|                                             || Initiative II (SPI II) of Japan's Ministry of Internal Affairs and    |
+|                                             || Communications (MIC).                                                 |
++---------------------------------------------+------------------------------------------------------------------------+
+|| User data that is easy for users to change || Cookies, UUIDs, etc.                                                  |
++---------------------------------------------+------------------------------------------------------------------------+
+|| User data that is difficulty for users to  || IMEIs, IMSIs, ICCIDs, MAC addresses, OS-generated IDs, etc.           |
+|| change                                     |                                                                        |
++---------------------------------------------+------------------------------------------------------------------------+
+|| User data requiring particularly delicate  || Location information, address books, telephone numbers, email         |
+|| handling                                   || addresses, etc.                                                       |
++---------------------------------------------+------------------------------------------------------------------------+
 ```
 
 #### Version-dependent differences in handling of Android IDs
@@ -3996,6 +4007,7 @@ The Android ID (Settings.Secure.ANDROID\_ID) is a randomly-generated
 as an identifier to identify individual terminals (although duplicate
 identifiers are possible in extremely rare cases). For this reason,
 incorrect usage can create serious risks associated with user
+
 tracking, and thus special care must be taken when using Android IDs.
 However, the rules governing aspects such as ID generation and
 accessible ranges differ for terminals running Android 7.1 (API Level
@@ -4052,55 +4064,84 @@ difficult for users to exchange* (as described in Section 5.5.3.2,
 discussion---we recommend that similar levels of caution be employed
 when using Android IDs.
 
-暗号技術を利用する
+Using Cryptography
 ------------------
 
-セキュリティの世界では、脅威を分析し対策するための観点として、機密性(Confidentiality)、完全性(Integrity)、可用性(Availavility)という用語が使われる。それぞれ秘密のデータを第三者に見られないようにすること、参照するデータが改ざんされないように(または、改ざんされたことを検知)すること、サービスやデータが必要な時にいつでも利用できることを意味しており、セキュリティを確保する際に考慮すべき大切な要素である。中でも、機密性や完全性のために暗号技術が用いられることが多く、Androidにおいてもアプリが機密性や完全性を実現するための様々な暗号機能が用意されている。
+In the security world, the terms \"confidentiality\", \"integrity\",
+and \"availability\" are used in analyzing responses to threats. These
+three terms refer, respectively, to measures to prevent the third
+parties from viewing private data, protections to ensure that the data
+referenced by users has not been modified (or techniques for detecting
+when it has been falsified) and the ability of users to access
+services and data at all times. All three of these elements are
+important to consider when designing security protections. In
+particular, encryption techniques are frequently used to ensure
+confidentiality and integrity, and Android is equipped with a variety
+of cryptographic features to allow applications to realize
+confidentiality and integrity.
 
-ここでは、Androidアプリにおける暗号化・復号(機密性の実現)、メッセージ認証コード/デジタル署名
-(完全性の実現)の安全な実装方法をサンプルコードで示す。
+In this section we will use sample code to illustrate methods by which
+Android applications can securely implement encryption and decryption
+(to ensure confidentiality) and message authentication codes (MAC) or
+digital signatures (to ensure integrity).
 
-### サンプルコード<!-- 5743e4ff -->
+### Sample Code<!-- 5743e4ff -->
 
-「暗号化・復号する(機密性を確保する)」、「改ざんを検知する(完全性を確認する)」というユースケースの具体的な用途や条件に対して、様々な暗号方式が開発されている。ここでは、暗号技術をどのような用途で利用するかという観点から、暗号方式を大きく3つに分類してサンプルコードを用意している。それぞれの暗号技術の特徴から利用すべき暗号方式・鍵の種類を判断することができる。より細やかな判断が必要な場合には、「5.6.3.1
-暗号方式の選択」も参照すること。
+A variety of cryptographic methods have been developed for specific
+purposes and conditions, including use cases such as encrypting and
+decrypting data (to ensure confidentiality) and detecting
+falsification of data (to ensure integrity). Here is sample code that
+is categorized into three broad groups of cryptography techniques on
+the basis of the purpose of each technology. The features of the
+cryptographic technology in each case should make it possible to
+choose an appropriate encryption method and key type. For cases in
+which more detailed considerations are necessary, see Section "5.6.3.1
+Choosing encryption methods".
 
-また、暗号技術を利用する実装をする際には、「5.6.3.3
-乱数生成における脆弱性と対策」もあらかじめ参照すること。
+Before designing an implementation that uses encryption technology, be
+sure to read Section "5.6.3.3 Measures to Protect against
+Vulnerabilities in Random-Number Generators".
 
--   第三者の盗聴からデータを守る
+-   Protecting data from third-party eavesdropping
 
-![](media/image89.png)
+![](media/image82.png)
 ```eval_rst
 .. {width="5.606944444444444in"
 .. height="2.933333333333333in"}
 ```
 
-図 5.6‑1
-盗聴からデータを守るサンプルコードを選択するフローチャート
+Figure 5.6‑1
 
--   第三者によるデータの改ざんを検知する
+-   Detecting falsification of data made by a third party
 
-![](media/image90.png)
+![](media/image83.png)
 ```eval_rst
 .. {width="5.720833333333333in"
 .. height="2.933333333333333in"}
 ```
 
-図
-5.6‑2　データの改ざんを検知するサンプルコードを選択するフローチャート
+Figure 5.6‑2
 
-#### パスワード鍵を利用して暗号化・復号する
+#### Encrypting and Decrypting With Password-based Keys
 
-ユーザーの情報資産の秘匿性を守る目的にはパスワードベース鍵暗号を使うことができる。
+You may use password-based key encryption for the purpose of
+protecting a user's confidential data assets.
 
-ポイント：
+Points:
 
-1.  明示的に暗号モードとパディングを設定する
-2.  脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
-3.  パスワードから鍵を生成する場合は、Saltを使用する
-4.  パスワードから鍵を生成する場合は、適正なハッシュの繰り返し回数を指定する
-5.  十分安全な長さを持つ鍵を利用する
+1.  Explicitly specify the encryption mode and the padding.
+
+2.  Use strong encryption technologies (specifically, technologies that
+    meet the relevant criteria), including algorithms, block cipher
+    modes, and padding modes.
+
+3.  When generating a key from password, use Salt.
+
+4.  When generating a key from password, specify an appropriate hash
+    iteration count.
+
+5.  Use a key of length sufficient to guarantee the strength of
+    encryption.
 
 AesCryptoPBEKey.java
 ```eval_rst
@@ -4110,15 +4151,24 @@ AesCryptoPBEKey.java
 ```
 
 
-#### 公開鍵を利用して暗号化・復号する
+#### Encrypting and Decrypting With Public Keys
 
-アプリ側では公開鍵を保持してデータの暗号化のみを行い、復号を異なる安全な場所(サーバーなど)で秘密鍵によって行うような用途には公開鍵(非対称鍵)暗号を使うことができる。
+In some cases, only data encryption will be performed -using a stored
+public key- on the application side, while decryption is performed in
+a separate safe location (such as a server) under a private key. In
+cases such as this, it is possible to use public-key (asymmetric-key)
+encryption.
 
-ポイント：
+Points:
 
-1.  明示的に暗号モードとパディングを設定する
-2.  脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
-3.  十分安全な長さを持つ鍵を利用する
+1.  Explicitly specify the encryption mode and the padding
+
+2.  Use strong encryption methods (specifically, technologies that meet
+    the relevant criteria), including algorithms, block cipher modes,
+    and padding modes.
+
+3.  Use a key of length sufficient to guarantee the strength of
+    encryption.
 
 RsaCryptoAsymmetricKey.java
 ```eval_rst
@@ -4128,15 +4178,21 @@ RsaCryptoAsymmetricKey.java
 ```
 
 
-#### 共通鍵を利用して暗号化・復号する
+#### Encrypting and Decrypting Using Pre Shared Keys
 
-サイズの大きなデータを扱う場合やアプリの資産・ユーザーの資産の秘匿性を守る目的で使うことができる。
+Pre shared keys may be used when working with large data sets or to
+protect the confidentiality of an application's or a user's assets.
 
-ポイント：
+Points:
 
-1.  明示的に暗号モードとパディングを設定する
-2.  脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
-3.  十分安全な長さを持つ鍵を利用する
+1.  Explicitly specify the encryption mode and the padding
+
+2.  Use strong encryption methods (specifically, technologies that meet
+    the relevant criteria), including algorithms, block cipher modes,
+    and padding modes.
+
+3.  Use a key of length sufficient to guarantee the strength of
+    encryption.
 
 AesCryptoPreSharedKey.java
 ```eval_rst
@@ -4146,17 +4202,25 @@ AesCryptoPreSharedKey.java
 ```
 
 
-#### パスワード鍵を利用して改ざんを検知する
+#### Using Password-based Keys to Detect Data Falsification
 
-ユーザーの情報資産の完全性をチェックする目的にはパスワードベース(共通鍵)暗号を使うことができる。
+You may use password-based (shared-key) encryption to verify the
+integrity of a user's data.
 
-ポイント：
+Points:
 
-1.  明示的に暗号モードとパディングを設定する
-2.  脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
-3.  パスワードから鍵を生成する場合は、Saltを使用する
-4.  パスワードから鍵を生成する場合は、適正なハッシュの繰り返し回数を指定する
-5.  十分安全な長さを持つ鍵を利用する
+1.  Explicitly specify the encryption mode and the padding.
+
+2.  Use strong encryption methods (specifically, technologies that meet
+    the relevant criteria), including algorithms, block cipher modes,
+    and padding modes.
+
+3.  When generating a key from a password, use Salt.
+
+4.  When generating a key from a password, specify an appropriate hash
+    iteration count.
+
+5.  Use a key of length sufficient to guarantee the MAC strength.
 
 HmacPBEKey.java
 ```eval_rst
@@ -4166,15 +4230,23 @@ HmacPBEKey.java
 ```
 
 
-#### 公開鍵を利用して改ざんを検知する
+#### Using Public Keys to Detect Data Falsification
 
-異なる安全な場所(サーバーなど)で秘密鍵による署名を行ったデータに対して、アプリ側では公開鍵を保持してデータの署名検証のみを行うような用途には公開鍵(非対称鍵)暗号を使うことができる。
+When working with data whose signature is determined using private
+keys stored in distinct, secure locations (such as servers), you may
+utilize public-key (asymmetric-key) encryption for applications
+involving the storage of public keys on the application side solely
+for the purpose of authenticating data signatures.
 
-ポイント：
+Points:
 
-1.  明示的に暗号モードとパディングを設定する
-2.  脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
-3.  十分安全な長さを持つ鍵を利用する
+1.  Explicitly specify the encryption mode and the padding.
+
+2.  Use strong encryption methods (specifically, technologies that meet
+    the relevant criteria), including algorithms, block cipher modes,
+    and padding modes.
+
+3.  Use a key of length sufficient to guarantee the signature strength.
 
 RsaSignAsymmetricKey.java
 ```eval_rst
@@ -4184,15 +4256,20 @@ RsaSignAsymmetricKey.java
 ```
 
 
-#### 共通鍵を利用して改ざんを検知する
+#### Using Pre Shared Keys to Detect Data Falsification
 
-アプリの資産・ユーザーの資産の完全性をチェックする目的で使うことができる。
+You may use pre-shared keys to verify the integrity of application
+assets or user assets.
 
-ポイント：
+Points:
 
-1.  明示的に暗号モードとパディングを設定する
-2.  脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
-3.  十分安全な長さを持つ鍵を利用する
+1.  Explicitly specify the encryption mode and the padding.
+
+2.  Use strong encryption methods (specifically, technologies that meet
+    the relevant criteria), including algorithms, block cipher modes,
+    and padding modes.
+
+3.  Use a key of length sufficient to guarantee the MAC strength.
 
 HmacPreSharedKey.java
 ```eval_rst
@@ -4202,151 +4279,223 @@ HmacPreSharedKey.java
 ```
 
 
-### ルールブック<!-- 44c89dc5 -->
+### Rule Book<!-- 44c89dc5 -->
 
-暗号技術を利用する際には以下のルールを守ること。
+When using encryption technology, it is important to obey the
+following rules.
 
-1.  暗号を指定する場合は、明示的に暗号モードとパディングを設定する （必須）
+1.  When Specifying an Encryption Algorithm, Explicitly Specify the
+    Encryption Mode and the Padding (Required)
 
-2.  脆弱でないアルゴリズム（基準を満たすもの）を使用する （必須）
+2.  Use Strong Algorithms (Specifically, Algorithms that Meet the
+    Relevant Criteria) (Required)
 
-3.  パスワードベース暗号のパスワードを端末内に保存しないこと （必須）
+3.  When Using Password-based Encryption, Do Not Store Passwords on
+    Device (Required)
 
-4.  パスワードから鍵を生成する場合は、Saltを使用する （必須）
+4.  When Generating Keys from Passwords, Use Salt (Required)
 
-5.  パスワードから鍵を生成する場合は、適正なハッシュの繰り返し回数を指定する （必須）
+5.  When Generating Key from Password, Specify Appropriate Hash
+    Iteration Count (Required)
 
-1.  パスワードの強度を高める工夫をする （推奨）
+6.  Take Steps to Increase the Strengths of Passwords (Recommended)
 
-#### 暗号を指定する場合は、明示的に暗号モードとパディングを設定する （必須）
+#### When Specifying an Encryption Algorithm, Explicitly Specify the Encryption Mode and the Padding (Required) 
 
-暗号化やデータ検証などで暗号技術を利用する場合、明示的に暗号モードとパディングを設定すること。Androidアプリの開発で暗号技術を利用する場合、主に
-java.crypto のクラスである Cipher
-クラスを利用する。Cipherクラスを利用する際、初めにどのような暗号を利用するかを指定してCipherクラスのオブジェクトを生成する。この指定をTransformationと呼ぶが、Transformationの指定の書式には以下の2種類が存在する
+When using cryptographic technologies such as encryption and data
+verification, it is important that the encryption mode and the padding
+be explicitly specified. When using encryption in Android application
+development, you will primarily use the Cipher class within
+java.crypto. To use the Cipher class, you will first create an
+instance of Cipher class object by specifying the type of encryption
+to use. This specification is called a Transformation, and there are
+two formats in which Transformations may be specified:
 
 -   "algorithm/mode/padding"
 
 -   "algorithm"
 
-後者の場合、暗号モードとパディングは、Androidで利用可能な暗号化サービスプロバイダ固有のデフォルト値が使用される。このデフォルト値は、利便性や互換性などを優先し、あまり安全でないものが設定されていることがあり、セキュリティを確保するためには必ず、前者の暗号モードとパディングを指定する書式を利用する必要がある。
+In the latter case, the encryption mode and the padding will be
+implicitly set to the appropriate default values for the encryption
+service provider that Android may access. These default values are
+chosen to prioritize convenience and compatibility and in some cases
+may not be particularly secure choices. For this reason, to ensure
+proper security protections it is mandatory to use the former of the
+two formats, in which the encryption mode and padding are explicitly
+specified.
 
-#### 脆弱でないアルゴリズム（基準を満たすもの）を使用する （必須）
+#### Use Strong Algorithms (Specifically, Algorithms that Meet the Relevant Criteria) (Required)
 
-暗号技術を利用する場合、アルゴリズムとして脆弱でない、一定の基準を満たしたものを使用すること。また、アルゴリズムとして複数の鍵長を許容する場合、アプリの製品ライフタイムを考慮して十分安全な鍵長を利用すること。さらには、暗号モードやパディングモードについても既知の攻撃方法が存在するものもあり、脆弱でない十分安全な方式を利用すること。
+When using cryptographic technologies it is important to choose strong
+algorithms which meet certain criteria. In addition, in cases where an
+algorithm allows multiple key lengths, it is important to consider the
+application's full product lifetime and to choose keys of length
+sufficient to guarantee security. Moreover, for some encryption modes
+and padding modes there exist known strategies of attack; it is
+important to make choices that are robust against such threats.
 
-脆弱な暗号技術を利用した場合、例えば第三者からの盗聴を防ぐために暗号化したファイルでも、有効な保護になっておらず、第三者の盗聴を許してしまう為である。IT技術の進化に伴い、暗号解析の技術も向上されるため、利用する技術はアプリが稼働することを想定する期間中、安全が保護されることが期待できるアルゴリズムを検討し選択する必要がある。
+Indeed, choosing weak encryption methods can have disastrous
+consequences; for example, files which were supposedly encrypted to
+prevent eavesdropping by a third party may in fact be only
+ineffectually protected and may allow third-party eavesdropping.
+Because the continual progress of IT leads to continual improvements
+in encryption-analysis technologies, it is crucial to consider and
+select algorithms that can guarantee security throughout the entire
+period during which you expect an application to remain in operation.
 
-実際の暗号技術の基準としては、以下のように各国の基準が利用できるため参考にすること。
+Standards for actual encryption technologies differ from country to
+country, as detailed in the tables below.
 
-表 5.6‑1　 NIST（米国） NIST SP800-57
+Table 5.6‑1 NIST(USA) NIST SP800-57
 ```eval_rst
-+------------------+------------+------------+----------+----------------+-----------+
-| アルゴリズムのラ | 対称鍵暗号 | 非対称暗号 | 楕円暗号 |      HASH      |   HASH    |
-|    イフタイム    |            |            |          |                |           |
-|                  |            |            |          | (デジタル署名, | (HMA,KD,  |
-|                  |            |            |          |                |           |
-|                  |            |            |          |     HASH)      | 乱数生成) |
-+==================+============+============+==========+================+===========+
-| ～2010           | 80         | 1024       | 160      | 160            | 160       |
-+------------------+------------+------------+----------+----------------+-----------+
-| ～2030           | 112        | 2048       | 224      | 224            | 160       |
-+------------------+------------+------------+----------+----------------+-----------+
-| 2030～           | 128        | 3072       | 256      | 256            | 160       |
-+------------------+------------+------------+----------+----------------+-----------+
++---------------+----------------+-----------------+-----------------+-------------+-----------------+
+|| Algorithm    || Symmetric-key || Asymmetric-key || Elliptic-curve || HASH       || HASH (HMA, KD, |
+|| Lifetime     || encryption    || encryption     || encryption     || (digital   || random-number  |
+|               |                |                 |                 || signature, || generation)    |
+|               |                |                 |                 || HASH)      |                 |
++===============+================+=================+=================+=============+=================+
+| ～2010        | 80             | 1024            | 160             | 160         | 160             |
++---------------+----------------+-----------------+-----------------+-------------+-----------------+
+| ～2030        | 112            | 2048            | 224             | 224         | 160             |
++---------------+----------------+-----------------+-----------------+-------------+-----------------+
+| 2030～        | 128            | 3072            | 256             | 256         | 160             |
++---------------+----------------+-----------------+-----------------+-------------+-----------------+
 ```
-単位：bit
+Unit: bit
 
-表 5.6‑2　 ECRYPT II (EU)
+Table 5.6‑2 ECRYPT II (EU)
 ```eval_rst
-=========================== =========== =========== ========= =====
-アルゴリズムのライフタイム  対称鍵暗号  非対称暗号  楕円暗号  HASH
-=========================== =========== =========== ========= =====
-2009～2012                  80          1248        160       160
-2009～2020                  96          1776        192       192
-2009～2030                  112         2432        224       224
-2009～2040                  128         3248        256       256
-2009～                      256         15424       512       512
-=========================== =========== =========== ========= =====
++---------------------+----------------+-----------------+-----------------+-------+
+|| Algorithm lifetime || Symmetric-key || Asymmetric-key || Elliptic-curve | HASH  |
+|                     || encryption    || encryption     || encryption     |       |  
++=====================+================+=================+=================+=======+
+| 2009～2012          | 80             | 1248            | 160             | 160   |
++---------------------+----------------+-----------------+-----------------+-------+
+| 2009～2020          | 96             | 1776            | 192             | 192   |
++---------------------+----------------+-----------------+-----------------+-------+
+| 2009～2030          | 112            | 2432            | 224             | 224   |
++---------------------+----------------+-----------------+-----------------+-------+
+| 2009～2040          | 128            | 3248            | 256             | 256   |
++---------------------+----------------+-----------------+-----------------+-------+
+| 2009～              | 256            | 15424           | 512             | 512   |
++---------------------+----------------+-----------------+-----------------+-------+
 ```
-単位：bit
+Unit: bit
 
-表 5.6‑3　 CRYPTREC(日本) 電子政府推奨暗号リスト
+Table 5.6‑3 CRYPTREC(Japan) CRYPTREC Ciphers List
 ```eval_rst
-+----------------------+-------------------------------+-------------------------------------+
-| 技術分類                                             |名称                                 |
++------------------------------------------------------+-------------------------------------+
+| Technology family                                    |Name                                 |
 +======================+===============================+=====================================+
-| 公開鍵暗号           | 署名                          | DSA,ECDSA,RSA=PSS,RSASSA=PKCS1=V1_5 |
+|                      | Signature                     | DSA,ECDSA,RSA=PSS,RSASSA=PKCS1=V1_5 |
+|| Public-key          +-------------------------------+-------------------------------------+
+|| cryptography        | Confidentiality               | RSA-OAEP                            |
 |                      +-------------------------------+-------------------------------------+
-|                      | 守秘                          | RSA-OAEP                            |
+|                      | Key sharing                   | DH,ECDH                             |
++----------------------+-------------------------------+-------------------------------------+
+|                      | 64 bit block encryption       | 3-key Triple DES                    |
+|| Shared-key          +-------------------------------+-------------------------------------+
+|| cryptography        | 128 bit block encryption      | AES,Camellia                        |
 |                      +-------------------------------+-------------------------------------+
-|                      | 鍵共有                        | DH,ECDH                             |
+|                      | Stream encryption             | KCipher-2                           |
 +----------------------+-------------------------------+-------------------------------------+
-| 共通鍵暗号           | 64ビットブロック暗号          | 3-key Triple DES                    |
-|                      +-------------------------------+-------------------------------------+
-|                      | 128ビットブロック暗号         | AES,Camellia                        |
-|                      +-------------------------------+-------------------------------------+
-|                      | ストリーム暗号                | KCipher-2                           |
+|| Hash function                                       | SHA-256,SHA-384,SHA-512             |
 +----------------------+-------------------------------+-------------------------------------+
-| ハッシュ関数                                         | SHA-256,SHA-384,SHA-512             |
+|| Encryption usage    | Cipher mode                   | BC,CFB,CTR,OFB                      |
+|| mode                +-------------------------------+-------------------------------------+
+|                      | Authenticated cipher modes    | CCM,GCM                             |
 +----------------------+-------------------------------+-------------------------------------+
-| 暗号利用モード       | 秘匿モード                    | CBC,CFB,CTR,OFB                     |
-|                      +-------------------------------+-------------------------------------+
-|                      | 認証付き秘匿モード            | CCM,GCM                             |
-+----------------------+-------------------------------+-------------------------------------+
-| メッセージ認証コード                                 | CMAC,HMAC                           |
-+----------------------+-------------------------------+-------------------------------------+
-| エンティティ認証                                     | ISO/IEC 9798-2,ISO/IEC 9798-3       |
-+----------------------+-------------------------------+-------------------------------------+
+|| Message authentication codes                        | CMAC,HMAC                           |
++------------------------------------------------------+-------------------------------------+
+|| Entity authentication                               | ISO/IEC 9798-2,ISO/IEC 9798-3       |
++------------------------------------------------------+-------------------------------------+
 ```
 
-#### パスワードベース暗号のパスワードを端末内に保存しないこと （必須）
+#### When Using Password-based Encryption, Do Not Store Passwords on Device (Required)
 
-パスワードベース暗号で、ユーザーから入力を受けたパスワードをベースに暗号鍵を生成する場合、入力されたパスワードを端末内に保存しないこと。パスワードベース暗号の利点は暗号鍵の管理を不要とすることであり、端末内にパスワードを保存してしまうと、その利点が得られなくなるためである。もちろん、端末内にパスワードを保存することで、他のアプリから盗聴されてしまうリスクが生じることもあり、安全面から考えても端末内への保存はしてはならない。
+In password-based encryption, when generating an encryption key based
+on a password input by a user, do not store the password within the
+device. The advantage of password-based encryption is that it
+eliminates the need to manage encryption keys; storing the password on
+the device eliminates this advantage. Needless to say, storing
+passwords on a device invites the risk of eavesdropping by other
+applications, and thus storing passwords on devices is also
+unacceptable for security reasons.
 
-#### パスワードから鍵を生成する場合は、Saltを使用する （必須）
+#### When Generating Keys from Passwords, Use Salt (Required)
 
-パスワードベース暗号で、ユーザーから入力を受けたパスワードをベースに暗号鍵を生成する場合、必ずSaltを使用すること。また、端末内の別ユーザーに機能を提供する場合は、ユーザー毎に異なるSaltを利用すること。Saltを利用せずに単純なハッシュ関数のみで暗号鍵を生成した場合、レインボーテーブルと呼ばれる技術を使うことで、容易に元のパスワードを類推することができるためである。Saltを付けた場合、同じパスワードから生成した鍵であっても異なる鍵（ハッシュ値）が生成されるようになり、レインボーテーブルによる鍵の探索を妨害することができる。
+In password-based encryption, when generating an encryption key based
+on a password input by a user, always use Salt. In addition, if you
+are providing features to different users within the same device, use
+a different Salt for each user. The reason for this is that, if you
+generate encryption keys using only a simple hash function without
+using Salt, the passwords may be easily recovered using a technique
+known as a "rainbow table." When Salt is applied, keys generated from
+the same password will be distinct (different hash values), preventing
+the use of a rainbow table to search for keys.
 
-パスワードから鍵を生成する場合に、Saltを使用する例
+(Sample) When generating keys from passwords, use salt
 ```java
 	public final byte[] encrypt(final byte[] plain, final char[] password) {
 		byte[] encrypted = null;
 
 		try {
-			// ★ポイント★ 明示的に暗号モードとパディングを設定する
-			// ★ポイント★ 脆弱でない(基準を満たす)暗号技術（アルゴリズム・モード・パディング等）を使用する
+			// *** POINT *** Explicitly specify the encryption mode and the padding.
+
+			// *** POINT *** Use strong encryption methods (specifically, technologies that meet the relevant criteria), including algorithms, block cipher modes, and padding modes.
 			Cipher cipher = Cipher.getInstance(TRANSFORMATION);
 
-			// ★ポイント★ パスワードから鍵を生成する場合は、Saltを使用する
+			// *** POINT *** When generating keys from passwords, use Salt.
 			SecretKey secretKey = generateKey(password, mSalt);
 ```
 
-#### パスワードから鍵を生成する場合は、適正なハッシュの繰り返し回数を指定する （必須）
+#### When Generating Key from Password, Specify Appropriate Hash Iteration Count (Required)
 
-パスワードベース暗号で、ユーザーから入力を受けたパスワードをベースに暗号鍵を生成する場合、鍵生成で適用するハッシュ処理を十分安全な回数繰り返す（ストレッチングする）こと。一般に1,000回以上の繰り返しであれば良いとされる。さらに重要な資産を保護するために利用する場合は1,000,000回以上の繰り返しを行うこと。ハッシュ関数は一回の計算にかかる時間が非常に短時間であるため、攻撃者による総当たり攻撃が容易になる原因にもなっている。そのため、ハッシュ処理を繰り返し用いるストレッチング手法で、わざと時間がかかるようにして総当たり攻撃を困難にする。なお、ストレッチング回数はアプリの処理速度にも影響を及ぼすため、設定する回数には注意すること。
+In password-based encryption, when generating an encryption key based
+on a password input by a user, you will choose a number of times for
+the hashing procedure to be repeated during the process of key
+generation ("stretching"); it is important to specify this number
+large enough to ensure security. In general, the iteration count equal
+to 1,000 or greater is considered sufficient. If you are using the key
+to protect even more valuable assets, specify a count equal to
+1,000,000 or greater. Because the processing time required for a
+single computation of the hash function is minuscule, it may be easy
+for attackers to launch brute-force attacks. Thus, by using the
+stretching method - in which hash processing is repeated many times -
+we can purposely ensure that the process consumes significant time and
+thus that brute-force attacks are more costly. Note that the number of
+stretching repetitions will also affect your application's processing
+speed, so take care in choosing an appropriate value.
 
-パスワードから鍵を生成する場合に、ハッシュの繰り返し回数を指定する例
+(Sample) When generating key from password, Set hash iteration counts
+
 ```java
 	private static final SecretKey generateKey(final char[] password, final byte[] salt) {
 		SecretKey secretKey = null;
 		PBEKeySpec keySpec = null;
 
-		// ～省略～
+		    (Omit)
 
-			// ★ポイント★ パスワードから鍵を生成する場合は、Saltを使用する
-			// ★ポイント★ パスワードから鍵を生成する場合は、適正なハッシュの繰り返し回数を指定する
-			// ★ポイント★ 十分安全な長さを持つ鍵を利用する
+			// *** POINT *** When generating a key from password, use Salt.
+			// *** POINT *** When generating a key from password, specify an appropriate hash iteration count.
+			// ** POINT *** Use a key of length sufficient to guarantee the strength of encryption.
 			keySpec = new PBEKeySpec(password, salt, KEY_GEN_ITERATION_COUNT, KEY_LENGTH_BITS);
 
 ```
 
-#### パスワードの強度を高める工夫をする （推奨）
+#### Take Steps to Increase the Strengths of Passwords (Recommended)
 
-パスワードベース暗号で、ユーザーから入力を受けたパスワードをベースに暗号鍵を生成する場合、暗号鍵の強度はユーザーのパスワードの強度に直結するため、ユーザーから受け付けるパスワードの強度を高める工夫をすることが望ましい。例えば、パスワードの最低長を8文字以上としたり、複数の文字種の利用を必須としたり(英数記号を各1文字以上など)するなどの方法が考えられる。
+In password-based encryption, when generating an encryption key based
+on a password input by a user, the strength of the generated key is
+strongly affected by the strength of the user's password, and thus it
+is desirable to take steps to strengthen the passwords received from
+users. For example, you might require that passwords be at least 8
+characters long and contain multiple types of characters---perhaps at
+least one letter, one numeral, and one symbol.
 
-### アドバンスト<!-- b624f617 -->
+### Advanced Topics<!-- b624f617 -->
 
-#### 暗号方式の選択
+#### Choosing encryption methods
 
 「サンプルコード」では、暗号化・復号、改ざん検知の各々について3つの暗号方式の実装例を示した。用途によってどの暗号方式を使用するかも、「図
 5.6‑1 盗聴からデータを守るサンプルコードを選択するフローチャート」、「図
