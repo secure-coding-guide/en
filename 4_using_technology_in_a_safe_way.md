@@ -4790,36 +4790,68 @@ method to verify whether the URL parameter is sent from a valid Web page or not.
 So it is necessary to verify safety of a URL parameter before using
 it, e.g. check if an unexpected value is included or not.
 
-LogCatにログ出力する
---------------------
+Outputting Log to LogCat
+------------------------
+
 ```eval_rst
-AndroidはLogCatと呼ばれるシステムログ機構があり、システムのログ情報だけでなくアプリのログ情報もLogCatに出力される。LogCatのログ情報は同じ端末内の他のアプリからも読み取り可能 [20]_ であるため、センシティブな情報をLogCatにログ出力してしまうアプリには情報漏洩の脆弱性があるとされる。LogCatにはセンシティブな情報をログ出力すべきではない。
+There\'s a logging mechanism called LogCat in Android, and not only
+system log information but also application log information are also
+output to LogCat. Log information in LogCat can be read out from other
+application in the same device [20]_, so the application which outputs
+sensitive information to Logcat, is considered that it has the
+vulnerability of the information leakage. The sensitive information
+should not be output to LogCat.
 
-.. [20] LogCat に出力されたログ情報は、READ\_LOGS Permissionを利用宣言したアプリであれば読み取り可能である。ただしAndroid
-    4.1 以降ではLogCatに出力された他のアプリのログ情報は読み取り不可となった。また、スマートフォンユーザーであれば、ADB
-    経由でLogCat のログ情報を参照することも可能である。
+.. [20] The log information output to LogCat can be read by applications
+    that declare using READ\_LOGS permission. However, in Android 4.1
+    and later, log information that is output by other application
+    cannot be read. But smartphone user can read every log information
+    output to logcat through ADB.
 ```
-セキュリティ観点ではリリース版アプリでは一切ログ出力しないことが望ましい。しかし様々な理由によりリリース版アプリでもログ出力するケースがある。ここではリリース版アプリにおいてもログ出力しつつ、センシティブな情報はログ出力しない方法を紹介する。また「4.8.3.1
-リリース版アプリにおけるログ出力の2つの考え方」も参照すること。
+From a security point of view, in release version application, it\'s
+preferable that any log should not be output. However, even in case of
+release version application, log is output for some reasons in some
+cases. In this chapter, we introduce some ways to output messages to
+LogCat in a safe manner even in a release version application. Along
+with this explanation, please refer to \"4.8.3.1 Two Ways of Thinking
+for the Log Outputting in Release version application\".
 
-### サンプルコード<!-- a0d9430e -->
+### Sample Code<!-- a0d9430e -->
 
-ここではProGuardを利用してリリース版アプリでのLogCatへのログ出力を制御する方法を紹介する。ProGuard
-は使用されていないメソッド等、実質的に不要なコードを自動削除する最適化ツールの一つである。
+Herein after, the method to control the Log output to LogCat by
+ProGuard in release version application. ProGuard is one of the
+optimization tools which automatically delete the unnecessary code
+like unused methods, etc.
 
-Androidのandroid.util.Logクラスには5種類のログ出力メソッドLog.e()、Log.w()、Log.i()、Log.d()、Log.v()がある。ログ情報は、リリース版アプリで出力することを意図したログ情報（以下、運用ログ情報と呼ぶ）と、リリース版アプリで出力してはならない（たとえばデバッグ用の）ログ情報（以下、開発ログ情報と呼ぶ）を区別するべきである。運用ログ出力のためにはLog.e()/w()/i()を使用し、開発ログ出力のためにはLog.d()/v()を使用するとよい。5種類のログ出力メソッドの使い分けの詳細については「4.8.3.2
-ログレベルとログ出力メソッドの選択基準」を参照すること。また、「4.8.3.3
-DEBUGログとVERBOSEログは自動的に削除されるわけではない」も参照すること。
+There are five types of log output methods, Log.e(), Log.w(), Log.i(),
+Log.d(), Log.v(), in android.util.Log class. Regarding log
+information, intentionally output log information (hereinafter
+referred to as the Operation log information) should be distinguished
+from logging which is inappropriate for a release version application
+such as debug log (hereinafter referred to as the Development log
+information). It\'s recommended to use Log.e()/w()/i() for outputting
+operation log information, and to use Log.d()/v() for outputting
+development log. Refer to \"4.8.3.2 Selection Standards of Log Level
+and Log Output Method\" for the details of proper usage of five types
+of log output methods, in addition, also refer to \"4.8.3.3 DEBUG Log
+and VERBOSE Log Are Not Always Deleted Automatically\".
 
-次ページ以降で、Log.d()/v()で出力する開発ログ情報を開発版アプリではログ出力し、リリース版アプリではログ出力しないサンプルコードを紹介する。このサンプルコードではLog.d()/v()呼び出しコードを自動削除するために、ProGuardを使用している。
+Here\'s an example of how to use LogCat in a safe manner. This example
+includes Log.d() and Log.v() for outputting debug log. If the
+application is for release, these two methods would be deleted
+automatically. In this sample code, ProGuard is used to automatically
+delete code blocks where Log.d()/v() is called.
 
-ポイント：
+Points:
 
-1.  センシティブな情報はLog.e()/w()/i()、System.out/errで出力しない
-2.  センシティブな情報をログ出力する場合はLog.d()/v()で出力する
-3.  Log.d()/v()の呼び出しでは戻り値を使用しない(代入や比較)
-4.  リリースビルドではLog.d()/v()の呼び出しが自動削除される仕組みを導入する
-5.  リリース版アプリのAPKファイルはリリースビルドで作成する
+1.  Sensitive information must not be output by Log.e()/w()/i(), System.out/err.
+2.  Sensitive information should be output by Log.d()/v() in case of need.
+3.  The return value of Log.d()/v() should not be used (with the purpose
+    of substitution or comparison).
+4.  When you build an application for release, you should bring the
+    mechanism that automatically deletes inappropriate logging method
+    like Log.d() or Log.v() in your code.
+5.  An APK file for the (public) release must be created in release build configurations.
 
 ProGuardActivity.java
 ```eval_rst
@@ -4828,72 +4860,93 @@ ProGuardActivity.java
    :encoding: shift-jis
 ```
 
-
 proguard-project.txt
 ```shell
-# クラス名、メソッド名等の変更を防ぐ
+# prevent from changing class name and method name etc.
 -dontobfuscate
 
-# ★ポイント4★ リリースビルドではLog.d()/v()の呼び出しが自動削除される仕組みを導入する
+# *** POINT 4 *** In release build, the build configurations in which Log.d()/v() are deleted automatically should be constructed.
 -assumenosideeffects class android.util.Log {
     public static int d(...);
     public static int v(...);
 }
 ```
 
-★ポイント5★ リリース版アプリのAPKファイルはリリースビルドで作成する
+\*\*\* Point 5 \*\*\* An APK file for the (public) release must be created in release build configurations.
 
-![](media/image48.png)
+![](media/image49.png)
 ```eval_rst
 .. {width="7.26875in" height="2.7849146981627295in"}
 ```
 
-図 4.8‑1リリース版アプリを作成する方法(Exportする)
+Figure 4.8‑1 How to create release version application
 
-開発版アプリ（デバッグビルド）とリリース版アプリ（リリースビルド）のLogCat出力の違いを図
-4.8‑2に示す。
+The difference of LogCat output between development version
+application (debug build) and release version application (release
+build) are shown in below Figure 4.8‑2.
 
-![](media/image49.png)
+![](media/image50.png)
 ```eval_rst
 .. {width="6.889763779527559in"
 .. height="2.2236220472440946in"}
 ```
 
-図 4.8‑2
-Logメソッドの開発版アプリとリリース版アプリのLogCat出力の違い
+Figure 4.8‑2 Difference of LogCat output between development version application and release version application
 
-### ルールブック<!-- 7121bb68 -->
+### Rule Book<!-- 7121bb68 -->
 
-LogCatにログを出力する際は、以下のルールを守ること。
+When you output log messages, follow the rules below.
 
-1.  運用ログ情報にセンシティブな情報を含めない （必須）
+1.  Sensitive Information Must Not Be Included in Operation Log Information (Required)
+2.  Construct the Build System to Auto-delete Codes which Output
+    Development Log Information When Build for the Release (Recommended)
+3.  Use Log.d()/v() Method When Outputting Throwable Object (Recommended)
+4.  Use Only Methods of the android.util.Log Class for the Log Output (Recommended)
 
-2.  開発ログ情報を出力するコードをリリースビルド時に自動削除する仕組みを導入する （推奨）
+#### Sensitive Information Must Not Be Included in Operation Log Information (Required)
 
-3.  Throwableオブジェクトをログ出力するときはLog.d()/v()メソッドを使う （推奨）
+Log which was output to LogCat can be read out from other
+applications, so sensitive information like user\'s login information
+should not be output by release version application. It\'s necessary
+not to write code which outputs sensitive information to log during
+development, or it\'s necessary to delete all of such codes before release.
 
-4.  ログ出力にはandroid.util.Logクラスのメソッドのみ使用する （推奨）
+To follow this rule, first, not to include sensitive information in
+operation log information. In addition, it\'s recommended to construct
+the system to delete code which outputs sensitive information when
+build for release. Please refer to \"4.8.2.2 Construct the Build
+System to Auto-delete Codes which Output Development Log Information
+When Build for the Release (Recommended)\".
 
-#### 運用ログ情報にセンシティブな情報を含めない （必須）
+#### Construct the Build System to Auto-delete Codes which Output Development Log Information When Build for the Release (Recommended)
 
-LogCatに出力したログは他のアプリから読むことができるので、リリース版アプリがユーザーのログイン情報などのセンシティブな情報をログ出力することがあってはならない。開発中にセンシティブな情報をログ出力するコードを書かないようにするか、あるいは、リリース前にそのようなコードを全て削除することが必要である。
+When application development, sometimes it\'s preferable if sensitive
+information is output to log for checking the process contents and for
+debugging, for example the interim operation result in the process of
+complicated logic, information of program\'s internal state,
+communication data structure of communication protocol. It doesn\'t
+matter to output the sensitive information as debug log during
+developing, in this case, the corresponding log output code should be
+deleted before release, as mentioned in \"4.8.2.1 Sensitive
+Information Must Not Be Included in Operation Log Information (Required)\".
 
-このルールを順守するためには、運用ログ情報にセンシティブな情報を含めないこと。さらに、センシティブな情報を出力するコードをリリースビルド時に削除する仕組みを導入することを強く推奨する。「4.8.2.2
-開発ログ情報を出力するコードをリリースビルド時に自動削除する仕組みを導入する
-（推奨）」を参照すること。
+To delete surely the code which outputs development log information
+when release builds, the system which executes code deletion
+automatically by using some tools, should be constructed. ProGuard,
+which was described in \"4.8.1 Sample Code\", can work for this
+method. As described below, there are some noteworthy points on
+deleting code by ProGuard. Here it\'s supposed to apply the system to
+applications which output development log information by either of
+Log.d()/v(), based on \"4.8.3.2 Selection Standards of Log Level and
+Log Output Method\".
 
-#### 開発ログ情報を出力するコードをリリースビルド時に自動削除する仕組みを導入する （推奨）
+ProGuard deletes unnecessary code like unused methods, automatically.
+By specifying Log.d()/v() as parameter of -assumenosideeffects option,
+call for Log.d(), Log.v() are granted as unnecessary code, and those
+are to be deleted.
 
-アプリ開発中は、複雑なロジックの処理過程の中間的な演算結果、プログラム内部の状態情報、通信プロトコルの通信データ構造など、処理内容の確認やデバッグ用でセンシティブな情報をログ出力させたいことがある。アプリ開発時にセンシティブな情報をデバッグログとして出力するのは構わないが、この場合は、「4.8.2.1
-運用ログ情報にセンシティブな情報を含めない
-（必須）」で述べたように、リリース前に必ず該当するログ出力コードを削除すること。
+By specifying -assumenosideeffects to Log.d()/v(), make it auto-deletion target.
 
-リリースビルド時に開発ログ情報を出力するコードを確実に削除するために、何らかのツールを用いてコード削除を自動化する仕組みを導入すべきである。そのためのツールに4.8.1で紹介したProGuardがある。以下では、ProGuardを使ったコード削除の仕組みを導入する際の注意を説明する。ここでは、「4.8.3.2
-ログレベルとログ出力メソッドの選択基準」に準拠し、開発ログ情報をLog.d()/v()のいずれかのみで出力しているアプリに対して仕組みを適用することを想定している。
-
-ProGuardは使用されていないメソッド等、実質的に不要なコードを自動削除する。Log.d()/v()を-assumenosideeffectsオプションの引数に指定することにより、Log.d()、Log.v()の呼び出しが実質的に不要なコードとみなされ、自動削除される。
-
-Log.d()/v()を-assumenosideeffectsと指定することで、自動削除の対象にする
 ```shell
 -assumenosideeffects class android.util.Log {
     public static int d(...);
@@ -4901,191 +4954,274 @@ Log.d()/v()を-assumenosideeffectsと指定することで、自動削除の対�
 }
 ```
 
-この自動削除の仕組みを利用する場合は、Log.v(),
-Log.d()の戻り値を使用してしまうとLog.v()/d()のコードが削除されない点に注意が必要である。よって、Log.v(),
-Log.d()の戻り値を使用してはならない。たとえば、次の実験コードにおいては、Log.v()が削除されない。
+In case using this auto deletion system, pay attention that
+Log.v()/d() code is not deleted when using returned value of Log.v(),
+Log.d(), so returned value of Log.v(), Log.d(), should not be used.
+For example, Log.v() is not deleted in the next examination code.
 
-削除指定したLog.v()が削除されない実験コード削除指定したLog.v()が削除されない実験コード
+Examination code which Log.v() that is specifeied to be deleted is not deketed.
+
 ```java
 int i = android.util.Log.v("tag", "message");
-System.out.println(String.format("Log.v()が%dを返した。", i));  // 実験のためLog.v()の戻り値を使用。
+System.out.println(String.format("Log.v() returned %d.", i)); //Use the returned value of Log.v() for examination.
 ```
 
-また、上記ProGuard設定により、Log.d()及びLog.v()が自動削除されることを前提としたソースコードがあったとする。もしそのソースコードをProGuard設定がされていない他のプロジェクトで再利用してしまうと、Log.d()及びLog.v()が削除されないため、センシティブな情報が漏洩してしまう危険性がある。ソースコードを再利用する際は、ProGuard設定を含めたプロジェクト環境の整合性を確保すること。
+If you\'d like to reuse source code, you should keep the consistency
+of the project environment including ProGuard settings. For example,
+source code that presupposes Log.d() and Log.v() are deleted
+automatically by above ProGuard setting. If using this source code in
+another project which ProGuard is not set, Log.d() and Log.v() are not
+to be deleted, so there\'s a risk that the sensitive information may
+be leaked. When reusing source code, the consistency of project
+environment including ProGuard setting should be secured.
 
-#### Throwableオブジェクトをログ出力するときはLog.d()/v()メソッドを使う （推奨）
+#### Use Log.d()/v() Method When Outputting Throwable Object (Recommended)
 
-「4.8.1 サンプルコード」および「4.8.3.2
-ログレベルとログ出力メソッドの選択基準」に示した通り、Log.e()/w()/i()ではセンシティブな情報をログ出力してはならない。一方で、開発者がプログラムの異常を詳細にログ出力するために、例外発生時にLog.e(...,
-Throwable tr)/w(..., Throwable tr)/i(..., Throwable
-tr)でスタックトレースをLogCatにログ出力しているケースがみられる。しかしながら、スタックトレースはプログラムの内部構造を詳細に出力してしまうので、アプリケーションによってはセンシティブな情報が含まれてしまう場合がある。例えば、SQLiteExceptionをそのまま出力してしまうと、どのようなSQLステートメントが発行されたかが明らかになるので、SQLインジェクション攻撃の手がかりを与えてしまうことがある。よって、Throwableオブジェクトをログ出力する際には、Log.d()/Log.v()メソッドのみを使用することを推奨する。
+As mentioned in \"4.8.1 Sample Code\" and \"4.8.3.2 Selection
+Standards of Log Level and Log Output Method\", sensitive information
+should not be output to log through Log.e()/w()/i(). On the other
+hand, in order that a developer wants to output the details of program
+abnormality to log, when exception occurs, stack trace is output to
+LogCat by Log.e(\..., Throwable tr)/w(\..., Throwable tr)/i(\...,
+Throwable tr), in some cases. However, sensitive information may
+sometimes be included in the stack trace because it shows detail
+internal structure of the program. For example, when SQLiteException
+is output as it is, what type of SQL statement is issued is clarified,
+so it may give the clue for SQL injection attack. Therefore, it\'s
+recommended that use only Log.d()/Log.v() methods, when outputting throwable object.
 
-#### ログ出力にはandroid.util.Logクラスのメソッドのみ使用する （推奨）
+#### Use Only Methods of the android.util.Log Class for the Log Output (Recommended)
 
-開発中にアプリが想定通りに動作していることを確認するために、System.out/errでログを出力することがあるだろう。もちろんSystem.out/errのprint()/println()メソッドでもLogCatにログを出力することは可能だが、以下の理由からログ出力にはandroid.util.Logクラスのメソッドのみを使用することを強く推奨する。
+You may output log by System.out/err to verify the application\'s
+behavior whether it works as expected or not, during development. Of
+course, log can be output to LogCat by print()/println() method of
+System.out/err, but it\'s strongly recommended to use only methods of
+android.util.Log class, by the following reasons.
 
-ログを出力するときは、一般には情報の緊急度に応じて出力メソッドを使い分け、出力を制御する。たとえば、深刻なエラー、警告、単なるアプリ情報通知などの区分が使われる。この区分をSystem.out/errに適用する手段の一つには、エラーと警告はSystem.err、それ以外はSystem.outで出力する方法がある。しかし、この場合、リリース時にも出力する必要のあるセンシティブでない情報(運用ログ情報)とセンシティブな情報が含まれている可能性のある情報(開発ログ情報)が同じメソッドによって出力されてしまう。よって、センシティブな情報を出力するコードを削除する際に、削除漏れが発生するおそれがある。
+When outputting log, generally, use the most appropriate output method
+properly based on the urgency of the information, and control the
+output. For example, categories like serious error, caution, simple
+application\'s information notice, etc. are to be used. However, in
+this case, information which needs to be output at the time of release
+(operation log information) and information which may include the
+sensitive information (development log information) are output by the
+same method. So, it may happen that when delete code which outputs
+sensitive information, it\'s in danger that some deletion are dropped by oversight.
 
-また、ログ出力にandroid.util.LogとSystem.out/errを使う場合は、android.util.Logのみを使う場合と比べて、ログ出力コードを削除する際に考慮することが増えるため、削除漏れなどのミスが生じるおそれがある。
+Along with this, when using android.util.Log and System.out/err for
+log output, compared with using only android.util.Log, what needs to
+be considered will increase, so it\'s in danger that some mistakes may
+occur, like some deletion are dropped by oversight.
 
-上記のようなミスが生じる危険を減らすために、android.util.Logクラスのメソッドのみ使用することを推奨する。
+To decrease risk of above mentioned mistakes occurrence, it\'s
+recommended to use only methods of android.util.Log class.
 
-### アドバンスト<!-- 309f2fdf -->
+### Advanced Topics<!-- 309f2fdf -->
 
-#### リリース版アプリにおけるログ出力の2つの考え方
+#### Two Ways of Thinking for the Log Outputting in Release version application
 
-リリース版Androidアプリにおけるログ出力の考え方には大きく分けて、一切ログ出力すべきではないという考え方と、後の解析のために必要な情報をログ出力すべきという考え方の2つがある。セキュリティ観点ではリリース版アプリでは一切ログ出力しないことが望ましい。しかし様々な理由によりリリース版アプリでもログ出力するケースがある。ここでは両者のそれぞれの考え方について述べる。
+There are two ways of thinking for log output in release version
+application. One is any log should never be output, and another is
+necessary information for later analysis should be output as log.
+It\'s favorable that any log should never be output in release version
+application from the security point of view, but sometimes, log is
+output even in release version application for various reasons. Each
+way of thinking is described as per below.
 
-1つ目は、リリース版アプリにおいてログ出力することにはあまり価値がなく、しかもセンシティブな情報を漏洩してしまうリスクがあるので、「一切ログ出力すべきではない」という考え方である。この考え方は、多くのWeb
-アプリ運用環境などと違い、Androidアプリ運用環境ではリリース後のアプリのログ情報を開発者が収集する手段が用意されていないことによるものである。この考え方に基づくと、開発中に使用したログ出力コードを最終版のソースコードから削除してリリース版アプリを作成するという運用がなされる。
+The former is \"Any log should never be output\", this is because
+outputting log in release version application is not so much valuable,
+and there is a risk to leak sensitive information. This comes from
+there\'s no method for developers to collect log information of the
+release version application in Android application operation
+environment, which is different from many Web application operation
+environments. Based on this thinking, the logging codes are used only
+in development phase, and all the logging codes are deleted on
+building release version application.
 
-2つ目は、カスタマーサポート等でアプリの不具合解析を行う最終手段として、「後の解析のために必要な情報をログ出力すべき」という考え方である。この考え方に基づくと、リリース版アプリではセンシティブな情報を誤ってログ出力してしまわないよう細心の注意が必要となるため、サンプルコードセクションで紹介したような人為的ミスを排除する運用が必要となる。なお、下記のGoogleのCode
-Style Guidelineも2つ目の考え方に基づいている。
+The latter is \"necessary information should be output as log for the
+later analysis\", as a final option to analyze application bugs in
+customer support, in case of any questions or doubt to your customer
+support. Based on this idea, as introduced above, it is necessary to
+prepare the system that prevent human errors and bring it in your
+project because if you don\'t have the system you have to keep in mind
+to avoid logging the sensitive information in release version application.
+
+For more details about logging method, refer to the following document.
+
+Code Style Guidebook for Contributors / Log Sparingly
+
+> [http://source.android.com/source/code-style.html\#log-sparingly](http://source.android.com/source/code-style.html#log-sparingly)
+
+#### Selection Standards of Log Level and Log Output Method
+
+There are five levels of log level (ERROR, WARN, INFO, DEBUG, VERBOSE)
+are defined in android.util.Log class in Android. You should select
+the most appropriate method when using the android.util.Log class to
+output log messages according to Table 4.8‑1 which shows the selection
+standards of logging levels and methods.
+
+Table 4.8‑1 Selection standards of log levels and log output method
+
+```eval_rst
++------------+----------+------------------------------------+--------------------------------------+
+| Log level  | Method   | Log information to be output       | Cautions for application release     |
++============+==========+====================================+======================================+
+| ERROR      | Log.e()  || Log information which is          || Log information as per left may be  |
+|            |          || output when application is        || referred by users, so it could be   |
+|            |          || in a fatal state.                 || output both in development version  |
+|            |          |                                    || application and in release version  |
+|            |          |                                    || application. Therefore, sensitive   |
+|            |          |                                    || information should not be output    |
+|            |          |                                    || in these levels.                    |
++------------+----------+------------------------------------+                                      |
+| WARN       | Log.w()  || Log information which is          |                                      |
+|            |          || output when application faces     |                                      |
+|            |          || the unexpected serious situation. |                                      |
++------------+----------+------------------------------------+                                      |
+| INFO       | Log.i()  || Other than above, log information |                                      |
+|            |          || which is output to notify any     |                                      |
+|            |          || remarkable changes or results in  |                                      |
+|            |          || application state.                |                                      |
++------------+----------+------------------------------------+--------------------------------------+
+| DEBUG      | Log.d()  || Program's internal state          || Log information as per left is      |
+|            |          || information which needs to be     || only for application developers.    |
+|            |          || output temporarily for analyzing  || Therefore, this type of information |
+|            |          || the cause of specific bug when    || should not be output in case of     |
+|            |          || developing application.           || release version application.        |
++------------+----------+------------------------------------+                                      |
+| VERBOSE    | Log.v()  || Log information which is not      |                                      |
+|            |          || applied to any of above.          |                                      |
+|            |          || Log information which application |                                      |
+|            |          || developer outputs for many        |                                      |
+|            |          || purposes, is applied this. For    |                                      |
+|            |          || example, in case of outputting    |                                      |
+|            |          || server communication data to dump.|                                      |
++------------+----------+------------------------------------+--------------------------------------+
+```
+
+For more details about logging method, refer to the following document.
 
 Code Style Guidelines for Contributors / Log Sparingly
 
-[http://source.android.com/source/code-style.html\#log-sparingly](http://source.android.com/source/code-style.html#log-sparingly)
+> [http://source.android.com/source/code-style.html\#log-sparingly](http://source.android.com/source/code-style.html#log-sparingly)
 
-#### ログレベルとログ出力メソッドの選択基準
+#### DEBUG Log and VERBOSE Log Are Not Always Deleted Automatically
 
-Androidのandroid.util.LogクラスにはERROR、WARN、INFO、DEBUG,VERBOSEの5段階のログレベルが定義されている。出力したいログ情報のログレベルに応じて、適切なandroid.util.Logクラスのログ出力メソッドを選択する必要がある。選択基準を表
-4.8‑1にまとめた。
-
-表 4.8‑1 ログレベルとログ出力メソッドの選択基準
 ```eval_rst
-+------------+----------+--------------------------------+----------------------------------+
-| ログレベル | メソッド | 出力するログ情報の趣旨         | アプリリリース時の注意           |
-+============+==========+================================+==================================+
-| ERROR      | Log.e()  | | アプリが致命的な状況         | | 左記のログ情報はユーザーも参   |
-|            |          | | に陥ったときに出力す         | | 照することが想定される情報であ |
-|            |          | | るログ情報。                 | | るため、開発版アプリとリリース |
-|            |          |                                | | 版アプリの両方でログ出力される |
-|            |          |                                | | べき情報である。そのためこのロ |
-|            |          |                                | | グレベルではセンシティブな情報 |
-|            |          |                                | | をログ出力してはならない。     |
-+------------+----------+--------------------------------+                                  |
-| WARN       | Log.w()  | | アプリが深刻な予期せ         |                                  |
-|            |          | | ぬ状況に遭遇したとき         |                                  |
-|            |          | | に出力するログ情報。         |                                  |
-+------------+----------+--------------------------------+                                  |
-| INFO       | Log.i()  | | 上記以外で、アプリの         |                                  |
-|            |          | | 注目すべき状態の変化         |                                  |
-|            |          | | や結果を知らせる目的         |                                  |
-|            |          | | で出力するログ情報。         |                                  |
-+------------+----------+--------------------------------+----------------------------------+
-| DEBUG      | Log.d()  | | アプリ開発時に特定の         | | 左記のログ情報はアプリ開発者   |
-|            |          | | バグの原因究明のため         | | 専用の情報であるため、リリース |
-|            |          | | に一時的にログ出力し         | | 版アプリではログ出力されてはな |
-|            |          | | たいプログラム内部の         | | らない情報である。開発版アプリ |
-|            |          | | 状態情報。                   | | ではセンシティブな情報を出力し |
-|            |          |                                | | ても構わないが、リリース版アプ |
-|            |          |                                | | リでは絶対にセンシティブな情報 |
-|            |          |                                | | をログ出力してはならない。     |
-+------------+----------+--------------------------------+                                  |
-| VERBOSE    | Log.v()  | | 以上のいずれにも該当         |                                  |
-|            |          | | しないログ情報。アプ         |                                  |
-|            |          | | リ開発者がさまざまな         |                                  |
-|            |          | | 目的で出力するログ情         |                                  |
-|            |          | | 報が該当する。               |                                  |
-|            |          | | サーバーとの通信デー         |                                  |
-|            |          | | タをダンプ出力したい         |                                  |
-|            |          | | 場合など。                   |                                  |
-+------------+----------+--------------------------------+----------------------------------+
-```
-より詳細なログ出力の作法については下記URLを参照すること。
-
-Code Style Guidelines for Contributors / Log Sparingly
-
-[http://source.android.com/source/code-style.html\#log-sparingly](http://source.android.com/source/code-style.html#log-sparingly)
-
-#### DEBUGログとVERBOSEログは自動的に削除されるわけではない
-```eval_rst
-Developer Referenceのandroid.util.Logクラスの解説 [21]_ には次のような記載がある。
+The following is quoted from the developer reference of android.util.Log class [21]_.
 
 The order in terms of verbosity, from least to most is ERROR, WARN,
 INFO, DEBUG, VERBOSE. Verbose should never be compiled into an
 application except during development. Debug logs are compiled in but
 stripped at runtime. Error, warning and info logs are always kept.
 
-.. [21] http://developer.android.com/intl/ja/reference/android/util/Log.html
+.. [21] http://developer.android.com/reference/android/util/Log.html
 ```
-開発者の中には、この文章からLogクラスの動作を次のように誤った解釈をしている人がいる。
 
--   Log.v()呼び出しはリリースビルド時にはコンパイルされず、VERBOSEログが出力されることがなくなる
+After reading the above texts, some developers might have
+misunderstood the Log class behavior as per below.
 
--   Log.d()呼び出しはコンパイルされるが、実行時にはDEBUGログが出力されることはない
+-   Log.v() call is not compiled when release build, VERBOSE log is never output.
+-   Log.v() call is compiled, but DEBUG log is never output when execution.
 
-しかし実際にはLog
-クラスはこのようには動作せず、デバッグビルド、リリースビルドを問わず全てのログを出力してしまう。よく読んでみるとわかるが、この英文はLogクラスの動作について語っているのではなく、ログ情報とはこうあるべきということを説明しているだけである。
+However, logging methods never behave in above ways, and all messages
+are output regardless of whether it is compiled with debug mode or
+release mode. If you read the document carefully, you will be able to
+realize that the gist of the document is not about the behavior of
+logging methods but basic policies for logging.
 
-この記事のサンプルコードでは、ProGuardを使って上記英文のような動作を実現する方法を紹介している。
+In this chapter, we introduced the sample code to get the expected
+result as described above by using ProGuard.
 
-#### ログ情報の組み立て処理を削除する
+#### Remove Sensitive Information from Assembly
 
-下記ソースコードをProGuardでリリースビルドしてLog.d()を削除した場合、Log.d()の呼び出し処理（下記コードの2行目）は削除されるものの、その前段でセンシティブな情報を組み立てる処理（下記コードの1行目）は削除されないことに注意が必要である。
+If you build the following code with ProGuard for the purpose of
+deleting Log.d() method, it is necessary to remember that ProGuard
+keeps the statement that construct the string for logging message (the
+first line of the code) even though it remove the statement of calling
+Log.d() method (the second line of the code).
 
 ```java
-    String debug_info = String.format("%s:%s", "センシティブな情報1", "センシティブな情報2");
+    String debug_info = String.format("%s:%s", "Sensitive information 1", "Sensitive information 2");
     if (BuildConfig.DEBUG) android.util.Log.d(TAG, debug_info);
 ```
-上記ソースコードをリリースビルドしたAPKファイルを逆アセンブルすると次のようになる。確かにLog.d()の呼び出し処理は存在しないが、"センシティブな情報1"といった文字列定数定義とString\#format()メソッドの呼び出し処理が削除されず残っていることが分かる。
+The following disassembly shows the result of release build of the
+code above with ProGuard. Actually, there\'s no Log.d() call process,
+but you can see that character string consistence definition like
+\"Sensitive information1\" and calling process of String\#format()
+method, are not deleted and still remaining there.
 
 ```
     const-string v1, "%s:%s"
     const/4 v2, 0x2
     new-array v2, v2, [Ljava/lang/Object;
     const/4 v3, 0x0
-    const-string v4, "センシティブな情報1"
+    const-string v4, "Sensitive information 1"
     aput-object v4, v2, v3
     const/4 v3, 0x1
-    const-string v4, "センシティブな情報2"
+    const-string v4, "Sensitive information 2"
     aput-object v4, v2, v3
     invoke-static {v1, v2}, Ljava/lang/String;->format(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
     move-result-object v0
 ```
 
-実際にはAPKファイルを逆アセンブルして、上記のようにログ出力情報を組み立てている箇所を発見するのは容易なことではない。しかし非常に機密度の高い情報を扱っているアプリにおいては、このような処理がAPKファイルに残ってしまってはならない場合もあり得る。
-```eval_rst
-もし上記のようなログ出力情報の組み立て処理も削除してしまいたい場合には、次のように記述するとよい [22]_。リリースビルド時にはコンパイラの最適化処理によって、下記サンプルコードの処理は丸ごと削除される。
+Actually, it\'s not easy to find the particular part that disassembled
+APK file and assembled log output information as above. However, in
+some application which handles the very confidential information, this
+type of process should not be remained in APK file in some cases.
 
-.. [22] 前述のサンプルコードを、条件式にBuildConfig.DEBUGを用いたif文で囲った。Log.d()呼び出し前のif文は不要であるが、前述のサンプルコードと対比させるため、そのまま残した。
-```
+You should implement your application like below to avoid such a
+consequence of remaining the sensitive information in bytecode. In
+release build, the following codes are deleted completely by the compiler optimization.
+
 ```java
-    if (BuildConfig.DEBUG) { 
-        String debug_info = String.format("%s:%s", "センシティブな情報1", "センシティブな情報2");
+    if (BuildConfig.DEBUG) {
+        String debug_info = String.format("%s:%s", "Snsitive information 1", "Sensitive information 2");
         if (BuildConfig.DEBUG) android.util.Log.d(TAG, debug_info);
     }
 ```
 
-なお、下記ソースコードにProGuardを適用した場合も、同様にログ情報の組み立て処理（"result:"+ valueの部分）が残ってしまう。
+Besides, ProGuard cannot remove the log message of the following code(\"result:\" + value).
 
 ```java
     Log.d(TAG, "result:" + value);
 ```
 
-この場合も下記のように対処すればよい。
+In this case, you can solve the problem in the following manner.
 
 ```java
     if (BuildConfig.DEBUG) Log.d(TAG, "result:" + value);
 ```
 
-#### Intentの内容がLogCatに出力される
+#### The Contents of Intent Is Output to LogCat
 
-Activityを利用する際にActivityManagerがIntentの内容をLogCatに出力するため、注意が必要である。「4.1.3.5
-Activity利用時のログ出力について」を参照すること。
+When using Activity, it\'s necessary to pay attention, since
+ActivityManager outputs the content of Intent to LogCat. Refer to
+\"4.1.3.5 Log Output When using Activities\".
 
-#### System.out/errに出力されるログの抑制
+#### Restrain Log which Is Output to System.out/err
 
-System.out/errの出力先はLogCatである。System.out/errに出力されるのは、開発者がデバッグのために出力したログに限らない。例えば、次の場合、スタックトレースはSystem.errに出力される。
+System.out/err method outputs all messages to LogCat. Android could
+send some messages to System.out/err even if developers did not use
+these methods in their code, for example, in the following cases,
+Android sends stack trace to System.err method.
 
--   Exception\#printStackTrace()を使った場合
+-   When using Exception\#printStackTrace()
+-   When it\'s output to System.err implicitly<br/>
+    (When the exception is not caught by application, it\'s given to
+    Exception\#printStackTrace() by the system.)
 
--   暗黙的にSystem.errに出力される場合\
-（例外をアプリでキャッチしていない場合、システムがException\#printStackTrace()に渡すため。）
+You should handle errors and exceptions appropriately since the stack
+trace includes the unique information of the application.
 
-スタックトレースにはアプリ固有の情報が含まれるため、例外は開発者が正しくハンドリングすべきである。
-
-保険的対策として、System.out/errの出力先をLogCat以外に変更する方法がある。以下に、リリースビルド時にSystem.out/errの出力先を変更し、どこにもログ出力しないようにする実装例を挙げる。ただし、この対応はSystem.out/errの出力先をアプリの実行時に一時的に書き換えるので、アプリやシステムの誤動作に繋がらないかどうかを充分に検討する必要がある。また、この対策はアプリ自身のプロセスには有効であるが、システムプロセスが生成するエラーログを抑制することはできない。すべてのエラーを抑制できるわけではないことに注意すること。
+We introduce a way of changing default output destination of
+System.out/err. The following code redirects the output of
+System.out/err method to nowhere when you build a release version
+application. However, you should consider whether this redirection
+does not cause a malfunction of application or system because the code
+temporarily overwrites the default behavior of System.out/err method.
+Furthermore, this redirection is effective only to your application
+and is worthless to system processes.
 
 OutputRedirectApplication.java
 ```eval_rst
@@ -5094,7 +5230,6 @@ OutputRedirectApplication.java
    :encoding: shift-jis
 ```
 
-
 AndroidManifest.xml
 ```eval_rst
 .. literalinclude:: CodeSamples/Log OutputRedirection.app.src.main.AndroidManifest.xml
@@ -5102,75 +5237,90 @@ AndroidManifest.xml
    :encoding: shift-jis
 ```
 
-
 proguard-project.txt
 ```shell
-# クラス名、メソッド名等の変更を防ぐ
+# Prevent from changing class name and method name, etc.
 -dontobfuscate
 
-# リリースビルド時にLog.d()/v()の呼び出しを自動的に削除する
+# In release build, delete call from Log.d()/v() automatically.
 -assumenosideeffects class android.util.Log {
     public static int d(...);
     public static int v(...);
 }
 
-# リリースビルド時にresetStreams()を自動的に削除する
+# In release build, delete resetStreams() automatically.
 -assumenosideeffects class org.jssec.android.log.outputredirection.OutputRedirectApplication {
     private void resetStreams(...);
 }
 ```
 
-開発版アプリ（デバッグビルド）とリリース版アプリ（リリースビルド）のLogCat出力の違いを図
-4.8‑3に示す。
+The difference of LogCat output between development version
+application (debug build) and release version application (release
+build) are shown as per below Figure 4.8‑3.
 
-![](media/image50.png)
+![](media/image51.png)
 ```eval_rst
 .. {width="7.26875in" height="2.237303149606299in"}
 ```
 
-図 4.8‑3
-System.out/errの開発版アプリとリリース版アプリのLogCat出力の違い
+Figure 4.8‑3 Difference of System.out/err in LogCat output, between development application and release application.
 
-WebViewを使う
+Using WebView
 -------------
 
-WebサイトやHTMLファイルを閲覧する機能を実装する方法として、WebViewを使用することができる。WebViewはHTMLをレンダリングする、JavaScriptを実行するなど、この目的のために有用な機能を提供する。
+WebView enables your application to integrate HTML/JavaScript content.
 
-### サンプルコード<!-- 1363357c -->
+### Sample Code<!-- 1363357c -->
 
-WebViewを使用することにより容易にWebサイト、HTMLファイル閲覧機能を実現することができるが、アクセスするコンテンツの特性によってWebViewが抱えるリスクや適切な防衛手段が異なってくる。
+We need to take proper action, depending on what we\'d like to show
+through WebView although we can easily show web site and html file by
+it. And also we need to consider risk from WebView\'s remarkable
+function; such as JavaScript-Java object bind.
 
-特に気をつけなければいけないのはJavaScriptの使用である。WebViewのデフォルト設定ではJavaScriptの機能が無効になっているが、WebSettings\#setJavaScriptEnabled()メソッドにより有効にすることが可能である。JavaScriptを使用することでインタラクティブなコンテンツの表示が可能になるが、悪意のある第三者により端末の情報を取得される、あるいは端末を操作されるという被害が発生する可能性がある。
+Especially what we need to pay attention is JavaScript. (Please note
+that JavaScript is disabled as default. And we can enable it by
+WebSettings\#setJavaScriptEnabled()). With enabling JavaScript, there
+is potential risk that malicious third party can get device
+information and operate your device.
+
 ```eval_rst
-WebViewを用いてコンテンツにアクセスするアプリを開発する際は、次の原則に従うこと [23]_。
+The following is principle for application with WebView [23]_:
 
-(1) 自社が管理しているコンテンツにのみアクセスする場合に限りJavaScriptを有効にしてよい
+(1) You can enable JavaScript if the application uses contents which are managed in house.
 
-(2) 上記以外の場合には、JavaScriptを有効にしてはならない
+(2) You should NOT enable JavaScript other than the above case.
 
-.. [23] 厳密に言えば安全性を保証できるコンテンツであればJavaScriptを有効にしてよい。自社管理のコンテンツであれば自社の努力で安全性を確保できるし責任も取れる。では信頼できる提携会社のコンテンツは安全だろうか？これは会社間の信頼関係により決まる。信頼できる提携会社のコンテンツを安全であると信頼してJavaScriptを有効にしてもよいが、万一の場合は自社責任も伴うため、ビジネス責任者の判断が必要となる。
+.. [23] Strictly speaking, you can enable JavaScript if we can say the
+    content is safe. If the contents are managed in house, the contents
+    should be guaranteed of security. And the company can secure them.
+    In other words, we need to have business representation's decision
+    to enable JavaScript for other company's contents. The contents
+    which are developed by trusted partner might have security
+    guarantee. But there is still potential risk. Therefore the decision
+    is needed by responsible person.
 ```
-開発しているアプリがアクセスするコンテンツの特性を踏まえ、図 4.9‑1に従いサンプルコードを選択することが必要である。
+Figure 4.9‑1 shows flow chart to choose sample code according to content characteristic.
 
-![](media/image51.png)
+![](media/image52.png)
 ```eval_rst
 .. {width="6.889763779527559in"
 .. height="2.912204724409449in"}
 ```
 
-図 4.9‑1
-WebViewのサンプルコードを選択するフローチャート
+Figure 4.9‑1 Flow Figure to select Sample code of WebView.
 
-#### assetsまたはresディレクトリに配置したコンテンツのみを表示する
+#### Show Only Contents Stored under assets/res Directory in the APK
 
-端末内のローカルコンテンツをWebViewで表示するアプリに関しては、アプリのAPKに含まれるassetsあるいはresディレクトリ内のコンテンツにアクセスする場合に限りJavaScriptを有効にしてもよい。
+You can enable JavaScript if your application shows only contents
+stored under assets/ and res/ directory in apk.
 
-以下にWebViewを使用してassetsディレクトリ内にあるHTMLファイルを表示するサンプルコードを示す。
+The following sample code shows how to use WebView to show contents
+stored under assets/ and res/.
 
-ポイント：
+Points:
 
-1.  assetsとresディレクトリ以外の場所に配置したファイルへのアクセスを禁止にする
-2.  JavaScriptを有効にしてよい
+1.  Disable to access files (except files under assets/ and res/ in apk).
+2.  You may enable JavaScript.
 
 WebViewAssetsActivity.java
 ```eval_rst
@@ -5179,35 +5329,43 @@ WebViewAssetsActivity.java
    :encoding: shift-jis
 ```
 
+#### Show Only Contents which Are Managed In-house
 
-#### インターネット上の自社管理コンテンツを表示する
+You can enable JavaScript to show only contents which are managed
+in-house only if your web service and your Android application can
+take proper actions to secure both of them.
 
-自社の管理するサービス上のコンテンツを表示する場合、サービス側、アプリ側の双方で適切な対策を施し、安全が確保できるならば、JavaScriptを有効にしてもよい。
+-   Web service side actions:
 
--   サービス側の対策
+As Figure 4.9‑2 shows, your web service can only refer to contents
+which are managed in-house. In addition, the web service is needed to
+take appropriate security action. Because there is potential risk if
+contents which your web service refers to may have risk; such as
+malicious attack code injection, data manipulation, etc.
 
-図 4.9‑2に示したように、サービス側に用意するコンテンツは自社の管理していないコンテンツを参照してはならない。加えて、サービスに適切なセキュリティ対策が施されていることも必要である。その理由は、サービスを構成するコンテンツへの攻撃コードの埋め込みや改ざんを防止することにある。「4.9.2.1 JavaScriptを有効にするのはコンテンツを自社が管理している場合に限定する （必須）」を参照すること。
+Please refer to \"4.9.2.1 Enable JavaScript Only If Contents Are Managed In-house (Required)\".
 
--   アプリ側の対策
+-   Android application side actions:
 
-次にアプリ側での対策を述べる。アプリ側では、接続先が自社管理サービスであることを確認することが必要である。そのために、通信プロトコルはHTTPSを使用し、証明書が信頼できる場合のみ接続するように実装する。
+Using HTTPS, the application should establish network connection to
+your managed web service only if the certification is trusted.
 
-以下では、アプリ側での実装の例として、WebViewを使って自社管理コンテンツを表示するActivityの例を示す。
+The following sample code is an activity to show contents which are managed in-house.
 
-![](media/image52.png)
+![](media/image53.png)
 ```eval_rst
 .. {width="6.471653543307086in"
 .. height="4.366141732283465in"}
 ```
 
-図 4.9‑2アプリが読み込んでよい自社管理コンテンツ
+Figure 4.9‑2 Accessible contents and Non-accessible contents from application.
 
-ポイント：
+Points:
 
-1.  WebViewのSSL通信エラーを適切にハンドリングする
-2.  WebViewのJavaScriptを有効にしてもよい
-3.  WebViewで表示するURLをHTTPSプロトコルだけに限定する
-4.  WebViewで表示するURLを自社管理コンテンツだけに限定する
+1.  Handle SSL error from WebView appropriately.
+2.  (Optional) Enable JavaScript of WebView.
+3.  Restrict URLs to HTTPS protocol only.
+4.  Restrict URLs to in-house.
 
 WebViewTrustedContentsActivity.java
 ```eval_rst
@@ -5216,19 +5374,24 @@ WebViewTrustedContentsActivity.java
    :encoding: shift-jis
 ```
 
+#### Show Contents which Are Not Managed In-house
 
-#### 自社管理以外のコンテンツを表示する
+Don\'t enable JavaScript if your application shows contents which are
+not managed in house because there is potential risk to access to malicious content.
 
-自社で管理していないコンテンツをWebViewで接続・表示する場合は、JavaScriptを有効にしてはならない。攻撃者が用意したコンテンツに接続する可能性があるからである。
+The following sample code is an activity to show contents which are not managed in-house.
 
-以下のサンプルコードはWebViewを使用して自社管理以外のコンテンツを表示するアプリである。このアプリは、アドレスバーに入力したURLの指すHTMLファイルなどのコンテンツを読み込み、画面に表示する。安全の確保のためにJavaScriptを無効化しているほか、HTTPSで通信していてSSLエラーが発生した場合は接続を中止する実装となっている。SSLエラーは「4.9.1.2
-インターネット上の自社管理コンテンツを表示する」と同様の方法によりハンドリングしている。HTTPS通信についての詳細は、「5.4
-HTTPSで通信する」を参照すること。
+This sample code shows contents specified by URL which user inputs
+through address bar. Please note that JavaScript is disabled and
+connection is aborted when SSL error occurs. The error handling is the
+same as \"4.9.1.2 Show Only Contents which Are Managed In-house\" for
+the details of HTTPS communication. Please refer to \"5.4
+Communicating via HTTPS\" for the details also.
 
-ポイント：
+Points:
 
-1.  HTTPS 通信の場合にはSSL通信のエラーを適切にハンドリングする
-2.  JavaScriptを有効にしない
+1.  Handle SSL error from WebView appropriately.
+2.  Disable JavaScript of WebView.
 
 WebViewUntrustActivity.java
 ```eval_rst
@@ -5237,150 +5400,186 @@ WebViewUntrustActivity.java
    :encoding: shift-jis
 ```
 
+### Rule Book<!-- c6c109b5 -->
 
-### ルールブック<!-- c6c109b5 -->
+Comply with following rule when you need to use WebView.
 
-WebViewを使用する際には以下のルールを守ること。
+1.  Enable JavaScript Only If Contents Are Managed In-house (Required)
+2.  Use HTTPS to Communicate to Servers which Are Managed In-house (Required)
+3.  Disable JavaScript to Show URLs Which Are Received through Intent, etc. (Required)
+4.  Handle SSL Error Properly (Required)
 
-1.  JavaScriptを有効にするのはコンテンツを自社が管理している場合に限定する （必須）
+#### Enable JavaScript Only If Contents Are Managed In-house (Required)
 
-2.  自社管理サービスとの通信にはHTTPSを使用する （必須）
+What we have to pay attention on WebView is whether we enable the
+JavaScript or not. As principle, we can only enable the JavaScript
+only IF the application will access to services which are managed
+in-house. And you must not enable the JavaScript if there is
+possibility to access services which are not managed in-house.
 
-3.  Intent経由など、他から受け取ったURLはJavaScriptが有効なWebViewには表示しない （必須）
+##### Services managed In-house
 
-4.  SSL通信のエラーを適切にハンドリングする （必須）
+In case that application accesses contents which are developed IN
+HOUSE and are distributed through servers which are managed IN HOUSE,
+we can say that the contents are ONLY modified by your company. In
+addition, it is also needed that each content refers to only contents
+stored in the servers which have proper security.
 
-#### JavaScriptを有効にするのはコンテンツを自社が管理している場合に限定する （必須）
+In this scenario, we can enable JavaScript on the WebView. Please
+refer to \"4.9.1.2 Show Only Contents which Are Managed In-house\" also.
 
-WebViewを用いてコンテンツやサービスにアクセスするアプリを開発する際に、セキュリティの面で最も注意しなければならない点はJavaScriptを有効にするかどうかである。原則的には、自社が管理しているサービスにのみアプリがアクセスする場合に限りJavaScriptを有効にしてもよい。しかし、そうでないサービスにアクセスする可能性が少しでもある場合には、JavaScriptを有効にしてはならない。
+And you can also enable JavaScript if your application shows only
+contents stored under assets/ and res/ directory in the apk. Please
+refer to \"4.9.1.1 Show Only Contents Stored under assets/res Directory\" also.
 
-##### 自社で管理しているサービス
+##### Services unmanaged in-house
 
-自社で作成あるいは、運用、管理に責任を持つサービスは、自社が安全を保証できる。例として、自社管理サーバー上の自社開発コンテンツにアプリがアクセスする場合を考える。各コンテンツがサーバー内部のコンテンツのみを参照しており、かつ、自社管理サーバーに対して適切なセキュリティ対策が施されているならば、このサービスは自社以外が内容を書き換えていることはないとみなせる。この場合、自社管理サービスにアクセスするアプリのJavaScriptを有効にしてもよい。「4.9.1.2
-インターネット上の自社管理コンテンツを表示する」を参照すること。また、他のアプリによる書き換えが不可能な端末内コンテンツ(APKのassetsまたはresディレクトリ内に配置されたコンテンツやアプリディレクトリ下のコンテンツ)にアクセスするアプリの場合も同様に考え、JavaScriptを有効にしてもよい。「4.9.1.1
-assetsまたはresディレクトリに配置したコンテンツのみを表示する」を参照すること。
+You must NOT think you can secure safety on contents which are NOT
+managed IN HOUSE. Therefore you have to disable JavaScript. Please
+refer to \"4.9.1.3 Show Contents which Are Not Managed In-house\".
 
-##### 自社で管理していないサービス
+In addition, you have to disable JavaScript if the contents are stored
+in external storage media; such as microSD because other application
+can modify the contents.
 
-自社で管理していないコンテンツ・サービスは自社が安全を保証できると考えてはならない。それゆえ、アプリのJavaScriptを無効にしなければならない。「4.9.1.3
-自社管理以外のコンテンツを表示する」を参照すること。加えて、SDカードのような端末の外部記憶装置に配置されたコンテンツは他のアプリによる書き換えが可能なので、自社が管理しているとは言えない。そのようなコンテンツにアクセスするアプリについてもJavaScriptを無効にしなければならない。
+#### Use HTTPS to Communicate to Servers which Are Managed In-house (Required)
 
-#### 自社管理サービスとの通信にはHTTPSを使用する （必須）
+You have to use HTTPS to communicate to servers which are managed
+in-house because there is potential risk of spoofing the services by
+malicious third party.
 
-自社管理サービスにアクセスするアプリは、悪意ある第三者によるサービスのなりすましによる被害を防ぎ、対象サービスへ確実に接続する必要がある。そのためには、サービスとの通信にHTTPSを使用する。
+Please refer to both \"4.9.2.4 Handle SSL Error Properly (Required)\",
+and \"5.4 Communicating via HTTPS\".
 
-詳細は「4.9.2.4 SSL通信のエラーを適切にハンドリングする
-（必須）」、「5.4 HTTPSで通信する」を参照すること。
+#### Disable JavaScript to Show URLs Which Are Received through Intent, etc. (Required)
 
-#### Intent経由など、他から受け取ったURLはJavaScriptが有効なWebViewには表示しない （必須）
+Don\'t enable JavaScript if your application needs to show URLs which
+are passed from other application as Intent, etc. Because there is
+potential risk to show malicious web page with malicious JavaScript.
 
-他のアプリからIntentを受信し、そのIntentのパラメータで渡されたURLをWebViewに表示する実装が多くのアプリで見られる。ここでWebViewのJavaScriptが有効である場合、悪意あるWebページのURLをWebViewで表示してしまい、悪意あるJavaScriptがWebView上で実行されて何らかの被害が生じる可能性がある。この実装の問題点は、安全を保証できない不特定のURLをJavaScriptが有効なWebViewで表示してしまうことである。
+Sample code in the section \"4.9.1.2 Show Only Contents which Are
+Managed In-house\", uses fixed value URL to show contents which are
+managed in-house, to secure safety.
 
-サンプルコード「4.9.1.2
-インターネット上の自社管理コンテンツを表示する」では、固定URL文字列定数で自社管理コンテンツを指定することで、WebViewで表示するコンテンツを自社管理コンテンツに限定し安全を確保している。
+If you need to show URL which is received from Intent, etc., you have
+to confirm that URL is in managed URL in-house. In short, the
+application has to check URL with white list which is regular
+expression, etc. In addition, it should be HTTPS.
 
-もしIntent等で受け取ったURLをJavaScriptが有効なWebViewで表示したい場合は、そのURLが自社管理コンテンツであることを保証しなければならない。あらかじめアプリ内に自社管理コンテンツURLのホワイトリストを正規表現等で保持しておき、このホワイトリストと照合して合致したURLだけをWebViewで表示することで安全を確保することができる。この場合も、ホワイトリスト登録するURLはHTTPSでなければならないことにも注意が必要だ。
+#### Handle SSL Error Properly (Required)
 
-#### SSL通信のエラーを適切にハンドリングする （必須）
+You have to terminate the network communication and inform error
+notice to user when SSL error happens on HTTPS communication.
 
-HTTPS通信でSSLエラーが発生した場合は、エラーが発生した旨をダイアログ表示するなどの方法でユーザーに通知して、通信を終了しなければならない。
+SSL error shows invalid server certification risk or MTIM
+(man-in-the-middle attack) risk. Please note that WebView has NO error
+notice mechanism regarding SSL error. Therefore your application has
+to show the error notice to inform the risk to the user. Please refer
+to sample code in the section of \"4.9.1.2 Show Only Contents which
+Are Managed In-house\", and \"4.9.1.3 Show Contents which Are Not
+Managed In-house\".
 
-SSLエラーの発生は、サーバー証明書に不備がある可能性、あるいは中間者攻撃を受けている可能性を示唆する。しかし、WebViewには、サービスとの通信時に発生したSSLエラーに関する情報をユーザーに通知する仕組みが備わっていない。そこで、SSLエラーが発生した場合にはその旨をダイアログなどで表示することで、脅威にさらされている可能性があることをユーザーに通知する必要がある。エラー通知の例は、「4.9.1.2
-インターネット上の自社管理コンテンツを表示する」のサンプルコードあるいは「4.9.1.3
-自社管理以外のコンテンツを表示する」のサンプルコードを参照すること。
+In addition, your application MUST terminate the communication with the error notice.
 
-また、エラーの通知に加えて、アプリはサービスとの通信を終了しなければならない。特に、次のような実装を行ってはならない。
+In other words, you MUST NOT do following.
 
--   発生したエラーを無視してサービスとの通信を継続する
+-   Ignore the error to keep the transaction with the service.
+-   Retry HTTP communication instead of HTTPS.
 
--   HTTPなどの非暗号化通信を使ってサービスと改めて通信する
+Please refer to the detail described in \"5.4 Communicating via HTTPS\".
 
-HTTP通信/HTTPS通信の詳細は「5.4 HTTPSで通信する」を参照すること。
+WebView\'s default behavior is to terminate the communication in case
+of SSL error. Therefore what we need to add is to show SSL error
+notice. And then we can handle SSL error properly.
 
-SSLエラーが発生した際には対象のサーバーと接続を行わないことがWebViewのデフォルトの挙動である。よって、WebViewのデフォルトの挙動にSSLエラーの通知機能を実装することで適切に通信エラーを取り扱うことができる。
+### Advanced Topics<!-- bbb3af0f -->
 
-### アドバンスト<!-- bbb3af0f -->
+#### Vulnerability caused by addJavascriptInterface() at Android versions 4.1 or earlier
 
-#### Android 4.2未満の端末におけるaddJavascriptInterface()に起因する脆弱性について
+Android versions under 4.2（API Level 17） have a vulnerability caused
+by addJavascriptInterface(), which could allow attackers to call
+native Android methods (Java) via JavaScript on WebView.
 
-Android 4.2（API Level
-17）未満の端末にはaddJavascriptInterface()に起因する脆弱性があり、JavaScriptからJavaのリフレクションを行うことにより任意のJavaメソッドが実行できてしまう問題が存在する。
+As explained in \"4.9.2.1 Enable JavaScript Only If Contents Are
+Managed In-house (Required)\", JavaScript must not be enabled if the
+services could access services out of in-house control.
 
-そのため、「4.9.2.1
-JavaScriptを有効にするのはコンテンツを自社が管理している場合に限定する
-（必須）」で解説した通り、自社で管理していないコンテンツ・サービスにアクセスする可能性がある場合は、JavaScriptを無効にする必要がある。
+In Android 4.2（API Level 17） or later, the measure of the
+vulnerability has been taken to limit access from JavaScript to only
+methods with @JavascriptInterface annotation on Java source codes
+instead of all methods of Java objects injected. However it is
+necessary to disable JavaScript if the services could access services
+out of in-house control as mentioned in \"4.9.2.1\".
 
-Android 4.2（API Level
-17）以降の端末では、Javaのソースコード上で@JavascriptInterfaceというアノテーションが指定されたメソッドしかJavaScriptから操作できないようにAPIが仕様変更され、脆弱性の対策がされた。ただし、自社で管理していないコンテンツ・サービスにアクセスする可能性がある場合は、コンテンツ・サービス提供者が悪意あるJavaScriptを送信する恐れがあるため、JavaScriptを無効化する対策は引き続き必要である。
+#### Issue caused by file scheme
 
-#### fileスキームに起因する問題について
+In case of using WebView with default settings, all files that the app
+has access rights can be accessed to by using the file scheme in web
+pages regardless of the page origins. For example, a malicious web
+page could access the files stored in the app\'s private directory by
+sending a request to the uri of a private file of the app with the
+file scheme.
 
-WebViewをデフォルト設定で使用している場合、fileスキームを利用してアクセスすると当該アプリがアクセス可能なすべてのファイルにアクセスすることが可能になる。この動作を悪用された場合、例えば、JavaScriptからfileスキーム使ったリクエストすることで、アプリの専用フォルダに保存したファイル等を攻撃者に取得されてしまう可能性がある。
+A countermeasure is to disable JavaScript as explained in \"4.9.2.1
+Enable JavaScript Only If Contents Are Managed In-house (Required)\"
+if the services could access services out of in-house control. Doing
+that is to protect against sending the malicious file scheme request.
 
-対策としては、「4.9.2.1
-JavaScriptを有効にするのはコンテンツを自社が管理している場合に限定する
-（必須）」で解説した通り、自社で管理していないコンテンツ・サービスにアクセスする可能性がある場合はJavaScriptを無効にする。この対策により意図しないfileスキームによるリクエストが送信されないようにする。
+Also in case of Android 4.1 (API Level 16) or later,
+setAllowFileAccessFromFileURLs() and
+setAllowUniversalAccessFromFileURLs() can be used to limit access via the file scheme.
 
-また、Android 4.1（API Level
-16）以降の場合、setAllowFileAccessFromFileURLs()およびsetAllowUniversalAccessFromFileURLs()を利用することでfileスキームによるアクセスを禁止することができる。
-
-fileスキームの無効化
+Disabling the file scheme
 ```java
-		webView = (WebView) findViewById(R.id.webview);
-		webView.setWebViewClient(new WebViewUnlimitedClient());
-		WebSettings settings = webView.getSettings();
-		settings.setAllowUniversalAccessFromFileURLs(false);
-		settings.setAllowFileAccessFromFileURLs(false);
+        webView = (WebView) findViewById(R.id.webview);
+        webView.setWebViewClient(new WebViewUnlimitedClient());
+        WebSettings settings = webView.getSettings();
+        settings.setAllowUniversalAccessFromFileURLs(false);
+        settings.setAllowFileAccessFromFileURLs(false);
 ```
 
-#### Web Messaging利用時の送信先オリジン指定について
+#### Specifying a Sender Origin When Using Web Messaging 
+
 ```eval_rst
-Android 6.0(API Level 23)において、HTML5 Web Messagingを実現するためのAPIが追加された。Web Messagingは異なるブラウジング・コンテキスト間でデータを送受信するための仕組みであり、HTML5で定義されている [24]_。
+Android 6.0 (API Level 23) adds an API for realizing HTML5 Web
+Messaging. Web Messaging is a framework defined in HTML5 for sending
+and receiving data between different browsing contexts. [24]_
 
 .. [24] http://www.w3.org/TR/webmessaging/
 
-WebViewクラスに追加されたpostWebMessage()はWeb Messagingで定義されているCross-domain messagingによるデータ送信を処理するメソッドである。このメソッドは第一引数で指定されたメッセージオブジェクトをWebViewに読み込んでいるブラウジング・コンテキストに対して送信するのだが、その際第二引数として送信先のオリジンを指定する必要がある。指定されたオリジン [25]_ が送信先コンテキストのオリジンと一致しない限りメッセージは送信されない。送信先オリジンを制限することで、意図しない送信先にメッセージを渡してしまうことを防いでいるのである。
+The postWebMessage() method added to the WebView class is a method for
+processing data transmissions via the Cross-domain messaging protocol defined by Web Messaging.
 
-.. [25] オリジンとは、URLのスキーム、ホスト名、ポート番号の組み合わせのこと。詳細な定義は http://tools.ietf.org/html/rfc6454 を参照。
+This method sends a message object---specified by its first
+parameter---from the browsing context that has been read into WebView;
+however, in this case it is necessary to specify the origin of the
+sender as the second parameter. If the specified origin [25]_ does not
+agree with the origin in the sender context, the message will not be
+sent. By placing restrictions on the sender origin in this way, this
+mechanism aims to prevent the passing of messages to unintended senders.
 
-ただし、postWebMessage()メソッドではオリジンとしてワイルドカードを指定できることに注意が必要である [26]_。ワイルドカードを指定するとメッセージの送信先オリジンがチェックされず、どのようなオリジンに対してもメッセージを送信してしまう。もしWebViewに悪意のあるコンテンツが読み込まれている状況でオリジンの制限なしに重要なメッセージを送信してしまうと何らかの被害につながる可能性も生じる。WebViewを用いてWeb messagingを行う際は、postWebMessage()メソッドに特定のオリジンを明示的に指定するべきである。
+.. [25] An "origin" is a URL scheme together with a host name and port
+    number. For the detailed definition see http://tools.ietf.org/html/rfc6454.
 
-.. [26] Uri.EMPTYおよびUri.parse(\"\")がワイルドカードとして機能する(2016年9月1日版執筆時)
+However, it is important to note that wildcards may be specified as
+the origin in the postWebMessage() method. [26]_ If wildcards are
+specified, the sender origin of the message is not checked, and the
+message may be sent from any arbitrary origin. In a situation in which
+malicious content has been read into WebView, various types of harm or
+damage may result if important messages are sent without origin
+restrictions. Thus, when using WebView for Web messaging, it is best
+to specify explicitly a specific origin in the postWebMessage() method.
+
+.. [26] Note that Uri.EMPTY and Uri.parse("") function as wildcards (at
+    the time of writing the September 1, 2016 version).
 ```
 
-Notificationを使用する
-----------------------
+Using Notifications
+-------------------
 
-Androidにはエンドユーザーへのメッセージを通知するNotification機能がある。Notificationを使うと、画面上部のステータスバーと呼ばれる領域に、アイコンやメッセージを表示することができる。
-
-![](media/image53.png)
-```eval_rst
-.. {width="3.716666666666667in"
-.. height="6.603472222222222in"}
-```
-
-図 4.10‑1　Notifcationの表示例
-
-Notificationの通知機能は、Android 5.0(API Level
-21)で強化され、アプリやユーザー設定によって、画面がロックされている状態であってもNotificationによる通知を表示することが可能になった。ただし、Notificationの使い方を誤ると、端末ユーザー本人にのみ見せるべきプライベートな情報が第三者の目に触れる恐れがある。したがって、プライバシーやセキュリティを考慮して適切に実装を行うことが重要である。
-
-なお、Visibilityが取り得る値とNotificationの振る舞いは以下の通りである。
-```eval_rst
-==============  ================================================================================
-Visibilityの値  Notificationの振る舞い
-==============  ================================================================================
-Public          | すべてのロック画面上でNotificationが表示される
-Private         | すべてのロック画面上でNotifcationが表示されるが、パスワード等で保護された
-                | ロック画面（セキュアロック）上では、Notificationのタイトルやテキスト等が
-                | 隠される（プライベート情報が隠された公開可能な文に置き換わる）
-Secret          | パスワード等で保護されたロック画面（セキュアロック）上では、Notification
-                | が表示されなくなる（セキュアロック以外のロック画面ではNotificationは表示
-                | される）
-==============  ================================================================================
-```
-### サンプルコード<!-- 2de6db20 -->
-
-Notificationに端末ユーザーのプライベートな情報を含む場合、プライベート情報を取り除いた通知を画面ロック時の表示用に作成し、加えておくこと。
+Android offers the Notification feature for sending messages to end
+users. Using a Notification causes a region known as a status bar to
+appear on the screen, inside which you may display icons and messages.
 
 ![](media/image54.png)
 ```eval_rst
@@ -5388,17 +5587,59 @@ Notificationに端末ユーザーのプライベートな情報を含む場合�
 .. height="6.603472222222222in"}
 ```
 
-図 4.10‑2　ロック画面上のNotification
+Figure 4.10‑1　An example of a Notification
 
-プライベート情報を含んだ通知を行うサンプルコードを以下に示す。
+The communication functionality of Notifications is enhanced in
+Android 5.0 (API Level 21) to allow messages to be displayed via
+Notifications even when the screen is locked, depending on user and
+application settings. However, incorrect use of Notifications runs the
+risk that private information---which should only be shown to the
+terminal user herself---may be seen by third parties. For this reason,
+this functionality must be implemented with careful attention paid to privacy and security.
 
-ポイント：
+The possible values for the Visibility option and the corresponding
+behavior of Notifications is summarized in the following table.
 
-1.  プライベート情報を含んだ通知を行う場合は、公開用（画面ロック時の表示用）のNotification
-    を用意する
-2.  公開用（画面ロック時の表示用）の Notificationにはプライベート情報を含めない
-3.  Visibility を明示的にPrivate に設定して、Notification を作成する
-4.  Visibility が Private の場合、プライベート情報を含めて通知してもよい
+```eval_rst
+================ ================================================================================
+Visibility value Behavior of Notifications
+================ ================================================================================
+Public           | Notifications are displayed on all locked screens.
+Private          | Notifications are displayed on all locked screens;
+                 | however, on locked screens that have been password-protected (secure locks),
+                 | fields such as the title and text of the Notification are hidden
+                 | (replaced by publicly-releasable messages in which private information is hidden).
+Secret           | Notifications are not displayed on locked screens
+                 | that are protected by passwords or other security measures (secure locks).
+                 | (Notifications are displayed on locked screens that do not involve secure locks.)
+================ ================================================================================
+```
+### Sample Code<!-- 2de6db20 -->
+
+When a Notification contains private information regarding the
+terminal user, a message from which the private information has been
+excluded must be prepared and added to be displayed in the event of a locked screen.
+
+![](media/image55.png)
+```eval_rst
+.. {width="3.716666666666667in"
+.. height="6.603472222222222in"}
+```
+
+Figure 4.10‑2 A notification on a locked screen
+
+Sample code illustrating the proper use of Notifications for messages
+containing private data is shown below.
+
+Points:
+
+1.  When using Notifications for messages containing private data,
+    prepare a version of the Notification that is suitable for public
+    display (to be displayed when the screen is locked).
+2.  Do not include private information in Notifications prepared for
+    public display (displayed when the screen is locked).
+3.  Explicitly set Visibility to Private when creating Notifications.
+4.  When Visibility is set to Private, Notifications may contain private information.
 
 VisibilityPrivateNotificationActivity.java
 ```eval_rst
@@ -5407,100 +5648,149 @@ VisibilityPrivateNotificationActivity.java
    :encoding: shift-jis
 ```
 
+### Rule Book<!-- a8692504 -->
 
-### ルールブック<!-- a8692504 -->
+When creating Notification, the following rules must be observed.
 
-Notificationを利用する際には以下のルールを守ること。
+1.  Regardless of the Visibility setting, Notifications must not contain
+    sensitive information (although private information is an exception)
+2.  Notifications with Visibility=Public must not contain private information (Required)
+3.  For Notifications that contain private information, Visibility must
+    be explicitly set to Private or Secret (Required)
+4.  When using Notifications with Visibility=Private, create an
+    additional Notification with Visibility=Public for public display (Recommended)
 
-1.  Visibilityの設定に依らず、Notificationにはセンシティブな情報を含めない（プライベート情報は例外）（必須）
-2.  Visibility PublicのNotificationには プライベート情報を含めない （必須）
-3.  （特にVisibility Privateにする場合）Visibility は明示的に設定する （必須）
-4.  VisibilityがPrivateのNotificationを利用する場合、VisibilityをPublicにした公開用のNotificationを併せて設定する （推奨）
+####  Regardless of the Visibility setting, Notifications must not contain sensitive information (although private information is an exception) (Required)
 
-#### Visibilityの設定に依らず、Notificationにはセンシティブな情報を含めない（プライベート情報は例外） （必須）
+On terminals using Android4.3 (API Level 18) or later, users can use
+the Settings window to grant apps permission to read Notifications.
+Apps granted this permission will be able to read all information in
+Notifications; for this reason, sensitive information must not be
+included in Notifications. (However, private information may be
+included in Notifications depending on the Visibility setting).
 
-Android4.3(API Level
-18)以降の端末では、設定画面からユーザーがNotificationの読み取り許可をアプリに与えることができる。許可されたアプリは、全てのNotificationの情報を読み取ることが可能になるため、センシティブな情報をNotificationに含めてはならない。（ただし、プライベート情報はVisibilityの設定によってはNotificationに含めて良い）
+Information contained in Notifications may generally not be read by
+apps other than the app that sent the Notification. However, users may
+explicitly grant permission to certain user-selected apps to read all
+information in Notifications. Because only apps that have been granted
+user permission may read information in Notifications, there is
+nothing problematic about including private information on the user
+within the Notification. On the other hand, if sensitive information
+other than the user\'s private information (for example, secret
+information known only to the app developers) is include in a
+Notification, the user herself may attempt to read the information
+contained in the Notification and may grant applications permission to
+view this information as well; thus the inclusion of sensitive
+information other than private user information is problematic.
 
-Notificationに含まれた情報は、通常はNotificationを送信したアプリを除き、他のアプリから読み取ることはできない。しかし、ユーザーが明示的に許可を与えることで、ユーザーが指定したアプリは全てのNotificationの情報を読み取ることが可能になる。ユーザーが許可を与えたアプリのみがNotificationの情報を読み取れることから、ユーザー自身のプライベート情報をNotificationに含めることは問題ない。一方で、ユーザーのプライベート情報以外のセンシティブな情報（例えば、アプリ開発者のみが知り得る機密情報）をNotificationに含めると、ユーザー自身がNotificationに含まれた情報を読みとろうとしてNotificationへの閲覧をアプリに許可する可能性があるため、利用者のプライベート情報以外のセンシティブな情報を含めることは問題となる。
+For specific methods and conditions, see Section "4.10.3.1 On
+User-granted Permission to View Notifications".
 
-具体的な方法と条件は、「4.10.3.1
-ユーザー許可によるNotificationの閲覧について」を参照の事。
+#### Notifications with Visibility=Public must not contain private information (Required)
 
-#### Visibility PublicのNotificationには プライベート情報を含めない （必須）
-
-VisibilityがPublicに設定されたNotificationによって通知を行う場合、ユーザーのプライベート情報をNotificationに含めてはならない。VisibilityがPublicに設定されたNotificationは、画面ロック中にもNotificationの情報が表示され、端末に物理的に接近できる第三者がプライベート情報を盗み見るリスクにつながるためである。
+When sending Notifications with Visibility=Public, private user
+information must not be included in the Notification. When a
+Notifications has the setting Visibility=Public, the information in
+the Notification is displayed even when the screen is locked. This is
+because such Notifications carry the risk that private information
+might be seen and stolen by a third party in physical proximity to the terminal.
 
 VisibilityPrivateNotificationActivity.java
 ```java
-    // 公開用（画面ロック時の表示用）の センシティブな情報を持たない Notification を用意する
+    // Prepare a Notification for public display (to be displayed on locked screens) that does not contain sensitive information.
     Notification.Builder publicNotificationBuilder = new Notification.Builder(this).setContentTitle("Notification : Public");
 
     publicNotificationBuilder.setVisibility(Notification.VISIBILITY_PUBLIC);
-    // 公開用（画面ロック時の表示用）の Notificationにはプライベート情報を含めない
-    publicNotificationBuilder.setContentText("Visibility Public : センシティブな情報は含めずに通知");
+    // Do not include private information in Notifications for public display (to be displayed on locked screens).
+    publicNotificationBuilder.setContentText("Visibility Public: sending notification without sensitive information.");
     publicNotificationBuilder.setSmallIcon(R.drawable.ic_launcher);
 ```
 
-プライベート情報の典型例としては、ユーザー宛てに送信されたメールやユーザーの位置情報など、「5.5.
-プライバシー情報を扱う」で言及されている情報が挙げられる。
+####  For Notifications that contain private information, Visibility must be explicitly set to Private or Secret (Required)
 
-#### （特にVisibility Privateにする場合）Visibility は明示的に設定する （必須）
+Terminals using Android 5.0 (API Level 21) or later will display
+Notifications even when the screen is locked. Thus, when the
+Notification contains private information, its Visibility flag should
+be set explicitly to Private or Secret. This is to protect against the
+risk of private information contained in a Notification being
+displayed on a locked screen.
 
-「4.10.2.2 Visibility PublicのNotificationには
-プライベート情報を含めない （必須）」の通り、Android 5.0(API Level
-21)以降の端末では、画面ロック中にもNotificationが表示されるため、Visibilityの設定が重要であり、デフォルト値に頼らず明示的に設定すること。
-
-現状では、NotificationのVisibilityのデフォルト値はPrivateに設定されており、明示的にPublicを指定しない限りプライベート情報が盗み見られるリスクは発生しない。しかし、Visibilityのデフォルト値が将来変更になる可能性もあり、含める情報の取り扱いを常に意識するためにも、たとえVisiblityをPrivateにする場合であっても、NotificationのVisibilityは明示的に設定することを必須としている。
+At present, the default value of Visibility is set to Private for
+Notifications, so the aforementioned risk will only arise if this flag
+is explicitly changed to Public. However, the default value of
+Visibility may change in the future; for this reason, and also for the
+purpose of clearly communicating one\'s intentions at all times when
+handling information, it is mandatory to set Visibility=Private
+explicitly for Notifications that contain private information.
 
 VisibilityPrivateNotificationActivity.java
 ```java
-        // プライベート情報を含む Notification を作成する
+        // Create a Notification that includes private information.
         Notification.Builder priavteNotificationBuilder = new Notification.Builder(this).setContentTitle("Notification : Private");
 
-        // ★ポイント★ 明示的に Visibility を Private に設定して、Notification を作成する
+        // *** POINT *** Explicitly set Visibility=Private when creating the Notification.
         priavteNotificationBuilder.setVisibility(Notification.VISIBILITY_PRIVATE);
 ```
 
-####  VisibilityがPrivateのNotificationを利用する場合、VisibilityをPublicにした公開用のNotificationを併せて設定する （推奨）
+Typical examples of private information include emails sent to the
+user, the user\'s location data, and other items listed in Section
+"5.5 Handling privacy data\".
 
-VisibilityがPrivateに設定されたNotificationを使って通知する場合、画面ロック中に表示される情報を制御するため、VisibilityをPublicにした公開用のNotificationを併せて設定することが望ましい。
+On terminals using Android4.3 (API Level 18) or later, users can use
+the Settings window to grant apps permission to read Notifications.
+Apps granted this permission will be able to read all information in
+Notifications; for this reason, sensitive information other than
+private user information must not be included in Notifications.
 
-VisibilityがPrivateに設定されたNotificationに公開用のNotificationを設定しない場合、画面ロック中にはシステムで用意されたデフォルトの文言が表示されるためセキュリティ上の問題はない。しかし、Notificationに含める情報の取り扱いを常に意識するためにも、公開用のNotificationを明示的に用意し設定することを推奨する。
+####  When using Notifications with Visibility=Private, create an additional Notification with Visibility=Public for public display (Recommended)
+
+When communicating information via a Notification with
+Visibility=Private, it is desirable to create simultaneously an
+additional Notification, for public display, with Visibility=Public;
+this is to restrict the information displayed on locked screens.
+
+If a public-display Notification is not registered together with a
+Visibility=Private notification, a default message prepared by the
+operating system will be displayed when the screen is locked. Thus
+there is no security problem in this case. However, for the purpose of
+clearly communicating one\'s intentions at all times when handling
+information, it is recommended that a public-display Notification be
+explicitly created and registered.
 
 VisibilityPrivateNotificationActivity.java
 ```java
-    // プライベート情報を含む Notification を作成する
+    // Create a Notification that contains private information.
     Notification.Builder privateNotificationBuilder = new Notification.Builder(this).setContentTitle("Notification : Private");
 
-    // ★ポイント★ 明示的に Visibility を Private に設定して、Notification を作成する
+    // *** POINT *** Explicitly set Visibility=Private when creating the Notification.
     if (Build.VERSION.SDK_INT >= 21)
         privateNotificationBuilder.setVisibility(Notification.VISIBILITY_PRIVATE);
-    // ★ポイント★ Visibility が Private の場合、プライベート情報を含めて通知してもよい
+    // *** POINT *** Notifications with Visibility=Private may include private information.
     privateNotificationBuilder.setContentText("Visibility Private : Including user info.");
     privateNotificationBuilder.setSmallIcon(R.drawable.ic_launcher);
-    // VisibilityがPrivateのNotificationを利用する場合、VisibilityをPublicにした公開用のNotificationを合わせて設定する
+    // When creating a Notification with Visibility=Private, simultaneously create and register a public-display Notification with Visibility=Public.
     if (Build.VERSION.SDK_INT >= 21)
         privateNotificationBuilder.setPublicVersion(publicNotification);
 ```
 
-### アドバンスト<!-- 5fe6bbe1 -->
+### Advanced Topics<!-- 5fe6bbe1 -->
 
-#### ユーザー許可によるNotificationの閲覧について
+#### On User-granted Permission to View Notifications
 
-「4.10.2.1
-Visibilityの設定に依らず、Notificationにはセンシティブな情報を含めない（プライベート情報は例外）
-（必須）」で述べたように、Android4.3(API Level
-18)以降の端末では、ユーザーが許可を与えた場合、指定されたアプリは全てのNotificationの情報を読み取ることが可能になる。ただし、ユーザー許可の対象となるためには、アプリがNotificationListenerServiceを継承したServiceを実装しておく必要がある。
+As noted above in Section "4.10.2.1 Regardless of the Visibility
+setting, Notifications must not contain sensitive information
+(although private information is an exception)", on terminals using
+Android 4.3 (API Level 18) or later, certain user-selected apps that
+have been granted user permission may read information in all Notifications.
 
-![](media/image55.png)
+![](media/image56.png)
 ```eval_rst
 .. {width="3.71875in" height="6.604166666666667in"}
 ```
 
-図 4.10‑3　Notificationの読み取りを設定する「通知へのアクセス」画面
+Figure 4.10‑3 The Access to Notifications window, from which Notification read controls may be configured
 
-NotificationListenerServiceを使ったサンプルコードを以下に示す。
+The following sample code illustrates the use of NotificationListenerService.
 
 AndroidManifest.xml
 ```eval_rst
@@ -5509,7 +5799,6 @@ AndroidManifest.xml
    :encoding: shift-jis
 ```
 
-
 MyNotificationListenerService.java
 ```eval_rst
 .. literalinclude:: CodeSamples/NotificationListenerService.MyNotificationListenerService.java
@@ -5517,5 +5806,7 @@ MyNotificationListenerService.java
    :encoding: shift-jis
 ```
 
-
-上記の通り、NotificationListenerServiceを使い、ユーザーの許可を得ることで、Notificationを読み取ることが可能になるが、Notificationに含まれる情報には端末のプライベート情報が含まれることが多いため、取り扱いには十分な注意が必要である。
+As discussed above, by using NotificationListenerService to obtain
+user permission it is possible to read Notifications. However, because
+the information contained in Notifications frequently includes private
+information on the terminal, care is required in handling such information.
