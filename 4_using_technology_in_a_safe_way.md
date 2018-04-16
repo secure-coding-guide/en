@@ -4125,58 +4125,79 @@ Total: about 5.12MB
 
 However, when icudt46l.zip is unzipped, it amounts to around 7MB.
 
-ファイルを扱う
+Handling Files
 --------------
 
-Androidのセキュリティ設計思想に従うと、ファイルは情報を永続化又は一時保存(キャッシュ)する目的にのみ利用し、原則非公開にするべきである。アプリ間の情報交換はファイルを直接アクセスさせるのではなく、ファイル内の情報をContent
-ProviderやServiceといったアプリ間連携の仕組みによって交換するべきである。これによりアプリ間のアクセス制御も実現できる。
+According to Android security designing idea, files are used only for
+making information persistence and temporary save (cache), and it
+should be private in principle. Exchanging information between
+applications should not be direct access to files, but it should be
+exchanged by inter-application linkage system, like Content Provider
+or Service. By using this, inter-application access control can be achieved.
 
-SDカード等の外部記憶デバイスは十分なアクセス制御ができないため、容量の大きなファイルを扱う場合や別の場所(PCなど)への情報の移動目的など、機能上どうしても必要な場合のみに使用を限定するべきである。基本的に外部記憶デバイス上にはセンシティブな情報を含んだファイルを配置してはならない。もしセンシティブな情報を外部記憶デバイス上のファイルに保存しなければならない場合は暗号化等の対策が必要になるが、ここでは言及しない。
+Since enough access control cannot be performed on external memory
+device like SD card etc., so it should be limited to use only when
+it\'s necessary by all means in terms of function, like when handling
+huge size files or transferring information to another location (PC
+etc.). Basically, files that include sensitive information should not
+be saved in external memory device. In case sensitive information
+needs to be saved in a file of external device at any rate,
+counter-measures like encryption are necessary, but it\'s not referred here.
 
-### サンプルコード<!-- 267a2965 -->
+### Sample Code<!-- 267a2965 -->
 
-前述のようにファイルは原則非公開にするべきである。しかしながらさまざまな事情によって、他のアプリにファイルを直接読み書きさせるべきときもある。セキュリティの観点から分類したファイルの種類と比較を表
-4.6‑1に示す。ファイルの格納場所や他アプリへのアクセス許可の組み合わせにより4種類のファイルに分類している。以降ではこのファイルの分類ごとにサンプルコードを示し説明を加えていく。
+As mentioned above, files should be private in principle. However,
+sometimes files should be read out/written by other applications
+directly for some reasons. File types which are categorized from the
+security point of view and comparison are shown in Table 4.6‑1. These
+are categorized into 4 types of files based on the file storage
+location or access permission to other application. Sample code for
+each file category is shown below and explanation for each of them are also added there.
 
-表
-4.6‑1　セキュリティ観点によるファイルの分類と比較
+Table 4.6‑1 File category and comparison from security point of view
+
 ```eval_rst
-+-----------+-----------+-------------+------------------------------------------+
-|| ファイル || 他アプリ | 格納場所    || 概要                                    |
-|| の分類   || へのアク |             |                                          |
-|           || セス許可 |             |                                          |
-+===========+===========+=============+==========================================+
-|| 非公開   || なし     || アプリディ || ・アプリ内でのみ読み書きできる。        |
-|| ファイル |           || レクトリ内 || ・センシティブな情報を扱うことができる。|
-|           |           |             || ・ファイルは原則このタイプにするべき。  |
-+-----------+-----------+-------------+------------------------------------------+
-|| 読み取り || 読み取り || アプリディ || ・他アプリおよびユーザーも読み取り可能。|
-|| 公開     |           || レクトリ内 || ・アプリ外部に公開（閲覧）可能な情報を  |
-|| ファイル |           |             || 扱う。                                  |
-+-----------+-----------+-------------+------------------------------------------+
-|| 読み書き || 読み取り || アプリディ || ・他アプリおよびユーザーも読み書き可能。|
-|| 公開     || 書き込み || レクトリ内 || ・セキュリティの観点からもアプリ設計の  |
-|| ファイル |           |             || 観点からも使用は避けるべき。            |
-+-----------+-----------+-------------+------------------------------------------+
-|| 外部記憶 || 読み取り || SDカードな || ・アクセス権のコントロールができない。  |
-|| ファイル || 書き込み || どの外部記 || ・他アプリやユーザーによるファイルの読み|
-|| (読み書  |           || 憶装置     || 書き・削除が常に可能。                  |
-|| き公開)  |           |             || ・使用は必要最小限にするべき。          |
-|           |           |             || ・比較的容量の大きなファイルを扱うことが|
-|           |           |             || できる。                                |
-+-----------+-----------+-------------+------------------------------------------+
++----------------+-----------------------+-------------------+-----------------------------------------------------+
+|| Feil category || Access permission    || Storage location || Overview                                           |
+||               || to other application ||                  ||                                                    |
++================+=======================+===================+=====================================================+
+|| Private file  || NA                   || In application   || - Can read and write only in an application.       |
+|                |                       || directory        || - Sensitive information can be handled.            |
+|                |                       |                   || - File should be this type in principle.           |
++----------------+-----------------------+-------------------+-----------------------------------------------------+
+|| Read out      || Read out             || In application   || - Other applications and users can read.           |
+|| public file   |                       || directory        || - Information that can be disclosed to outside of  |
+|                |                       |                   || application is handled.                            |
++----------------+-----------------------+-------------------+-----------------------------------------------------+
+|| Read write    || Read out             || In application   || - Other applications and users can read and write. |
+|| public file   || Write in             || directory        || - It should not be used from both security         |
+|                |                       |                   || and application designing points of view.          |
++----------------+-----------------------+-------------------+-----------------------------------------------------+
+|| External      || Read out             || External memory  || - No access control.                               |
+|| memory device || Write in             || device like      || - Other applications and users can always          |
+|| (Read write   |                       || SD card          || read/write/delete files.                           |
+|| public)       |                       |                   || - Usage should be minimum requirement.             |
+|                |                       |                   || - Comparatively huge size of files can be handled. |
++----------------+-----------------------+-------------------+-----------------------------------------------------+
 ```
-#### 非公開ファイルを扱う
 
-同一アプリ内でのみ読み書きされるファイルを扱う場合であり、安全なファイルの使い方である。ファイルに格納する情報が公開可能かどうかに関わらず、できるだけファイルは非公開の状態で保持し、他アプリとの必要な情報のやり取りは別のAndroidの仕組み（Content
-Provider、Service)を利用して行うことを原則とする。
+#### Using Private Files
 
-ポイント：
+This is the case to use files that can be read/written only in the
+same application, and it is a very safe way to use files. In
+principle, whether the information stored in the file is public or
+not, keep files private as much as possible, and when exchanging the
+necessary information with other applications, it should be done using
+another Android system (Content Provider, Service.)
 
-1.  ファイルは、アプリディレクトリ内に作成する
-2.  ファイルのアクセス権は、他のアプリが利用できないようにプライベートモードにする
-3.  センシティブな情報を格納することができる
-4.  ファイルに格納する(された)情報に対しては、その入手先に関わらず内容の安全性を確認する
+Points:
+
+1.  Files must be created in application directory.
+2.  The access privilege of file must be set private mode in order not
+    to be used by other applications.
+3.  Sensitive information can be stored.
+4.  Regarding the information to be stored in files, handle file data
+    carefully and securely.
 
 PrivateFileActivity.java
 ```eval_rst
@@ -4185,7 +4206,6 @@ PrivateFileActivity.java
    :encoding: shift-jis
 ```
 
-
 PrivateUserActivity.java
 ```eval_rst
 .. literalinclude:: CodeSamples/File PrivateFile.PrivateUserActivity.java
@@ -4193,20 +4213,23 @@ PrivateUserActivity.java
    :encoding: shift-jis
 ```
 
+#### Using Public Read Only Files
 
-#### 読み取り公開ファイルを扱う
+This is the case to use files to disclose the contents to unspecified
+large number of applications. If you implement by following the below
+points, it\'s also comparatively safe file usage method. Note that
+using the MODE\_WORLD\_READABLE variable to create a public file is
+deprecated in API Level 17 and later versions, and will trigger a
+security exception in API Level 24 and later versions; thus
+file-sharing methods using Content Provider are preferable.
 
-不特定多数のアプリに対して内容を公開するためのファイルである。以下のポイントに気を付けて実装すれば、比較的安全なファイルの使い方になる。ただし、公開ファイルを作成するための、MODE\_WORLD\_READABLE変数はAPI
-Level17以降ではdeprecatedとなっており、API Level 24
-以降ではセキュリティ例外が発生するため、Content
-Providerによるファイル共有方法が望ましい。
+Points:
 
-ポイント：
-
-1.  ファイルは、アプリディレクトリ内に作成する
-2.  ファイルのアクセス権は、他のアプリに対しては読み取り専用モードにする
-3.  センシティブな情報は格納しない
-4.  ファイルに格納する(された)情報に対しては、その入手先に関わらず内容の安全性を確認する
+1.  Files must be created in application directory.
+2.  The access privilege of file must be set to read only to other applications.
+3.  Sensitive information must not be stored.
+4.  Regarding the information to be stored in files, handle file data
+    carefully and securely.
 
 PublicFileActivity.java
 ```eval_rst
@@ -4215,7 +4238,6 @@ PublicFileActivity.java
    :encoding: shift-jis
 ```
 
-
 PublicUserActivity.java
 ```eval_rst
 .. literalinclude:: CodeSamples/File PublicROUser.PublicUserActivity.java
@@ -4223,34 +4245,55 @@ PublicUserActivity.java
    :encoding: shift-jis
 ```
 
+#### Using Public Read/Write Files
 
-#### 読み書き公開ファイルを扱う
+This is the usage of the file which permits read-write access to
+unspecified large number of application.
 
-不特定多数のアプリに対して、読み書き権限を許可するファイルの使い方である。
+Unspecified large number of application can read and write, means that
+needless to say. Malware can also read and write, so the credibility
+and safety of data will be never guaranteed. In addition, even in case
+of not malicious intention, data format in file or timing to write in
+cannot be controlled. So this type of file is almost not practical in
+terms of functionality.
 
-不特定多数のアプリが読み書き可能ということは、マルウェアも当然内容の書き換えが可能であり、データの信頼性も安全性も全く保証されない。また、悪意のない場合でもファイル内のデータの形式や書き込みを行うタイミングなど制御が困難であり、そのようなファイルは機能面からも実用性が無いに等しい。
+As above, it\'s impossible to use read-write files safely from both
+security and application designing points of view, so using read-write
+files should be avoided.
 
-以上のように、セキュリティの観点からもアプリ設計の観点からも、読み書き公開ファイルを安全に運用することは不可能であり、読み書き公開ファイルの使用は避けなければならない。
+Point:
 
-ポイント：
+1.  Must not create files that be allowed to read/write access from other applications.
 
-1.  他アプリから読み書き可能なアクセス権を設定したファイルは作らない
+#### Using Eternal Memory (Read Write Public) Files
 
-#### 外部記憶(読み書き公開)ファイルを扱う
+This is the case when storing files in an external memory like SD
+card. It\'s supposed to be used when storing comparatively huge
+information (placing file which was downloaded from Web), or when
+bring out the information to outside (backup etc.).
 
-SDカードのような外部記憶デバイス上にファイルを格納する場合である。比較的容量の大きな情報を格納する(Webからダウンロードしたファイルを置くなどの)場合や外部に情報を持ち出す(バックアップなどの)場合に利用することが想定される。
+\"External memory file (Read Write public)\" has the equal
+characteristics with \"Read Write public file\" to unspecified large
+number of applications. In addition, it has the equal characteristics
+with \"Read Write public file\" to applications which declares to use
+android.permission.WRITE\_EXTERNAL\_STORAGE Permission. So, the usage
+of \"External memory file (Read Write public) file\" should be
+minimized as less as possible.
 
-「外部記憶(読み書き公開)ファイル」は不特定多数のアプリに対して「読み取り公開ファイル」と同等の性質を持つ。さらにandroid.permission.WRITE\_EXTERNAL\_STORAGE
-Permissionを利用宣言している不特定多数のアプリに対しては「読み書き公開ファイル」と同等の性質を持つ。そのため、外部記憶(読み書き公開)ファイルの使用は必要最小限にとどめるべきである。
+A Backup file is most probably created in an external memory device as
+Android application\'s customary practice. However, as mentioned as
+above, files in an external memory have the risk that is tampered/deleted
+by other applications including malware. Hence, in
+applications which output backup, some contrivances to minimize risks
+in terms of application spec or designing like displaying a caution
+\"Copy Backup files to the safety location like PC etc., a.s.a.p.\", are necessary.
 
-Androidアプリの慣例として、バックアップファイルは外部記憶デバイス上に作成されることが多い。しかし外部記憶デバイス上のファイルは前述のようにマルウェアを含む他のアプリから改ざんや削除されてしまうリスクがある。ゆえにバックアップを出力するアプリでは「バックアップファイルは速やかにPC等の安全な場所にコピーしてください」といった警告表示をするなど、アプリの仕様や設計面でのリスク最小化の工夫も必要となる。
+Points:
 
-ポイント：
-
-1.  センシティブな情報は格納しない
-2.  アプリ毎にユニークなディレクトリにファイルを配置する
-3.  ファイルに格納する(された)情報に対しては、その入手先に関わらず内容の安全性を確認する
-4.  利用側のアプリで書き込みを行わない仕様にする
+1.  Sensitive information must not be stored.
+2.  Files must be stored in the unique directory per application.
+3.  Regarding the information to be stored in files, handle file data carefully and securely.
+4.  Writing file by the requesting application should be prohibited as the specification.
 
 AndroidManifest.xml
 ```eval_rst
@@ -4258,7 +4301,6 @@ AndroidManifest.xml
    :language: xml
    :encoding: shift-jis
 ```
-
 
 ExternalFileActivity.java
 ```eval_rst
@@ -4267,8 +4309,7 @@ ExternalFileActivity.java
    :encoding: shift-jis
 ```
 
-
-利用側のサンプルコード
+Sample code for use
 
 ExternalUserActivity.java
 ```eval_rst
@@ -4277,7 +4318,6 @@ ExternalUserActivity.java
    :encoding: shift-jis
 ```
 
-
 AndroidManifest.xml
 ```eval_rst
 .. literalinclude:: CodeSamples/File ExternalUser.app.src.main.AndroidManifest.xml
@@ -4285,100 +4325,138 @@ AndroidManifest.xml
    :encoding: shift-jis
 ```
 
+### Rule Book<!-- 2b11bdc8 -->
 
-### ルールブック<!-- 2b11bdc8 -->
+Handling files follow the rules below.
 
-ファイルを扱う場合には以下のルールを守ること。
+1.  File Must Be Created as a Private File in Principle (Required)
+2.  Must Not Create Files that Be Allowed to Read/Write Access from Other Applications (Required)
+3.  Using Files Stored in External Device (e.g. SD Card) Should Be Requisite Minimum (Required)
+4.  Application Should Be Designed Considering the Scope of File (Required)
 
-1.  ファイルは原則非公開ファイルとして作成する （必須）
-2.  他のアプリから読み書き権限でアクセス可能なファイルは作成しない （必須）
-3.  SDカードなど外部記憶デバイスに格納するファイルの利用は必要最小限にする （必須）
-4.  ファイルの生存期間を考慮してアプリの設計を行う （必須）
+#### File Must Be Created as a Private File in Principle (Required)
 
-#### ファイルは原則非公開ファイルとして作成する （必須）
+As mentioned in \"4.6 Handling Files\" and \"4.6.1.3 Using Public
+Read/Write File,\" regardless of the contents of the information to be
+stored, files should be set private, in principle. From Android
+security designing point of view, exchanging information and its
+access control should be done in Android system like Content Provider
+and Service, etc., and in case there\'s a reason that is impossible,
+it should be considered to be substituted by file access permission as alternative method.
 
-「4.6ファイルを扱う」「4.6.1.1非公開ファイルを扱う」で述べたように、格納する情報の内容に関わらずファイルは原則非公開にするべきである。Androidのセキュリティ設計の観点からも、情報のやり取りとそのアクセス制御はContent
-ProviderやServiceなどのAndroidの仕組みの中で行うべきであり、できない事情がある場合のみファイルのアクセス権で代用することを検討することになる。
+Please refer to sample code of each file type and following rule items.
 
-各ファイルタイプのサンプルコードや以下のルールの項も参照のこと。
+#### Must Not Create Files that Be Allowed to Read/Write Access from Other Applications (Required)
 
-#### 他のアプリから読み書き権限でアクセス可能なファイルは作成しない （必須）
+As mentioned in \"4.6.1.3 Using Public Read/Write File,\" when
+permitting other applications to read/write files, information stored
+in files cannot be controlled. So, sharing information by using
+read/write public files should not be considered from both security
+and function/designing points of view.
 
-「4.6.1.3読み書き公開ファイルを扱う」で述べたように、他のアプリに対してファイルの読み書きを許可すると、ファイルに格納される情報の制御ができない。そのため、セキュリティ的な観点からも機能・設計的な観点からも読み書き公開ファイルを利用した情報の共有を考えるべきではない。
+#### Using Files Stored in External Device (e.g. SD Card) Should Be Requisite Minimum (Required)
 
-#### SDカードなど外部記憶デバイスに格納するファイルの利用は必要最小限にする （必須）
+As mentioned in \"4.6.1.4 Using Eternal Memory (Read Write Public)
+File,\" storing files in external memory device like SD card, leads to
+holding the potential problems from security and functional points of
+view. On the other hand, SD card can handle files which have longer
+scope, compared with application directory, and this is the only one
+storage that can be always used to bring out the data to outside of
+application. So, there may be many cases that cannot help using it,
+depends on application\'s spec.
 
-「4.6.1.4外部記憶(読み書き公開)ファイルを扱う」で述べたように、SDカードをはじめとする外部記憶デバイスにファイルを置くことは、セキュリティおよび機能の両方の観点から潜在的な問題を抱えることに繋がる。一方で、SDカードはアプリディレクトリより生存期間の長いファイルを扱え、アプリ外部にデータを持ち出すのに常時使える唯一のストレージなので、アプリの仕様によっては使用せざるを得ないケースも多いと考えられる。
+When storing files in external memory device, considering unspecified
+large number of applications and users can read/write/delete files, so
+it\'s necessary that application is designed considering the points as
+per below as well as the points mentioned in sample code.
 
-外部記憶デバイスにファイルを格納する場合、不特定多数のアプリおよびユーザーが読み・書き・削除できることを考慮して、サンプルコードで述べたポイントを含めて以下のようなポイントに気をつけてアプリの設計を行う必要がある。
+-   Sensitive information should not be saved in a file of external memory device, in principle.
+-   In case sensitive information is saved in a file of external memory device, it should be encrypted.
+-   In case saving in a file of external memory device information that
+    will be trouble if it\'s tampered by other application or users, it
+    should be saved with electrical signature.
+-   When reading in files in external memory device, use data after
+    verifying the safety of data to read in.
+-   Application should be designed supposing that files in external
+    memory device can be always deleted.
 
--   原則としてセンシティブな情報は外部記憶デバイス上のファイルに保存しない
+Please refer to \"4.6.2.4 Application Should Be Designed Considering the Scope of File (Required).\"
 
--   もしセンシティブな情報を外部記憶デバイス上のファイルに保存する場合は暗号化する
+#### Application Should Be Designed Considering the Scope of File (Required)
 
--   他アプリやユーザーに改ざんされては困る情報を外部記憶デバイス上のファイルに保存する場合は電子署名も一緒に保存する
+Data saved in application directory is deleted by the following user
+operations. It\'s consistent with the application\'s scope, and it\'s
+distinctive that it\'s shorter than the scope of application.
 
--   外部記憶デバイス上のファイルを読み込む場合、読み込むデータの安全性を確認してからデータを利用する
+-   Uninstalling application.
+-   Delete data and cache of each application (Setting \> Apps \> select target application.)
 
--   他のアプリやユーザーによって外部記憶デバイス上のファイルはいつでも削除されることを想定してアプリを設計しなければならない
+Files that were saved in external memory device like SD card, it\'s
+distinctive that the scope of the file is longer than the scope of the
+application. In addition, the following situations are also necessary to be considered.
 
-「4.6.2.4ファイルの生存期間を考慮してアプリの設計を行う
-（必須）」も参照すること。
+-   File deletion by user
+-   Pick off/replace/unmount SD card
+-   File deletion by Malware
 
-#### ファイルの生存期間を考慮してアプリの設計を行う （必須）
+As mentioned above, since scope of files are different depends on the
+file saving location, not only from the viewpoint to protect sensitive
+information, but also form view point to achieve the right behavior as
+application, it\'s necessary to select the file save location.
 
-アプリディレクトリに保存されたデータは以下のユーザー操作により消去される。アプリの生存期間と一致する、またはアプリの生存期間より短いのが特徴である。
+### Advanced Topics<!-- c8492450 -->
 
--   アプリのアンインストール
+#### File Sharing Through File Descriptor
 
--   各アプリのデータおよびキャッシュの消去（「設定」→「アプリケーション」→「アプリケーションの管理」）
+There is a method to share files through file descriptor, not letting
+other applications access to public files. This method can be used in
+Content Provider and in Service. Opponent application can read/write
+files through file descriptors which are got by opening private files
+in Content Provider or in Service.
 
-SDカード等の外部記憶デバイス上に保存されたファイルは、アプリの生存期間よりファイルの生存期間が長いことが特徴である。さらに次の状況も想定する必要がある。
+Comparison between the file sharing method of direct access by other
+applications and the file sharing method via file descriptor, is as
+per below Table 4.6‑2. Variation of access permission and range of
+applications that are permitted to access, can be considered as
+merits. Especially, from security point of view, this is a great merit
+that, applicaions that are permitted to accesss can be controlled in detail.
 
--   ユーザーによるファイルの消去
+Table 4.6‑2 Comparison of inter-application file sharing method
 
--   SDカードの抜き取り・差し替え・アンマウント
-
--   マルウェアによるファイルの消去
-
-このようにファイルの保存場所によってファイルの生存期間が異なるため、本節で説明したようなセンシティブな情報を保護する観点だけでなく、アプリとして正しい動作を実現する観点でもファイルの保存場所を正しく選択する必要がある。
-
-### アドバンスト<!-- c8492450 -->
-
-#### ファイルディスクリプタ経由のファイル共有
-
-他のアプリに公開ファイルを直接アクセスさせるのではなく、ファイルディスクリプタ経由でファイル共有する方法がある。Content
-ProviderとServiceでこの方法が使える。Content
-ProviderやServiceの中で非公開ファイルをオープンし、そのファイルディスクリプタを相手のアプリに渡す。相手アプリはファイルディスクリプタ経由でファイルを読み書きできる。
-
-他のアプリにファイルを直接アクセスさせるファイル共有方法とファイルディスクリプタ経由のファイル共有方法の比較を表
-4.6‑2に示す。アクセス権のバリエーションとアクセス許可するアプリの範囲でメリットがある。特にアクセスを許可するアプリを細かく制御できるところがセキュリティ観点ではメリットが大きい。
-
-表 4.6‑2　アプリ間ファイル共有方法の比較
 ```eval_rst
-+-------------------------+--------------------------------+--------------------------------+
-| ファイル共有方法        | アクセス権設定のバリエーション | アクセスを許可するアプリの範囲 |
-+=========================+================================+================================+
-|| 他のアプリにファイルを || 読み取り                      || すべてのアプリに対して        |
-|| 直接アクセスさせる     || 書き込み                      || 一律アクセス許可して          |
-|| ファイル共有           || 読み取り＋書き込み            || てしまう                      |
-+-------------------------+--------------------------------+--------------------------------+
-|| ファイルディスクリプタ || 読み取り                      || Content ProviderやService     |
-|| 経由のファイル共有     || 書き込み                      || にアクセスしてくるアプリに    |
-|                         || 追記のみ                      || 対して個別に一時的にアクセ    |
-|                         || 読み取り＋書き込み            || ス許可・不許可を制御できる    |
-|                         || 読み取り＋追記のみ            |                                |
-+-------------------------+--------------------------------+--------------------------------+
++----------------------------+----------------------------+-------------------------------------+
+|| File sharing method       || Variation or              || Range of applications              |
+||                           || access permission setting || that are permitted to access       |
++============================+============================+=====================================+
+|| File sharing that permits || Read in                   || Give all applications access       |
+|| other applications to     || Write in                  || permissions equally                |
+|| access files directly     || Read in + Write in        |                                     |
++----------------------------+----------------------------+-------------------------------------+
+|| File sharing through      || Read in                   || Can control whether to give access |
+|| file descriptor           || Write in                  || permission or not, to application  |
+|                            || Only add                  || which try to access individually   |
+|                            || Read in + Write in        || and temporarily,                   |
+|                            || Read in + Only add        || to Content Provider or Service     |
++----------------------------+----------------------------+-------------------------------------+
 ```
-上記ファイル共有方法のどちらにも共通することであるが、他のアプリにファイルの書き込みを許可するとファイル内容の完全性が保証しづらくなる。特に複数のアプリから同時に書き込みが行われると、ファイル内容のデータ構造が壊れてしまいアプリが正常に動作しなくなるリスクがある。他のアプリとのファイル共有においては、読み込み権限だけを許可するのが望ましい。
 
-以下では、Content
-Providerでファイルを共有する実装例(非公開Providerの場合)をサンプルコードとして掲載する。
+This is common in both of above file sharing methods, when giving
+write permission for files to other applications, integrity of file
+contents are difficult to be guaranteed. When several applications
+write in in parallel, there\'s a risk that data structure of file
+contents are destroyed, and application doesn\'t work normally. So, in
+sharing files with other applications, giving only read only
+permission is preferable.
 
-ポイント
+Herein below an implementation example of file sharing by Content
+Provider and its sample code, are published.
 
-1.  利用元アプリは自社アプリであるから、センシティブな情報を保存してよい
-2.  自社限定Content Providerアプリからの結果であっても、結果データの安全性を確認する
+Point
+
+1.  The source application is In house application, so sensitive
+    information can be saved.
+2.  Even if it\'s a result from In house only Content Provider
+    application, verify the safety of the result data.
 
 InhouseProvider.java
 ```eval_rst
@@ -4387,7 +4465,6 @@ InhouseProvider.java
    :encoding: shift-jis
 ```
 
-
 InhouseUserActivity.java
 ```eval_rst
 .. literalinclude:: CodeSamples/File InhouseProviderUser.InhouseUserActivity.java
@@ -4395,99 +4472,141 @@ InhouseUserActivity.java
    :encoding: shift-jis
 ```
 
+#### Access Permission Setting for the Directory
 
-#### ディレクトリのアクセス権設定
+Herein above, security considerations are explained, focusing on
+files. It\'s also necessary to consider the security for directory
+which is a file container. Herein below, security considerations of
+access permission setting for directory are explained.
 
-これまでファイルに着目してセキュリティの考慮点を説明してきた。ファイルのコンテナであるディレクトリについてもセキュリティの考慮が必要である。ここではディレクトリのアクセス権設定についてセキュリティ上の考慮ポイントを説明する。
+In Android, there are some methods to get/create subdirectory in
+application directory. The major ones are as per below Table 4.6‑3.
 
-Androidには、アプリディレクトリ内にサブディレクトリを取得・作成するメソッドがいくつか用意されている。主なものを表
-4.6‑3に示す。
+Table 4.6‑3 Methods to get/create subdirectory in application directory
 
-表
-4.6‑3 アプリディレクトリ配下のサブディレクトリ取得・作成メソッド
 ```eval_rst
-====================================== ====================== ========================
- ..                                    | 他アプリに対する     | ユーザーによる削除
-                                       | アクセス権の指定     |
-====================================== ====================== ========================
-Context\#getFilesDir()                 | 不可(実行権限のみ)   | 「設定」→「アプリ」→
-                                                              | アプリケーションを選択
-                                                              | →「データを消去」
-Context\#getCacheDir()                 | 不可(実行権限のみ)   | 「設定」→「アプリ」→
-                                                              | アプリケーションを選択
-                                                              | →「キャッシュを消去」
-                                                              | ※「データを消去」でも
-                                                              | 削除される。
-Context\#getDir(String name, int mode) | modeに以下を指定可能 | 「設定」→「アプリ」→
-                                       | MODE_PRIVATE         | アプリケーションを選択
-                                       | MODE_WORLD_READABLE  | →「データを消去」
+====================================== ============================= =============================
+ ..                                    | Specify access permission   | Deletion by user
+                                       | to other application        |
+====================================== ============================= =============================
+Context\#getFilesDir()                 | Impossible                  | "Setting" > "Apps" >
+                                       | (Only execution permission) | select target application >
+                                                                     | "Clear data"
+Context\#getCacheDir()                 | Impossible                  | "Setting" > "Apps" >
+                                       | (Only execution permission) | select target application >
+                                                                     | "Clear cache"
+                                                                     |
+                                                                     | It can be deleted by
+                                                                     | "Clear data," too.
+Context\#getDir(String name, int mode) | Following can be specified  | "Setting" > "Apps" >
+                                       | to MODE                     | select target application >
+                                       | MODE_PRIVATE                | "Clear data"
+                                       | MODE_WORLD_READABLE
                                        | MODE_WORLD_WRITEABLE
-====================================== ====================== ========================
+====================================== ============================= =============================
 ```
-ここで特に気を付けるのはContext\#getDir()によるアクセス権の設定である。ファイルの作成でも説明しているように、Androidのセキュリティ設計の観点からディレクトリも基本的には非公開にするべきであり、アクセス権の設定によって情報の共有を行うと思わぬ副作用があるので、情報の共有には他の手段を考えるべきである。
+
+Here especially what needs to pay attention is access permission
+setting by Context\#getDir(). As explained in file creation, basically
+directory also should be set private from the security designing point
+of view. When sharing information depends on access permission
+setting, there may be an unexpected side effect, so other methods
+should be taken as information sharing.
 
 ##### MODE\_WORLD\_READABLE
-```eval_rst
-すべてのアプリに対してディレクトリの読み取り権限を与えるフラグである。すべてのアプリがディレクトリ内のファイル一覧や個々のファイルの属性情報を取得可能になる。このディレクトリ配下に秘密のファイルを配置することはできないため、通常はこのフラグを使用してはならない [18]_。
 
-.. [18] MODE\_WORLD\_READABLEおよびMODE\_WORLD\_WRITEABLEは API Level17 以降ではdeprecated となっており、API Level 24 以降ではセキュリティ例外が発生するため使用できなくなっている。
+```eval_rst
+This is a flag to give all applications read-only permission to
+directory. So all applications can get file list and individual file
+attribute information in the directory. Because secret files may not
+be placed in these directories, in general this flag must not be used. [18]_
+
+.. [18] MODE_WORLD_READABLE and MODE_WORLD_WRITEABLE are deprecated
+    in API Level17 and later versions, and in API Level 24 and later
+    versions their use will trigger a security exception.
 ```
 
 ##### MODE\_WORLD\_WRITEABLE
+
 ```eval_rst
-他アプリに対してディレクトリの書き込み権限を与えるフラグである。すべてのアプリがディレクトリ内のファイルを作成、移動 [19]_、リネーム、削除が可能になる。これらの操作はファイル自体のアクセス権設定（読み取り、書き込み、実行）とは無関係であり、ディレクトリの書き込み権限があるだけで可能となる操作であることに注意が必要だ。他のアプリから勝手にファイルを削除されたり置き換えられたりするため、通常はこのフラグを使用してはならない [18]_。
+This flag gives other applications write permission to directory. All
+applications can create/move [19]_/rename/delete files in the
+directory. These operations has no relation with access permission
+setting (Read/Write/Execute) of file itself, so it\'s necessary to pay
+attention that operations can be done only with write permission to
+directory. This flag allows other apps to delete or replace files
+arbitrarily, so in general it must not be used. [18]_
 
-.. [19] 内部ストレージから外部記憶装置(SDカードなど)への移動などマウントポイントを超えた移動はできない。そのため、読み取り権限のない内部ストレージファイルが外部記憶装置に移動されて読み書き可能になるようなことはない。
+.. [19] Files cannot be moved over mount point (e.g. from internal
+    storage to external storage). Therefore, moving the protected files
+    from internal storage to external storage cannot be happened.
 ```
-表 4.6‑3の「ユーザーによる削除」に関しては、「4.6.2.4ファイルの生存期間を考慮してアプリの設計を行う （必須）」を参照のこと。
 
-#### Shared Preferenceやデータベースファイルのアクセス権設定
+Regarding Table 4.6‑3 \"Deletion by User,\" refer to \"4.6.2.4
+Application Should Be Designed Considering the Scope of File (Required).\"
 
-Shared
-Preferenceやデータベースもファイルで構成される。アクセス権設定についてはファイルと同じことが言える。したがってShared
-Preferenceもデータベースもファイルと同様に基本的には非公開ファイルとして作成し、内容の共有はAndroidのアプリ間連携の仕組みによって実現するべきである。
+#### Access Permission Setting for Shared Preference and Database File
 
-Shared
-Preferenceの使用例を次に示す。MODE\_PRIVATEにより非公開ファイルとしてShared
-Preferenceを作成している。
+Shared Preference and database also consist of files. Regarding access
+permission setting what are explained for files are applied here.
+Therefore, both Shared Preference and database, should be created as
+private files same like files, and sharing contents should be achieved
+by the Android\'s inter-application linkage system.
 
-Shared Preferenceファイルにアクセス制限を設定する例
+Herein below, the usage example of Shared Preference is shown. Shared
+Preference is crated as private file by MODE\_PRIVATE.
+
+Example of setting access restriction to Shared Preference file.
+
 ```java
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
-// ～省略～
+... Abbreviation ...
 
-        // Shared Preferenceを取得する（なければ作成される）
-        // ポイント：基本的にMODE_PRIVATEモードを指定する
+        // Get Shared Preference.(If there's no Shared Preference, it's to be created.)
+        // Point: Basically, specify MODE_PRIVATE mode.
         SharedPreferences preference = getSharedPreferences(
-                PREFERENCE_FILE_NAME, MODE_PRIVATE);
+            PREFERENCE_FILE_NAME, MODE_PRIVATE);
 
-        // 値が文字列のプリファレンスを書き込む例
+        // Example of writing preference which value is charcter string.
         Editor editor = preference.edit();
-        editor.putString("prep_key", "prep_value");// key:"prep_key", value:"prep_value"
+        editor.putString("prep_key", "prep_value"); // key:"prep_key", value:"prep_value"
         editor.commit();
 ```
 
-データベースについては「4.5 SQLiteを使う」を参照すること。
+Please refer to \"4.5 Using SQLite\" for database.
 
-#### Android 4.4 (API Level 19)における外部ストレージへのアクセスに関する仕様変更について
+#### Specification Change regarding External Storage Access in Android 4.4 (API Level 19) and later
 
-Android 4.4 (API Level
-19)以降の端末において、外部ストレージへのアクセスに関して以下のように仕様が変更された。
+The specification regarding External Storage Access has been changed
+to the followings since Android 4.4 (API Level 19).
 
-(1) 外部ストレージ上のアプリ固有ディレクトリに読み書きする場合は、WRITE\_EXTERNAL\_STORAGE/READ\_EXTERNAL\_STORAGE Permissionが不要である(変更箇所)
+(1) In the case that the application needs read/write to its specific
+    directories on external storage media, the
+    WRITE\_EXTERNAL\_STORAGE/READ\_EXTERNAL\_STORAGE permissions need
+    not to be declared with \<uses-permission\>. (Changed)
 
-(2) 外部ストレージ上のアプリ固有ディレクトリ以外の場所にあるファイルを読み込む場合は、READ\_EXTERNAL\_STORAGE Permissionが必要である(変更箇所)
+(2) In the case that the application needs read files on other
+    directories than its specific directories on external storage media,
+    the READ\_EXTERNAL\_STORAGE permission needs to be declared with
+    \<uses-permission\>. (Changed)
 
-(3) プライマリ外部ストレージ上のアプリ固有ディレクトリ以外の場所にファイルを書き込む場合は、WRITE\_EXTERNAL\_STORAGE Permissionが必要である
+(3) In the case that the application needs to write files on other
+    directories than its specific directories on the primary external
+    storage media, the WRITE\_EXTERNAL\_STORAGE permission needs to be
+    declared with \<uses-permission\>.
 
-(4) セカンダリ以降の外部ストレージにはアプリ固有ディレクトリ以外の場所に書き込みは出来ない
+(4) The application cannot write files on other directories than its
+    specific directories on the secondary external storage media.
 
-この仕様では、Android
-OSのバージョンによってPermissionの利用宣言の要・不要が変わっているため、Android
-4.4 (API Level
-19)をまたいで端末のサポートが必要なアプリの場合は、インストールする端末のバージョンによって不要なPermissionをユーザーに要求することになり、好ましい状況とは言えない。よって、上記仕様(1)のみに該当するアプリの場合は、\<uses-permission\>タグのmaxSdkVersion属性を以下のように記述して対応することをお薦めする。
+In that specification, whether the permission requisitions are needed
+is determined according to the version of Android OS. So in the case
+that the application supports the versions including Android 4.3 and
+4.4, it could lead to a pleasant situation that the application
+requires the unnecessary permission of users. Therefore, applications
+just corresponding to the paragraph (1) is recommended to use the
+maxSdkVersion attribute of \<uses-permission\> like the below.
 
 AndroidManifest.xml
 ```eval_rst
@@ -4496,41 +4615,54 @@ AndroidManifest.xml
    :encoding: shift-jis
 ```
 
+#### Revised specifications in Android 7.0 (API Level 24) for accessing specific directories on external storage media
 
-#### Android 7.0（API Level 24）における外部ストレージの特定ディレクトリへのアクセスに関する仕様変更について
+On devices running Android 7.0 (API Level 24) or later, a new API
+known as Scoped Directory Access API has been introduced. Scoped
+Directory Access allows the application to access to specific
+directories on external storage media without permission.
 
-Android 7.0（API Level
-24）以降の端末において、外部ストレージの特定ディレクトリに対し、Permissionの利用宣言なしにアクセスできるための仕組みとして、「Scoped
-Directory Access」が導入された。
+Within Scoped Directory Access, a directory defined in the Environment
+class is passed as a parameter to the
+StorageVolume\#createAccessIntent method to create an Intent. By
+sending this Intent via startActivityForResult, you can enable a
+situation in which a dialog box requesting access permission appears
+on the terminal screen, and---if the user grants permission---the
+specified directories on each storage volume become accessible.
 
-Scoped Directory
-Accessでは、StorageVolume\#createAccessIntentメソッドの引数にEnviromentクラスで定義されたディレクトリを指定し、Intentを生成する。生成されたIntentをstartActivityForResultで送信することで、画面上にアクセスの許可を求めるダイアログが表示され、ユーザーが許可をするとストレージボリュームごとの指定されたディレクトリへアクセスが可能となる。
+Table 4.6-4 Directories that may be accessed via Scoped Directory Access
 
-表　4.6-4 Scoped Directory Accessによってアクセスできるディレクトリ
 ```eval_rst
-========================== ========================================================
-DIRECTORY\_MUSIC           一般的な音楽ファイルの標準ディレクトリ
-DIRECTORY\_PODCASTS        ポッドキャストの標準ディレクトリ
-DIRECTORY\_RINGTONES       着信音の標準ディレクトリ
-DIRECTORY\_ALARMS          アラーム音の標準ディレクトリ
-DIRECTORY\_NOTIFICATIONS   通知音の標準ディレクトリ
-DIRECTORY\_PICTURES        画像ファイルの標準ディレクトリ
-DIRECTORY\_MOVIES          動画ファイルの標準ディレクトリ
-DIRECTORY\_DOWNLOADS       ユーザーがダウンロードしたファイルの標準ディレクトリ
-DIRECTORY\_DCIM            カメラによる画像・動画ファイルの標準ディレクトリ
-DIRECTORY\_DOCUMENTS       ユーザーによって作られたドキュメントの標準ディレクトリ
-========================== ========================================================
+========================== ============================================================
+DIRECTORY\_MUSIC           Standard location for general music files
+DIRECTORY\_PODCASTS        Standard directory for podcasts
+DIRECTORY\_RINGTONES       Standard directory for ringtones
+DIRECTORY\_ALARMS          Standard directory for alarms
+DIRECTORY\_NOTIFICATIONS   Standard directory for notifications
+DIRECTORY\_PICTURES        Standard directory for pictures
+DIRECTORY\_MOVIES          Standard directory for movies
+DIRECTORY\_DOWNLOADS       Standard directory for user-downloaded files
+DIRECTORY\_DCIM            Standard directory for image/video files produced by cameras
+DIRECTORY\_DOCUMENTS       Standard directory for user-created documents
+========================== ============================================================
 ```
-アプリがアクセスする必要のある領域が上記のディレクトリであるならば、Android
-7.0以上の端末で動作させる場合は、以下の理由によりScoped Directory
-Access機能を利用することを推奨する。Android7.0をまたいで端末のサポートが必要なアプリの場合は、「4.6.3.4
-Android 4.4 (API Level
-19)における外部ストレージへのアクセスに関する仕様変更について」で掲載したAndroidManifestの記述例を参照すること。
 
--   外部ストレージにアクセスできるPermissionを付与した場合、アプリの目的外のディレクトリにもアクセスできてしまう。
+If the location to be accessed by an app lies within one of the above
+directories, and if the app is running on an Android 7.0 or later
+device, the use of Scoped Directory Access is recommended for the
+following reasons. For apps that must continue to support pre-Android
+7.0 devices, see the sample code in the AndroidManifest listed in
+Section "4.6.3.4Specification Change regarding External Storage Access
+in Android 4.4 (API Level 19) and later".
 
--   Storage Access
-    Frameworkでアクセスできるディレクトリをユーザーに選択させる場合、その都度ピッカー上で煩雑な操作を求められる。また、外部ストレージのルートディレクトリにアクセス許可を与えた場合は、外部ストレージ全体にアクセスできる。
+-   When a Permission is granted to access external storage, the app is
+    able to access directories other than its intended destination.
+
+-   Using Storage Access Framework to require users to choose accessible
+    directories results in a cumbersome procedure in which the user must
+    configure a selector on each access. Also, when access to the root
+    directory of an external storage is granted, the entirety of that
+    storage becomes accessible.
 
 Browsable Intentを利用する
 --------------------------
