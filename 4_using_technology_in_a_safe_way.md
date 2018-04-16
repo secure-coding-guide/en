@@ -4652,7 +4652,7 @@ directories, and if the app is running on an Android 7.0 or later
 device, the use of Scoped Directory Access is recommended for the
 following reasons. For apps that must continue to support pre-Android
 7.0 devices, see the sample code in the AndroidManifest listed in
-Section "4.6.3.4Specification Change regarding External Storage Access
+Section "4.6.3.4 Specification Change regarding External Storage Access
 in Android 4.4 (API Level 19) and later".
 
 -   When a Permission is granted to access external storage, the app is
@@ -4664,42 +4664,59 @@ in Android 4.4 (API Level 19) and later".
     directory of an external storage is granted, the entirety of that
     storage becomes accessible.
 
-Browsable Intentを利用する
---------------------------
+Using Browsable Intent
+----------------------
 
-ブラウザからWebページのリンクに対応して起動するようにアプリを作ることができる。Browsable
-Intentという機能である。アプリは、URIスキームをManifestファイルで指定することで、そのURIスキームを持つリンクへの移動(ユーザーのタップなど)に反応し、リンクをパラメータとして起動することが可能になる。
+Android application can be designed to launch from browser
+corresponding with a webpage link. This functionality is called
+\'Browsable Intent.\' By specifying URI scheme in Manifest file, an
+application responds the transition to the link (user tap etc.) which
+has its URI scheme, and the application is launched with the link as a parameter.
 
-また、URIスキームを利用することでブラウザから対応するアプリを起動する方法は、AndroidのみならずiOS他のプラットフォームでも対応しており、Webアプリとの外部アプリ連携などに一般的に使われている。例えば、TwitterアプリやFacebookアプリでは次のようなURIスキームが定義されており、AndroidでもiOSでもブラウザから対応するアプリが起動するようになっている。
+In addition, the method to launch the corresponding application from
+browser by using URI scheme is supported not only in Android but also
+in iOS and other platforms, and this is generally used for the linkage
+between Web application and external application, etc. For example,
+following URI scheme is defined in Twitter application or Facebook
+application, and the corresponding applications are launched from the
+browser both in Android and in iOS.
 
-表 4.7‑1
+Table 4.7‑1
+
 ```eval_rst
-============= ================
-URIスキーム   対応するアプリ
-============= ================
-fb://         Facebook
-twitter://    Twitter
-============= ================
+========== =========================
+URI scheme Corresponding application
+========== =========================
+fb://      Facebook
+twitter:// Twitter
+========== =========================
 ```
-このように連携や利便性を考えた便利な機能であるが、悪意ある第三者に悪用される危険性も潜んでいる。悪意のあるWebサイトを用意してリンクのURLに不正なパラメータを仕込むことでアプリの機能を悪用したり、同じURIスキームに対応したマルウェアをインストールさせてURLに含まれる情報を横取りしたりするなどが考えられる。
 
-このような危険性に対応するために、利用する際にはいくつかのポイントに気をつけなければならない。
+It seems very convenient function considering the linkage and
+convenience, but there are some risks that this function is abused by
+a malicious third party. What can be supposed are as follows, they
+abuse application functions by preparing a malicious Web site with a
+link in which URL has incorrect parameter, or they get information
+which is included in URL by cheating a smartphone owner into
+installing the Malware which responds the same URI scheme.
 
-### サンプルコード<!-- bde3d2b5 -->
+There are some points to be aware when using \'Browsable Intent\' against these risks.
 
-以下に、Browsable Intentを利用したアプリのサンプルコードを示す。
+### Sample Code<!-- bde3d2b5 -->
 
-ポイント：
+Sample codes of an application which uses \'Browsable Intent\' are shown below.
 
-1.  (Webページ側)対応するURIスキーマを使ったリンクのパラメータにセンシティブな情報を含めない
-2.  URLのパラメータを利用する前に値の安全性を確認する
+Points:
+
+1.  (Webpage side) Sensitive information must not be included.
+2.  Handle the URL parameter carefully and securely.
 
 Starter.html
 ```html
 <html>
     <body>
-<!-- ★ポイント1★ URLにセンシティブな情報を含めない -->
-<!-- URLパラメータとして渡す文字列は、UTF-8で、かつURIエンコードしておくこと -->
+        <!-- *** POINT 1 *** Sensitive information must not be included. -->
+        <!-- Character strings to be passed as URL parameter, should be UTF-8 and URI encoded. -->
         <a href="secure://jssec?user=user_id"> Login </a>
     </body>
 </html>
@@ -4712,7 +4729,6 @@ AndroidManifest.xml
    :encoding: shift-jis
 ```
 
-
 BrowsableIntentActivity.java
 ```eval_rst
 .. literalinclude:: CodeSamples/Browsable Intent.BrowsableIntentActivity.java
@@ -4720,37 +4736,59 @@ BrowsableIntentActivity.java
    :encoding: shift-jis
 ```
 
+### Rule Book<!-- f1ed81a9 -->
 
-### ルールブック<!-- f1ed81a9 -->
+Follow rules listed below when using \"Browsable Intent\".
 
-Browsable Intentを利用する場合には以下のルールを守ること。
+1.  (Webpage side) Sensitive Information Must Not Be Included in
+    Parameter of Corresponding Link (Required)
+2.  Handle the URL Parameter Carefully and Securely (Required)
 
-1.  （Webページ側）対応するリンクのパラメータにセンシティブな情報を含めない （必須）
-2.  URLのパラメータを利用する前に値の安全性を確認する （必須）
+#### (Webpage side) Sensitive Information Must Not Be Included in Parameter of Corresponding Link (Required)
 
-#### （Webページ側）対応するリンクのパラメータにセンシティブな情報を含めない （必須）
+When tapping the link in browser, an intent which has a URL value in
+its data (It can be retrieve by Intent\#getData) is issued, and an
+application which has a corresponding Intent Filter is launched from Android system.
 
-ブラウザ上でリンクをタップした際、data（Intent\#getDataにて取得)にURLの値が入ったIntentが発行され、システムにより該当するIntent
-Filterを持つアプリが起動する。
+At this moment, when there are several applications which Intent
+Filter is set to receive the same URI scheme, application selection
+dialogue is shown in the same way as normal launch by implicit Intent,
+and an application which user selected is launched. In case that a
+Malware is listed in the selection of application selection dialogue,
+there is a risk that user may launch the Malware by mistake and
+parameters in URL are sent to Malware.
 
-この時、同じURIスキームを受け付けるようIntent
-Filterが設定されたアプリが複数存在する場合は、通常の暗黙的Intentによる起動と同様にアプリ選択のダイアログが表示され、ユーザーの選択したアプリが起動することになる。仮に、アプリ選択画面の選択肢としてマルウェアが存在していた場合は、ユーザーが誤ってマルウェアを起動させてしまう危険性があり、パラメータがマルウェアに渡ることになる。
+As per above, it is necessary to avoid from include sensitive
+information directly in URL parameter as it is for creating general
+Webpage link since all parameters which are included in Webpage link
+URL can be given to Malware.
 
-このようにWebページのリンクURLに含めたパラメータはすべてマルウェアに渡る可能性があるので、一般のWebページのリンクを作るときと同様に、URLのパラメータに直接センシティブな情報を含めることは避けなければならない。
+Example that User ID and Password are included in URL.
 
-URLにユーザーIDとパスワードが入っている例
 ```
 insecure://sample/login?userID=12345&password=abcdef
 ```
 
-また、URLのパラメータがユーザーIDなどセンシティブでない情報のみの場合でも、アプリ起動時のパスワード入力をアプリ側でさせるような仕様では、ユーザーが気付かずにマルウェアを起動してしまい、マルウェアに対してパスワードを入力してしまう危険性もある。そのため、一連のログイン処理自体はアプリ側で完結するような仕様を検討すべきである。Browsable
-Intentによるアプリ起動はあくまで暗黙的Intentによるアプリ起動であり、意図したアプリが起動される保証がないことを念頭に置いたアプリ・サービス設計を心がける必要がある。
+In addition, there is a risk that user may launch a Malware and input
+password to it when it is defined in specs that password input is
+executed in an application after being launched by \'Browsable
+Intent\', even if the URL parameter includes only non-sensitive
+information like User ID. So it should be considered that specs like a
+whole Login process is completed within application side. It must be
+kept in mind when designing an application and a service that
+launching application by \'Browsable Intent\' is equivalent to
+launching by implicit Intent and there is no guarantee that a valid
+application is launched.
 
-#### URLのパラメータを利用する前に値の安全性を確認する （必須）
+#### Handle the URL Parameter Carefully and Securely (Required)
 
-URIスキーマに合わせたリンクは、アプリ開発者に限らず誰でも作成可能なので、アプリに渡されたURLのパラメータが正規のWebページから送られてくるとは限らない。また、渡されたURLのパラメータが正規のWebページから送られてきたかどうかを調べる方法もない。
+URL parameters which are sent to an application are not always from a
+legitimate Web page, since a link which is matched with URI scheme can
+be made by not only developers but anyone. In addition, there is no
+method to verify whether the URL parameter is sent from a valid Web page or not.
 
-そのため、渡されたURLのパラメータを利用する前に、パラメータに想定しない値が入っていないかなど、値の安全性を確認する必要がある。
+So it is necessary to verify safety of a URL parameter before using
+it, e.g. check if an unexpected value is included or not.
 
 LogCatにログ出力する
 --------------------
