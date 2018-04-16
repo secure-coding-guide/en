@@ -2674,52 +2674,85 @@ necessary to perform input validation on that result data as well.
 
 Please refer to \"3.2 Handling Input Data Carefully and Securely\"
 
-Serviceを作る・利用する
+Creating/Using Services
 -----------------------
 
-### サンプルコード<!-- d4d5857c -->
+### Sample Code<!-- d4d5857c -->
 
-Serviceがどのように利用されるかによって、Serviceが抱えるリスクや適切な防御手段が異なる。次の判定フローによって作成するServiceがどのタイプであるかを判断できる。なお、作成するServiceのタイプによってServiceを利用する側の実装も決まるので、利用側の実装についても合わせて説明する。
+The risks and countermeasures of using Services differ depending on
+how that Service is being used. You can find out which type of Service
+you are supposed to create through the following chart shown below.
+Since the secure coding best practice varies according to how the
+service is created, we will also explain about the implementation of
+the Service as well.
 
-![](media/image43.png)
+Table 4.4‑1 Definition of service types
+
+```eval_rst
+================= ==================================================
+Type              Definition
+================= ==================================================
+Private Service   A service that cannot be used another application, and therefore is the safest service.
+Public Service    A service that is supposed to be used by an unspecified large number of applications
+Partner Service   A service that can only be used by the specific applications made by a trusted partner company.
+In-house Service  A service that can only be used by other in-house applications.
+================= ==================================================
+```
+
+![](media/image44.png)
 ```eval_rst
 .. {width="7.26875in" height="3.186301399825022in"}
 ```
 
-図 4.4‑1
+Figure 4.4‑1
 
-Serviceには複数の実装方法があり、その中から作成するServiceのタイプに合った方法を選択することになる。下表の縦の項目が本文書で扱う実装方法であり、5種類に分類した。表中のo印は実現可能な組み合わせを示し、その他は実現不可能もしくは困難なものを示す。
+There are several implementation methods for Service, and you will
+select the method which matches with the type of Service that you
+suppose to create. The items of vertical columns in the table show the
+implementation methods, and these are divided into 5 types. \"OK\"
+stands for the possible combination and others show
+impossible/difficult combinations in the table.
 
-なお、Serviceの実装方法の詳細については、「4.4.3.2 Serviceの実装方法について」および各Serviceタイプのサンプルコード（表中で\*印の付いたもの）を参照すること。
+Please refer to \"4.4.3.2 How to Implement Service\" and Sample code
+of each Service type (with \* mark in a table) for detailed
+implementation methods of Service.
 
-表 4.4‑1
+Table 4.4‑2
+
 ```eval_rst
-================ ========= ========= ============= ===========
-分類             | 非公開  | 公開    | パートナー  | 自社限定
-                 | Service | Service | 限定Service | Service
-================ ========= ========= ============= ===========
-startService型   | **o\*** | o       | \-          | o
-IntentService型  | o       | **o\*** | \-          | o
-local bind型     | o       | \-      | \-          | \-
-Messenger bind型 | o       | o       | \-          | **o\***
-AIDL bind型      | o       | o       | **o\***     | o
-================ ========= ========= ============= ===========
+=================== ========== ========== ========== ===========
+Category            | Private  | Public   | Partner  | In-house
+                    | Service  | Service  | Service  | Service
+=================== ========== ========== ========== ===========
+startService type   | **OK\*** | OK       | \-       | OK
+IntentService type  | OK       | **OK\*** | \-       | OK
+local bind type     | OK       | \-       | \-       | \-
+Messenger bind type | OK       | OK       | \-       | **OK\***
+AIDL bind type      | OK       | OK       | **OK\*** | OK
+=================== ========== ========== ========== ===========
 ```
-以下では表 4.4‑1中の\*印の組み合わせを使って各セキュリティタイプのServiceのサンプルコードを示す。
 
-#### 非公開Serviceを作る・利用する
+Sample code for each security type of Service are shown as below, by
+using combination of \* mark in Table 4.4‑2.
 
-非公開Serviceは、同一アプリ内でのみ利用されるServiceであり、もっとも安全性の高いServiceである。
+#### Creating/Using Private Services
 
-また、非公開Serviceを利用するには、クラスを指定する明示的Intentを使えば誤って外部アプリにIntentを送信してしまうことがない。
+Private Services are Services which cannot be launched by the other
+applications and therefore it is the safest Service.
 
-以下、startService型のServiceを使用した例を示す。
+When using Private Services that are only used within the application,
+as long as you use explicit Intents to the class then you do not have
+to worry about accidently sending it to any other application.
 
-ポイント(Serviceを作る）：
+Sample code of how to use the startService type Service is shown below.
 
-1.  exported=\"false\"により、明示的に非公開設定する
-2.  同一アプリからのIntentであっても、受信Intentの安全性を確認する
-3.  結果を返す場合、利用元アプリは同一アプリであるから、センシティブな情報を返送してよい
+Points (Creating a Service):
+
+1.  Explicitly set the exported attribute to false.
+2.  Handle the received intent carefully and securely, even though the
+    intent was sent from the same application.
+3.  Sensitive information can be sent since the requesting application
+    is in the same application.
 
 AndroidManifest.xml
 ```eval_rst
@@ -2728,7 +2761,6 @@ AndroidManifest.xml
    :encoding: shift-jis
 ```
 
-
 PrivateStartService.java
 ```eval_rst
 .. literalinclude:: CodeSamples/Service PrivateService.PrivateStartService.java
@@ -2736,14 +2768,18 @@ PrivateStartService.java
    :encoding: shift-jis
 ```
 
+> Next is sample code for Activity which uses Private Service.
+>
+> Points (Using a Service):
 
-次に非公開Serviceを利用するActivityのサンプルコードを示す。
+4. Use the explicit intent with class specified to call a service in
+   the same application.
 
-ポイント(Serviceを利用する）：
+5. Sensitive information can be sent since the destination service is
+   in the same application.
 
-4.  同一アプリ内Serviceはクラス指定の明示的Intentで呼び出す
-5.  利用先アプリは同一アプリであるから、センシティブな情報を送信してもよい
-6.  結果を受け取る場合、同一アプリ内Serviceからの結果情報であっても、受信データの安全性を確認する
+6. Handle the received result data carefully and securely, even though
+   the data came from a service in the same application.
 
 PrivateUserActivity.java
 ```eval_rst
@@ -2752,18 +2788,21 @@ PrivateUserActivity.java
    :encoding: shift-jis
 ```
 
+#### Creating/Using Public Services
 
-#### 公開Serviceを作る・利用する
+Public Service is the Service which is supposed to be used by the
+unspecified large number of applications. It\'s necessary to pay
+attention that it may receive the information (Intent etc.) which was
+sent by Malware. In case using public Service, It\'s necessary to pay
+attention that information(Intent etc.) to send may be received by Malware.
 
-公開Serviceは、不特定多数のアプリに利用されることを想定したServiceである。マルウェアが送信した情報（Intentなど）を受信することがあることに注意が必要である。また、公開Serviceを利用するには、送信する情報（Intentなど）がマルウェアに受信されることがあることに注意が必要である。
+Sample code of how to use the startService type Service is shown below.
 
-以下、IntentService型のServiceを使用した例を示す。
+Points (Creating a Service):
 
-ポイント（Serviceを作る）：
-
-1.  exported=\"true\"により、明示的に公開設定する
-2.  受信Intentの安全性を確認する
-3.  結果を返す場合、センシティブな情報を含めない
+1.  Explicitly set the exported attribute to true.
+2.  Handle the received intent carefully and securely.
+3.  When returning a result, do not include sensitive information.
 
 AndroidManifest.xml
 ```eval_rst
@@ -2772,7 +2811,6 @@ AndroidManifest.xml
    :encoding: shift-jis
 ```
 
-
 PublicIntentService.java
 ```eval_rst
 .. literalinclude:: CodeSamples/Service PublicService.PublicIntentService.java
@@ -2780,12 +2818,12 @@ PublicIntentService.java
    :encoding: shift-jis
 ```
 
-次に公開Serviceを利用するActivityのサンプルコードを示す。
+Next is sample code for Activity which uses Public Service.
 
-ポイント（Serviceを利用する）：
+Points (Using a Service):
 
-4.  センシティブな情報を送信してはならない
-5.  結果を受け取る場合、結果データの安全性を確認する
+4. Do not send sensitive information.
+5. When receiving a result, handle the result data carefully and securely.
 
 AndroidManifest.xml
 ```eval_rst
@@ -2801,22 +2839,30 @@ PublicUserActivity.java
    :encoding: shift-jis
 ```
 
+#### Creating/Using Partner Services
 
-#### パートナー限定Service
+Partner Service is Service which can be used only by the particular
+applications. System consists of partner company\'s application and In
+house application, this is used to protect the information and
+features which are handled between a partner application and In house application.
 
-パートナー限定Serviceは、特定のアプリだけから利用できるServiceである。パートナー企業のアプリと自社アプリが連携してシステムを構成し、パートナーアプリとの間で扱う情報や機能を守るために利用される。
+Following is an example of AIDL bind type Service.
 
-以下、AIDL bind型のServiceを使用した例を示す。
+Points (Creating a Service):
 
-ポイント(Serviceを作る)：
+1.  Do not define the intent filter and explicitly set the exported
+    attribute to true.
+2.  Verify that the certificate of the requesting application has been
+    registered in the own white list.
+3.  Do not (Cannot) recognize whether the requesting application is
+    partner or not by onBind (onStartCommand, onHandleIntent).
+4.  Handle the received intent carefully and securely, even though the
+    intent was sent from a partner application.
+5.  Return only information that is granted to be disclosed to a partner application.
 
-1.  Intent Filterを定義せず、exported=\"true\"を明示的に設定する
-2.  利用元アプリの証明書がホワイトリストに登録されていることを確認する
-3.  onBind(onStartCommand,onHandleIntent)で呼び出し元がパートナーかどうか判別できない
-4.  パートナーアプリからのIntentであっても、受信Intentの安全性を確認する
-5.  パートナーアプリに開示してよい情報に限り返送してよい
-
-なお、ホワイトリストに指定する利用先アプリの証明書ハッシュ値の確認方法は「[5.2.1.3 アプリの証明書のハッシュ値を確認する方法」を参照すること。
+In addition, refer to \"5.2.1.3 How to Verify the Hash Value of an
+Application\'s Certificate\" for how to verify the certification hash
+value of destination application which is specified to white list.
 
 AndroidManifest.xml
 ```eval_rst
@@ -2825,8 +2871,12 @@ AndroidManifest.xml
    :encoding: shift-jis
 ```
 
-
-今回の例ではAIDLファイルを２つ作成する。１つは、ServiceからActivityにデータを渡すためのコールバックインターフェースで、もう１つはActivityからServiceにデータを渡し、情報を取得するインターフェースである。なお、AIDLファイルに記述するパッケージ名は、javaファイルに記述するパッケージ名と同様に、AIDLファイルを作成するディレクトリ階層に一致させる必要がある。
+In this example, 2 AIDL files are to be created. One is for callback
+interface to give data from Service to Activity. The other one is
+Interface to give data from Activity to Service and to get
+information. In addition, package name that is described in AIDL file
+should be consistent with directory hierarchy in which AIDL file is
+created, same like package name described in java file.
 
 IPartnerAIDLServiceCallback.aidl
 ```java
@@ -2834,7 +2884,7 @@ package org.jssec.android.service.partnerservice.aidl;
 
 interface IPartnerAIDLServiceCallback {
     /**
-     * 値が変わった時に呼び出される
+     * It's called when the value is changed.
      */
     void valueChanged(String info);
 }
@@ -2849,17 +2899,17 @@ import org.jssec.android.service.partnerservice.aidl.IExclusiveAIDLServiceCallba
 interface IPartnerAIDLService {
 
     /**
-     * コールバックを登録する
+     * Register Callback
      */
     void registerCallback(IPartnerAIDLServiceCallback cb);
-    
+
     /**
-     * 情報を取得する
-     */     
+     * Get Information
+     */
     String getInfo(String param);
 
     /**
-     * コールバックを解除する
+     * Unregister Callback
      */
     void unregisterCallback(IPartnerAIDLServiceCallback cb);
 }
@@ -2886,15 +2936,17 @@ PkgCert.java
    :encoding: shift-jis
 ```
 
+Next is sample code of Activity which uses partner only Service.
 
-次にパートナー限定Serviceを利用するActivityのサンプルコードを示す。
+Points (Using a Service):
 
-ポイント(Serviceを利用する)：
-
-6.  利用先パートナー限定Serviceアプリの証明書がホワイトリストに登録されていることを確認する
-7.  利用先パートナー限定アプリに開示してよい情報に限り送信してよい
-8.  明示的Intentによりパートナー限定Serviceを呼び出す
-9.  パートナー限定アプリからの結果情報であっても、受信Intentの安全性を確認する
+6. Verify if the certificate of the target application has been
+   registered in the own white list.
+7. Return only information that is granted to be disclosed to a partner
+   application.
+8. Use the explicit intent to call a partner service.
+9. Handle the received result data carefully and securely, even though
+   the data came from a partner application.
 
 PartnerAIDLUserActivity.java
 ```eval_rst
@@ -2903,14 +2955,12 @@ PartnerAIDLUserActivity.java
    :encoding: shift-jis
 ```
 
-
 PkgCertWhitelists.java
 ```eval_rst
 .. literalinclude:: CodeSamples/JSSEC Shared.PkgCertWhitelists.java
    :language: java
    :encoding: shift-jis
 ```
-
 
 PkgCert.java
 ```eval_rst
@@ -2919,22 +2969,29 @@ PkgCert.java
    :encoding: shift-jis
 ```
 
+#### Creating/Using In-house Services
 
-#### 自社限定Service
+In-house Services are the Services which are prohibited to be used by
+applications other than in-house applications. They are used in
+applications developed internally that want to securely share
+information and functionality.
 
-自社限定Serviceは、自社以外のアプリから利用されることを禁止するServiceである。複数の自社製アプリでシステムを構成し、自社アプリが扱う情報や機能を守るために利用される。
+Following is an example which uses Messenger bind type Service.
 
-以下、Messenger bind型のServiceを使用した例を示す。
+Points (Creating a Service):
 
-ポイント（Serviceを作る）：
-
-1.  独自定義Signature Permissionを定義する
-2.  独自定義Signature Permissionを要求宣言する
-3.  Intent Filterを定義せず、exported=\"true\"を明示的に設定する
-4.  独自定義Signature Permissionが自社アプリにより定義されていることを確認する
-5.  自社アプリからのIntentであっても、受信Intentの安全性を確認する
-6.  利用元アプリは自社アプリであるから、センシティブな情報を返送してよい
-7.  利用元アプリと同じ開発者鍵でAPKを署名する
+1.  Define an in-house signature permission.
+2.  Require the in-house signature permission.
+3.  Do not define the intent filter and explicitly set the exported
+    attribute to true.
+4.  Verify that the in-house signature permission is defined by an
+    in-house application.
+5.  Handle the received intent carefully and securely, even though the
+    intent was sent from an in-house application.
+6.  Sensitive information can be returned since the requesting
+    application is in-house.
+7.  When exporting an APK, sign the APK with the same developer key as
+    the requesting application.
 
 AndroidManifest.xml
 ```eval_rst
@@ -2942,7 +2999,6 @@ AndroidManifest.xml
    :language: xml
    :encoding: shift-jis
 ```
-
 
 InhouseMessengerService.java
 ```eval_rst
@@ -2965,28 +3021,31 @@ PkgCert.java
    :encoding: shift-jis
 ```
 
+\*\*\* Point 7 \*\*\* When exporting an APK, sign the APK with the
+same developer key as the requesting application.
 
-★ポイント7★APKをExportするときに、利用元アプリと同じ開発者鍵でAPKを署名する。
-
-![](media/image34.png)
+![](media/image35.png)
 ```eval_rst
 .. {width="4.647222222222222in"
 .. height="3.2743055555555554in"}
 ```
 
-図 4.4‑2
+Figure 4.4‑2
 
-次に自社限定Serviceを利用するActivityのサンプルコードを示す。
+Next is the sample code of Activity which uses in house only Service.
 
-ポイント(Serviceを利用する)：
+Points (Using a Service):
 
-8.  独自定義Signature Permissionを利用宣言する
-9.  独自定義Signature Permissionが自社アプリにより定義されていることを確認する
-10.  利用先アプリの証明書が自社の証明書であることを確認する
-11.  利用先アプリは自社アプリであるから、センシティブな情報を送信してもよい
-12.  明示的Intentにより自社限定Serviceを呼び出す
-13.  自社アプリからの結果情報であっても、受信Intentの安全性を確認する
-14.  利用先アプリと同じ開発者鍵でAPKを署名する
+8. Declare to use the in-house signature permission.
+9. Verify that the in-house signature permission is defined by an
+   in-house application.
+10. Verify that the destination application is signed with the in-house certificate.
+11. Sensitive information can be sent since the destination application is in-house.
+12. Use the explicit intent to call an in-house service.
+13. Handle the received result data carefully and securely, even though
+    the data came from an in-house application.
+14. When exporting an APK, sign the APK with the same developer key as
+    the destination application.
 
 AndroidManifest.xml
 ```eval_rst
@@ -3016,53 +3075,61 @@ PkgCert.java
    :encoding: shift-jis
 ```
 
+\*\*\* Point14 \*\*\* When exporting an APK, sign the APK with the
+same developer key as the destination application.
 
-★ポイント14★APKをExportするときに、利用先アプリと同じ開発者鍵でAPKを署名する。
-
-![](media/image34.png)
+![](media/image35.png)
 ```eval_rst
 .. {width="4.647222222222222in"
 .. height="3.2743055555555554in"}
 ```
 
-図 4.4‑3
+Figure 4.4‑3
 
-### ルールブック<!-- b4210f43 -->
+### Rule Book<!-- b4210f43 -->
 
-Service実装時には以下のルールを守ること。
+Implementing or using service, follow the rules below.
 
-1.  アプリ内でのみ使用するServiceは非公開設定する （必須）
-1.  受信データの安全性を確認する （必須）
-2.  独自定義Signature Permissionは、自社アプリが定義したことを確認して利用する （必須）
-3.  連携するタイミングでServiceの機能を提供するかを判定する （必須）
-4.  結果情報を返す場合には、返送先アプリからの結果情報漏洩に注意する （必須）
-5.  利用先Serviceが固定できる場合は明示的IntentでServiceを利用する （必須）
-6.  他社の特定アプリと連携する場合は利用先Serviceを確認する （必須）
-7.  資産を二次的に提供する場合には、その資産の従来の保護水準を維持する （必須）
-8.  センシティブな情報はできる限り送らない （推奨）
+1.  Service that Is Used Only in an application, Must Be Set as Private (Required)
+2.  Handle the Received Data Carefully and Securely (Required)
+3.  Use the In-house Defined Signature Permission after Verifying If
+    it\'s Defined by an In-house Application (Required)
+4.  Do Not Determine Whether the Service Provides its Functions, in onCreate (Required)
+5.  When Returning a Result Information, Pay Attention the Result
+    Information Leakage from the Destination Application (Required)
+6.  Use the Explicit Intent if the Destination Service Is fixed (Required)
+7.  Verify the Destination Service If Linking with the Other Company\'s Application (Required)
+8.  When Providing an Asset Secondarily, the Asset should be protected
+    with the Same Level Protection (Required)
+9.  Sensitive Information Should Not Be Sent As Much As Possible (Recommended)
 
-#### アプリ内でのみ使用するServiceは非公開設定する （必須）
+#### Service that Is Used Only in an application, Must Be Set as Private (Required)
 
-アプリ内（または、同じUID）でのみ使用されるServiceは非公開設定する。これにより、他のアプリから意図せずIntentを受け取ってしまうことがなくなり、アプリの機能を利用される、アプリの動作に異常をきたす等の被害を防ぐことができる。
+Service that is used only in an application (or in same UID) must be
+set as Private. It avoids the application from receiving Intents from
+other applications unexpectedly and eventually prevents from damages
+such as application functions are used or application behavior becomes abnormal.
 
-実装上はAndroidManifest.xmlでServiceを定義する際に、exported属性をfalseにするだけである。
+All you have to do in implementation is set exported attribute false
+when defining Service in AndroidManifest.xml.
 
 AndroidManifest.xml
 ```xml
-        <!-- 非公開Service -->
-        <!-- ★ポイント1★ exported="false"により、明示的に非公開設定する -->
+        <!-- Private Service derived from Service class -->
+        <!-- *** POINT 1 *** Set false for the exported attribute explicitly. -->
         <service android:name=".PrivateStartService" android:exported="false"/>
 ```
 
-また、ケースは少ないと思われるが、同一アプリ内からのみ利用されるServiceであり、かつIntent
-Filterを設置するような設計はしてはならない。Intent
-Filterの性質上、同一アプリ内の非公開Serviceを呼び出すつもりでも、Intent
-Filter経由で呼び出したときに意図せず他アプリの公開Serviceを呼び出してしまう場合が存在するからである。
+In addition, this is a rare case, but do not set Intent Filter when
+service is used only within the application. The reason is that, due
+to the characteristics of Intent Filter, public service in other
+application may be called unexpectedly though you intend to call
+Private Service within the application.
 
-AndroidManifest.xml(非推奨)
+AndroidManifest.xml(Not recommended)
 ```xml
-        <!-- 非公開Service -->
-        <!-- ★ポイント1★ exported="false"により、明示的に非公開設定する -->
+        <!-- Private Service derived from Service class -->
+        <!-- *** POINT 1 *** Set false for the exported attribute explicitly. -->
         <service android:name=".PrivateStartService" android:exported="false">
             <intent-filter>
                 <action android:name=”org.jssec.android.service.OPEN />
@@ -3070,125 +3137,190 @@ AndroidManifest.xml(非推奨)
         </service>
 ```
 
-「4.4.3.1 exported
-設定とintent-filter設定の組み合わせ(Serviceの場合)」も参照すること。
+See \"4.4.3.1 Combination of Exported Attribute and Intent-filter
+Setting (In the Case of Service).\"
 
-#### 受信データの安全性を確認する （必須）
+#### Handle the Received Data Carefully and Securely (Required)
 
-ServiceもActivityと同様に、受信Intentのデータを処理する際には、まず受信Intentの安全性を確認しなければならない。Serviceを利用する側もServiceからの結果(として受信した）情報の安全性を確認する必要がある。Activityの「4.1.2.5
-受信Intentの安全性を確認する （必須）」「4.1.2.9
-利用先Activityからの戻りIntentの安全性を確認する
-（必須）」も参照すること。
+Same like Activity, In case of Service, when processing a received
+Intent data, the first thing you should do is input validation. Also
+in Service user side, it\'s necessary to verify the safety of result
+information from Service. Please refer to \"4.1.2.5 Handling the
+Received Intent Carefully and Securely (Required)\" and \"4.1.2.9
+Handle the Returned Data from a Requested Activity Carefully and
+Securely (Required).\"
 
-Serviceにおいては、Intent以外にもメソッドの呼び出しやMessageによるデータの送受信などがあるため、それぞれ注意して実装を行わなければならない。
+In Service, you should also implement calling method and exchanging
+data by Message carefully.
 
-「3.2入力データの安全性を確認する」を参照すること。
+Please refer to \"3.2 Handling Input Data Carefully and Securely\"
 
-#### 独自定義Signature Permissionは、自社アプリが定義したことを確認して利用する （必須）<!-- f8ccf894 -->
+#### Use the In-house Defined Signature Permission after Verifying If it\'s Defined by an In-house Application (Required) <!-- f8ccf894 -->
 
-自社アプリだけから利用できる自社限定Serviceを作る場合、独自定義Signature
-Permissionにより保護しなければならない。AndroidManifest.xmlでのPermission定義、Permission要求宣言だけでは保護が不十分であるため、「5.2
-PermissionとProtection Level」の「5.2.1.2 独自定義のSignature
-Permissionで自社アプリ連携する方法」を参照すること。
+Make sure to protect your in-house Services by defining in-house
+signature permission when creating the Service. Since defining a
+permission in the AndroidManifest.xml file or declaring a permission
+request does not provide adequate security, please be sure to refer to
+\"5.2.1.2 How to Communicate Between In-house Applications with
+In-house-defined Signature Permission.\"
 
-#### 連携するタイミングでServiceの機能を提供するかを判定する （必須）
+#### Do Not Determine Whether the Service Provides its Functions, in onCreate (Required)
 
-Intentパラメータの確認や独自定義Signature
-Permissionの確認といったセキュリティチェックをonCreateに入れてはいけない。その理由は、Serviceが起動中に新しい要求を受けたときにonCreateの処理が実施されないためである。したがって、startServiceによって開始されるServiceを実装する場合は、onStartCommand（IntentServiceを利用する場合はonHandleIntent）で判定を行わなければならない。bindServiceで開始するServiceを実装する場合も同様のことが言えるので、onBindで判定をしなければならない。
+Security checks such as Intent parameter verification or
+in-house-defined Signature Permission verification should not be
+included in onCreate, because when receiving new request during
+Service is running, process of onCreate is not executed. So, when
+implementing Service which is started by startService, judgment should
+be executed by onStartCommand (In case of using IntentService,
+judgment should be executed by onHandleIntent.) It\'s also same in the
+case when implementing Service which is started by bindService,
+judgment should be executed by onBind.
 
-#### 結果情報を返す場合には、返送先アプリからの結果情報漏洩に注意する （必須）<!-- ee466beb -->
+#### When Returning a Result Information, Pay Attention the Result Information Leakage from the Destination Application (Required) <!-- ee466beb -->
 
-Serviceのタイプによって結果情報の返送先（コールバックの呼び出し先やMessageの送信先）アプリの信用度が異なる。返送先がマルウェアである可能性も考慮して十分に情報漏洩に対する配慮をしなければならない。
+Depends on types of Service, the reliability of result information
+destination application (callback receiver side/ Message destination)
+are different. Need to consider seriously about the information
+leakage considering the possibility that the destination may be Malware.
 
-詳細は、Activityの「4.1.2.7
-結果情報を返す場合には、返送先アプリからの結果情報漏洩に注意する
-（必須）」を参照すること。
+See, Activity \"4.1.2.7 When Returning a Result, Pay Attention to the
+Possibility of Information Leakage of that Result from the Destination
+Application (Required)\", for details.
 
-#### 利用先Serviceが固定できる場合は明示的IntentでServiceを利用する （必須）
+#### Use the Explicit Intent if the Destination Service Is fixed (Required)
 
-暗黙的IntentによりServiceを利用すると、Intent
-Filterの定義が同じ場合には先にインストールしたServiceにIntentが送信されてしまう。もし意図的に同じIntent
-Filterを定義したマルウェアが先にインストールされていた場合、マルウェアにIntentが送信されてしまい、情報漏洩が生じる。一方、明示的IntentによりServiceを利用すると、指定したService以外がIntentを受信することはなく比較的安全である。
+When using a Service by implicit Intents, in case the definition of
+Intent Filter is same, Intent is sent to the Service which was
+installed earlier. If Malware with the same Intent Filter defined
+intentionally was installed earlier, Intent is sent to Malware and
+information leakage occurs. On the other hand, when using a Service by
+explicit Intents, only the intended Service will receive the Intent so
+this is much safer.
 
-ただし、別途考慮すべき点があるので、Activityの「4.1.2.8
-利用先Activityが固定できる場合は明示的IntentでActivityを利用する
-（必須）」を参照すること。
+There are some other points which should be considered, please refer
+to \"4.1.2.8 Use the explicit Intents if the destination Activity is
+predetermined. (Required).\"
 
-#### 他社の特定アプリと連携する場合は利用先Serviceを確認する （必須）
+#### Verify the Destination Service If Linking with the Other Company\'s Application (Required)
 
-他社の特定アプリと連携する場合にはホワイトリストによる確認方法がある。自アプリ内に利用先アプリの証明書ハッシュを予め保持しておく。利用先の証明書ハッシュと保持している証明書ハッシュが一致するかを確認することで、なりすましアプリにIntentを発行することを防ぐことができる。具体的な実装方法についてはサンプルコードセクション「4.4.1.3パートナー限定Service」を参照すること。
+Be sure to sure a whitelist when linking with another company\'s
+application. You can do this by saving a copy of the company\'s
+certificate hash inside your application and checking it with the
+certificate hash of the destination application. This will prevent a
+malicious application from being able to spoof Intents. Please refer
+to sample code section \"4.4.1.3 Creating/Using Partner Service\" for
+the concrete implementation method.
 
-#### 資産を二次的に提供する場合には、その資産の従来の保護水準を維持する （必須）<!-- d4124f77 -->
+#### When Providing an Asset Secondarily, the Asset should be protected with the Same Level Protection (Required)
 
-Permissionにより保護されている情報資産および機能資産を他のアプリに二次的に提供する場合には、提供先アプリに対して同一のPermissionを要求するなどして、その保護水準を維持しなければならない。AndroidのPermissionセキュリティモデルでは、保護された資産に対するアプリからの直接アクセスについてのみ権限管理を行う。この仕様上の特性により、アプリに取得された資産がさらに他のアプリに、保護のために必要なPermissionを要求することなく提供される可能性がある。このことはPermissionを再委譲していることと実質的に等価なので、Permissionの再委譲問題と呼ばれる。「5.2.3.4　Permissionの再委譲問題」を参照すること。
+When an information or function asset, which is protected by
+permission, is provided to another application secondhand, you need to
+make sure that it has the same required permissions needed to access
+the asset. In the Android OS permission security model, only an
+application that has been granted proper permissions can directly
+access a protected asset. However, there is a loophole because an
+application with permissions to an asset can act as a proxy and allow
+access to an unprivileged application. Substantially this is the same
+as re-delegating permission so it is referred to as the \"Permission
+Re-delegation\" problem. Please refer to \"5.2.3.4 Permission
+Re-delegation Problem.\"
 
-#### センシティブな情報はできる限り送らない （推奨）<!-- 900385e7 -->
+#### Sensitive Information Should Not Be Sent As Much As Possible (Recommended) <!-- 900385e7 -->
 
-不特定多数のアプリと連携する場合にはセンシティブな情報を送ってはならない。
+You should not send sensitive information to untrusted parties.
 
-センシティブな情報をServiceと受け渡しする場合、その情報の漏洩リスクを検討しなければならない。公開Serviceに送付した情報は必ず漏洩すると考えなければならない。またパートナー限定Serviceや自社限定Serviceに送付した情報もそれらServiceの実装に依存して情報漏洩リスクの大小がある。
+You need to consider the risk of information leakage when exchanging
+sensitive information with a Service. You must assume that all data in
+Intents sent to a Public Service can be obtained by a malicious third
+party. In addition, there is a variety of risks of information leakage
+when sending Intents to Partner or In-house Services as well depending
+on the implementation.
 
-センシティブな情報はできるだけ送付しないように工夫すべきである。送付する場合も、利用先Serviceは信頼できるServiceに限定し、情報がLogCatなどに漏洩しないように配慮しなければならない。
+Not sending sensitive data in the first place is the only perfect
+solution to prevent information leakage therefore you should limit the
+amount of sensitive information being sent as much as possible. When
+it is necessary to send sensitive information, the best practice is to
+only send to a trusted Service and to make sure the information cannot
+be leaked through LogCat.
 
-### アドバンスト<!-- 78f16a9a -->
+### Advanced Topics<!-- 78f16a9a -->
 
-#### exported 設定とintent-filter設定の組み合わせ(Serviceの場合)
+#### Combination of Exported Attribute and Intent-filter Setting (In the Case of Service)
 
-このガイド文書では、Serviceの用途から非公開Service、公開Service、パートナー限定Service、自社限定Serviceの4タイプのServiceについて実装方法を述べている。各タイプに許されているAndroidManifest.xmlのexported属性とintent-filter要素の組み合わせを次の表にまとめた。作ろうとしているServiceのタイプとexported属性およびintent-filter要素の対応が正しいことを確認すること。
+We have explained how to implement the four types of Services in this
+guidebook: Private Services, Public Services, Partner Services, and
+In-house Services. The various combinations of permitted settings for
+each type of exported attribute defined in the AndroidManifest.xml
+file and the intent-filter elements are defined in the table below.
+Please verify the compatibility of the exported attribute and
+intent-filter element with the Service you are trying to create.
 
-表 4.4‑2
+Table 4.4‑3
+
 ```eval_rst
-+-------------------------+--------------------------------------------------------------+
-|                         | exported属性の値                                             |
-+                         +--------------------------------+--------------+--------------+
-|                         | true                           | false        | 無指定       |
-+=========================+================================+==============+==============+
-| intent-filter定義がある | 公開                           | （使用禁止） | （使用禁止） |
-+-------------------------+--------------------------------+--------------+--------------+
-| intent-filter定義がない | 公開、パートナー限定、自社限定 | 非公開       | （使用禁止） |
-+-------------------------+--------------------------------+--------------+--------------+
++---------------------------+------------------------------------------------------------+
+|                           | Value of exported attribute                                |
++                           +-----------------------------+--------------+---------------+
+|                           | true                        | false        | Not specified |
++===========================+=============================+==============+===============+
+| Intent Filter defined     | Public                      | (Do not Use) | (Do not Use)  |
++---------------------------+-----------------------------+--------------+---------------+
+| Intent Filter Not Defined | Public, Partner, In-house   | Private      | (Do not Use)  |
++---------------------------+-----------------------------+--------------+---------------+
 
-Serviceのexported属性が無指定である場合にそのServiceが公開されるか非公開となるかは、intent-filterの定義の有無により決まるが [12]_、本ガイドではServiceのexported属性を「無指定」にすることを禁止している。前述のようなAPIのデフォルトの挙動に頼る実装をすることは避けるべきであり、exported属性のようなセキュリティ上重要な設定を明示的に有効化する手段があるのであればそれを利用すべきであると考えられるためである。
+If the exported attribute is not unspecified in a Service, the
+question of whether or not the Service is public is determined by
+whether or not intent filters are defined; [12]_ however, in this
+guidebook it is forbidden to set a Service's exported attribute to
+unspecified. In general, as mentioned previously, it is best to avoid
+implementations that rely on the default behavior of any given API;
+moreover, in cases where explicit methods exist for configuring
+important security-related settings such as the exported attribute, it
+is always a good idea to make use of those methods.
 
-.. [12] intent-filterが定義されていれば公開Service、定義されていなければ非公開Serviceとなる。
-    https://developer.android.com/guide/topics/manifest/service-element.html\exported
-    を参照のこと。
+
+.. [12] If any intent filters are defined then the Service is public;
+    otherwise it is private. For more information, see
+    https://developer.android.com/guide/topics/manifest/service-element.html#exported.
 ```
 
-「intent-filter定義がある」&「exported="false"」を使用禁止にしているのは、Androidの振る舞いとして、同一アプリ内の非公開Serviceを呼び出したつもりでも、意図せず他アプリの公開Serviceを呼び出してしまう場合が存在するためである。
+The reason why an undefined intent filter and an exported attribute of
+false should not be used is that there is a loophole in Android\'s
+behavior, and because of how Intent filters work, other application\'s
+Services can be called unexpectedly.
 
-具体的には、Androidは以下のような振る舞いをするのでアプリ設計時に検討が必要である。
+Concretely, Android behaves as per below, so it\'s necessary to
+consider carefully when application designing.
 
--   複数のServiceで同じ内容のintent-filterを定義した場合、先にインストールしたアプリ内のServiceの定義が優先される
+-   When multiple Services define the same content of intent-filter, the
+    definition of Service within application installed earlier is prioritized.
 
--   暗黙的Intentを使った場合は、OSによって優先のServiceが自動的に選ばれて、呼び出される。
+-   In case explicit Intent is used, prioritized Service is
+    automatically selected and called by OS.
 
-以下の3つの図でAndroidの振る舞いによる意図せぬ呼び出しが起こる仕組みを説明する。図
-4.4‑4は、同一アプリ内からしか非公開Service(アプリA）を暗黙的Intentで呼び出せない正常な動作の例である。Intent-filter(図中action=\"X\")を定義しているのが、アプリAしかいないので意図通りの動きとなっている。
+The system that unexpected call is occurred due to Android\'s behavior
+is described in the three figures below. Figure 4.4‑4 is an example of
+normal behavior that Private Service (application A) can be called by
+implicit Intent only from the same application. Because only
+application A defines Intent-filter (action=\"X\" in the Figure), it
+behaves normally. This is the normal behavior.
 
-![](media/image44.png)
+![](media/image45.png)
 ```eval_rst
 .. {width="4.739583333333333in" height="2.9375in"}
 ```
 
-図 4.4‑4
+Figure 4.4‑4
 
-図 4.4‑5および図
-4.4‑6は、アプリAに加えてアプリBでも同じintent-filter(図中action=\"X\")を定義している場合である。
+Figure 4.4‑5 and Figure 4.4‑6 below show a scenario in which the same
+Intent filter (action=\"X\") is defined in Application B as well as Application A.
 
-図
-4.4‑5は、アプリA→アプリBの順でインストールされた場合である。この場合、アプリCが暗黙的Intentを送信すると、非公開のService(A-1)を呼び出そうとして失敗する。一方、アプリAは暗黙的Intentを使って意図通りに同一アプリ内の非公開Serviceを呼び出せるので、セキュリティの(マルウェア対策の)面では問題は起こらない。
-
-![](media/image45.png)
-```eval_rst
-.. {width="4.739583333333333in"
-.. height="3.8020833333333335in"}
-```
-
-図 4.4‑5
-
-図
-4.4‑6は、アプリB→アプリAの順でインストールされた場合であり、セキュリティ面からみて問題がある。アプリAが暗黙的Intentを送信して同一アプリ内の非公開Serviceを呼び出そうとするが、先にインストールしたアプリBの公開Activity(B-1)が呼び出されてしまう例を示している。これによりアプリAからアプリBに対してセンシティブな情報を送信する可能性が生じてしまう。アプリBがマルウェアであれば、そのままセンシティブな情報の漏洩に繋がる。
+Figure 4.4‑5 shows the scenario that applications are installed in the
+order, application A -\> application B. In this case, when application
+C sends implicit Intent, calling Private Service (A-1) fails. On the
+other hand, since application A can successfully call Private Service
+within the application by implicit Intent as expected, there won\'t be
+any problems in terms of security (counter-measure for Malware).
 
 ![](media/image46.png)
 ```eval_rst
@@ -3196,124 +3328,204 @@ Serviceのexported属性が無指定である場合にそのServiceが�
 .. height="3.8020833333333335in"}
 ```
 
-図 4.4‑6
+Figure 4.4‑5
 
-このように、Intent
-Filterを用いた非公開Serviceの暗黙的Intent呼び出しは、意図せぬアプリの呼び出しや意図せぬアプリへのセンシティブな情報の送信を避けるためにも行うべきではない。
+Figure 4.4‑6 shows the scenario that applications are installed in the
+order, applicationB -\> applicationA. There is a problem here, in terms
+of security. It shows an example that applicationA tries to call
+Private Service within the application by sending implicit Intent, but
+actually Public Activity (B-1) in application B which was installed
+earlier, is called. Due to this loophole, it is possible that
+sensitive information can be sent from applicationA to applicationB.
+If applicationB is Malware, it will lead the leakage of sensitive information.
 
-#### Serviceの実装方法について
-
-Serviceの実装方法は多様であり、サンプルコードで分類したセキュリティ上のタイプとの相性もあるため簡単に特徴を示す。startServiceを利用する場合とbindServiceを利用する場合とに大きく分かれるが、startServiceとbindServiceの両方で利用できるServiceを作成することも可能である。Serviceの実装方法を決定するために、次のような項目について検討を行うことになる。
-
--   Serviceを別アプリに公開するか（Serviceの公開）
-
--   実行中にデータのやり取りを行うか(データの相互送受信)
-
--   Serviceを制御するか（起動や終了など）
-
--   別プロセスとして実行するか（プロセス間通信）
-
--   複数の処理を同時に行うか(並行処理)
-
-実装方法の分類と各々の項目の実現の可否を表にすると、表
-4.4‑3のようになる。xは実現不可能かもしくは提供される機能とは別の枠組みが必要な場合を表す。
-
-表 4.4‑3 Serviceの実装方法の分類
+![](media/image47.png)
 ```eval_rst
-=============== ========== ============= ================ =========== ==========
-分類            | Service  | データの    | Serviceの制御  | プロセス  並行処理
-                | の公開   | 相互送受信  | (起動・終了)   | 間通信
-=============== ========== ============= ================ =========== ==========
-startService型  | o        | x           | o              | o          x
-IntentService型 | o        | x           | x              | o          x
-localbind型     | x        | o           | o              | x          x
-Messengerbind型 | o        | o           | o              | o          x
-AIDLbind型      | o        | o           | o              | o          o
-=============== ========== ============= ================ =========== ==========
+.. {width="4.739583333333333in"
+.. height="3.8020833333333335in"}
 ```
 
-##### startService型
+Figure 4.4‑6
 
-最も基本的なServiceである。Serviceクラスを継承し、onStartCommandで処理を行うServiceのことを指す。
+As shown above, using Intent filters to send implicit Intents to
+Private Service may result in unexpected behavior so it is best to
+avoid this setting.
 
-利用する側は、Service
-をIntentで指定してstartServiceを使用して呼び出す。Intentの送信元に対して、結果などのデータを直接返すことはできないため、Broadcastなど別の方法を組み合わせて実現する必要がある。具体的な実装例は、「4.4.1.1非公開Serviceを作る・利用する」を参照のこと。
+#### How to Implement Service 
 
-セキュリティ上のチェックはonStartCommandで行う必要があるが、送信元のパッケージ名が取得できないためパートナー限定Serviceには使用できない。
+Because methods for Service implementation are various and should be
+selected with consideration of security type which is categorized by
+sample code, each characteristics are briefly explained. It\'s divided
+roughly into the case using startService and the case using
+bindService. And it\'s also possible to create Service which can be
+used in both startService and bindService. Following items should be
+investigated to determine the implementation method of Service.
 
-##### IntentService型
+-   Whether to disclose Service to other applications or not (Disclosure of Service)
+-   Whether to exchange data during running or not (Mutual sending/receiving data)
+-   Whether to control Service or not (Launch or complete)
+-   Whether to execute as another process (communication between processes)
+-   Whether to execute multiple processes in parallel (Parallel process)
 
-IntentServiceはServiceを継承して作られているクラスである。呼び出し方は、startService型と同様である。通常のService（startService型）に比べて以下の特徴がある。
+Table 4.4‑3 shows category of implementation methods and feasibility of each item.
 
--   Intentの処理はonHandleIntentで行う。（onStartCommandは使わない）
+\"NG\" stands for impossible case or case that another frame work
+which is different from the provided function is required.
 
--   別スレッドで実行される
+Table 4.4‑4 Category of implementation methods for Service
 
--   処理がキューイングされる
+```eval_rst
+=================== ============ ================= ================= =================== ==========
+Category            | Disclosure | Mutual sending  | Control Service | Communication     | Parallel
+                    | of Service | /receiving data | (Boot/Exit)     | between processes | process
+=================== ============ ================= ================= =================== ==========
+startService type   | OK         | NG              | OK              | OK                | NG
+IntentService type  | OK         | NG              | NG              | OK                | NG
+local bind type     | NG         | OK              | OK              | NG                | NG
+Messenger bind type | OK         | OK              | OK              | OK                | NG
+AIDL bind type      | OK         | OK              | OK              | OK                | OK
+=================== ============ ================= ================= =================== ==========
+```
 
-処理が別スレッドのため呼び出しは即座に返され、キューイング機構によりシーケンシャルにIntentに対する処理が行われる。各Intentの並行処理はされないが、製品の要件によっては実装の簡素化の一つとして選択が可能である。Intentの送信元に対して、結果などのデータを直接返すことはできないため、Broadcastなど別の方法を組み合わせて実現する必要がある。具体的な実装例は、「4.4.1.2公開Serviceを作る・利用する」を参照のこと。
+##### startService type
 
-セキュリティ上のチェックはonHandleIntentで行う必要があるが、送信元のパッケージ名が取得できないためパートナー限定Serviceには使用できない。
+This is the most basic Service. This inherits Service class, and
+executes processes by onStartCommand.
 
-##### local bind型
+In user side, specify Service by Intent, and call by startService.
+Because data such as results cannot be returned to source of Intent
+directly, it should be achieved in combination with another method
+such as Broadcast. Please refer to \"4.4.1.1 Creating/Using Private
+Service\" for the concrete example.
 
-アプリと同じプロセス内でのみ動くローカルServiceを実装するための方法を指す。Binderクラスから派生したクラスを定義して、Serviceで実装した機能（メソッド）を呼び出し元に提供できるようにする。
+Checking in terms of security should be done by onStartCommand, but it
+cannot be used for partner only Service since the package name of the
+source cannot be obtained.
 
-利用する側は、Service
-をIntentで指定してbindServiceを使用して呼び出す。Serviceをbindする方法の中では、最もシンプルな実装であるが、別プロセスでの起動やServiceの公開ができないため用途は限定される。具体的な実装例は、サンプルコードに含まれるプロジェクト「Service
-PrivateServiceLocalBind」を参照のこと。
+##### IntentService type
 
-セキュリティ的には非公開Serviceのみ実装可能である。
+IntentService is the class which was created by inheriting Service.
+Calling method is same as startService type. Following are
+characteristics compared with standard service (startService type.)
 
-##### Messenger bind型
+-   Processing Intent is done by onHandleIntent (onStartCommand is not
+    used.)
+-   It\'s executed by another thread.
+-   Process is to be queued.
 
-Messengerの仕組みを利用してServiceとの連携を実現する方法を指す。
+Call is immediately returned because process is executed by another
+thread, and process towards Intents is sequentially executed by
+Queuing system. Each Intent is not processed in parallel, but it is
+also selectable depending on the product\'s requirement, as an option
+to simplify implementation. Since data such as results cannot be
+returned to source of Intent, it should be achieved in combination
+with another method such as Broadcast. Please refer to "4.4.1.2
+Creating/Using Public Service\" for the concrete example of implementation.
 
-Serviceを利用する側からもMessageの返信先としてMessengerを渡すことができるため、双方でのデータのやり取りが比較的容易に実現可能である。また、処理はキューイングされるため、スレッドセーフに動作する特徴がある。各Messageの並行処理はされないが、製品の要件によっては実装の簡素化の一つとして選択が可能である。利用する側は、Service
-をIntentで指定してbindServiceを使用して呼び出す。具体的な実装例は、「4.4.1.4自社限定Service」を参照のこと。
+Checking in terms of security should be done by onHandleIntent, but it
+cannot be used for partner only Service since the package name of the
+source cannot be obtained.
 
-セキュリティ上のチェックはonBindやMessage
-Handlerで行う必要があるが、送信元のパッケージ名が取得できないためパートナー限定Serviceには使用できない。
+##### local bind type
 
-##### AIDL bind型
+This is a method to implement local Service which works only within
+the process same as an application. Define the class which was derived
+from Binder class, and prepare to provide the feature (method) which
+was implemented in Service to caller side.
 
-AIDLの仕組みを利用してServiceとの連携を実現する方法を指す。AIDLによってインターフェースを定義し、Serviceの持つ機能をメソッドとして提供する。また、AIDLで定義したインターフェースを利用側で実装することで、コールバックを実現することもできる。マルチスレッド呼び出しは可能だが、排他処理はされないのでService側で明示的に実装する必要がある。
+From user side, specify Service by Intent and call Service by using
+bindService. This is the most simple implementation method among all
+methods of binding Service, but it has limited usages since it cannot
+be launched by another process and also Service cannot be disclosed.
+See project \"Service PrivateServiceLocalBind\" which is included in
+Sample code, for the concrete implementation example.
 
-利用する側は、Service
-をIntentで指定してbindServiceを使用して呼び出す。具体的な実装例は、「4.4.1.3パートナー限定Service」を参照のこと。
+From the security point of view, only private Service can be implemented.
 
-セキュリティ上のチェックは自社限定ServiceではonBindで、パートナー限定ServiceではAIDLで定義したインターフェースの各メソッドで行う必要がある。本文書で分類した全セキュリティタイプのServiceに利用可能である。
+##### Messenger bind type
 
-SQLiteを使う
+This is the method to achieve the linking with Service by using Messenger system.
+
+Since Messenger can be given as a Message destination from Service
+user side, the mutual data exchanging can be achieved comparatively
+easily. In addition, since processes are to be queued, it has a
+characteristic that behaves \"thread-safely". Parallel process for
+each process is not possible, but it is also selectable as an option
+to simplify the implementation depending on the product\'s
+requirement. Regarding user side, specify Service by Intent, and call
+Service by using bindService. See \"4.4.1.4 Creating/Using In-house
+Service\" for the concrete implementation example.
+
+Security check in onBind or by Message Handler is necessary, however,
+it cannot be used for partner only Service since package name of
+source cannot be obtained.
+
+##### AIDL bind type
+
+This is a method to achieve linking with Service by using AIDL system.
+Define interface by AIDL, and provide features that Service has as a
+method. In addition, call back can be also achieved by implementing
+interface defined by AIDL in user side, Multi-thread calling is
+possible, but it\'s necessary to implement explicitly in Service side
+for exclusive process.
+
+User side can call Service, by specifying Intent and using
+bindService. Please refer to \"4.4.1.3 Creating/Using Partner
+Service\" for the concrete implementation example.
+
+Security must be checked in onBind for In-house only Service and by
+each method of interface defined by AIDL for partner only Service.
+
+This can be used for all security types of Service which are described
+in this Guidebook.
+
+Using SQLite
 ------------
 
-本文書ではSQLiteを使用してデータベースの作成および操作を行う際にセキュリティ上で注意すべき点をまとめる。主なポイントは、データベースファイルのアクセス権の適切な設定と
-SQL
-インジェクションに対する対策である。ここでは、直接外部からデータベースファイルの読み書きを許す(複数アプリで共有する)ようなデータベースはここでは想定せずContent
-Provider
-のバックエンドやアプリ単体での使用を前提とする。また、ある程度センシティブな情報を扱っていることを想定しているが、そうでない場合も他アプリからの想定外の読み書きを避けるためにもここで挙げる対策を適用することをお勧めする。
+Herein after, some cautions in terms of security when
+creating/operating database by using SQLite. Main points are
+appropriate setting of access right to database file, and
+counter-measures for SQL injection. Database which permits
+reading/writing database file from outside directly (sharing among
+multiple applications) is not supposed here, but suppose the usage in
+backend of Content Provider and in an application itself. In addition,
+it is recommended to adopt counter-measures mentioned below in case of
+handling not so much sensitive information, though handling a certain
+level of sensitive information is supposed here.
 
-### サンプルコード<!-- b48a65ad -->
+### Sample Code<!-- b48a65ad -->
 
-#### データベースの作成と操作　
+#### Creating/Operating Database
+
 ```eval_rst
-Androidのアプリでデータベースを扱う場合、SQLiteOpenHelperを使用することでデータベースファイルの適切な配置およびアクセス権の設定（他のアプリがアクセスできない設定）ができる [13]_。ここでは、アプリ起動時にデータベースを作成し、UI上からデータの検索・追加・変更・削除を行う簡単なアプリを例に、外部からの入力に対して不正なSQLが実行されないようにSQLインジェクション対策したサンプルコードを示す。
+When handling database in Android application, appropriate
+arrangements of database files and access right setting (Setting for
+denying other application\'s access) can be achieved by using
+SQLiteOpenHelper [13]_. Here is an example of easy application that
+creates database when it\'s launched, and executes
+searching/adding/changing/deleting data through UI. Sample code is what
+counter-measure for SQL injection is done, to avoid from incorrect SQL
+being executed against the input from outside.
 
-.. [13] ファイルの配置に関しては、SQLiteOpenHelperのコンストラクタの第2引数（name）にファイルの絶対パスも指定できる。そのため、誤ってSDカードを直接指定した場合には他のアプリからの読み書きが可能になるので注意が必要である。
+.. [13] As regarding file storing, the absolute file path can be
+    specified as the 2nd parameter (name) of SQLiteOpenHelper
+    constructor. Therefore, need attention that the stored files can be
+    read and written by the other applications if the SD Card path is specified.
 ```
-![](media/image47.png)
+
+![](media/image48.png)
 ```eval_rst
 .. {width="5.541666666666667in"
 .. height="4.395833333333333in"}
 ```
 
-図 4.5‑1
+Figure 4.5‑1
 
-ポイント：
+Points:
 
-1.  データベース作成にはSQLiteOpenHelperを使用する
-2.  SQLインジェクションの対策として入力値をSQL文に使用する場合にはプレースホルダを利用する
-3.  SQLインジェクションの保険的な対策としてアプリ要件に従って入力値をチェックする
+1.  SQLiteOpenHelper should be used for database creation.
+2.  Use place holder.
+3.  Validate the input value according the application requirements.
 
 SampleDbOpenHelper.java
 ```eval_rst
@@ -3322,13 +3534,12 @@ SampleDbOpenHelper.java
    :encoding: shift-jis
 ```
 
-DataSearchTask.java （SQLite Databaseプロジェクト）
+DataSearchTask.java (SQLite Database project)
 ```eval_rst
 .. literalinclude:: CodeSamples/SQLite Database.DataSearchTask.java
    :language: java
    :encoding: shift-jis
 ```
-
 
 DataValidator.java
 ```eval_rst
@@ -3337,133 +3548,185 @@ DataValidator.java
    :encoding: shift-jis
 ```
 
+### Rule Book<!-- 48e87243 -->
 
-### ルールブック<!-- 48e87243 -->
+Using SQLite, follow the rules below accordingly.
 
-SQLiteを使用する際には以下のルールを守ること。
+1.  Set DB File Location and Access Right Correctly (Required)
+2.  Use Content Provider for Access Control When Sharing DB Data with
+    Other Application (Required)
+3.  Place Holder Must Be Used in the Case Handling Variable Parameter
+    during DB Operation (Required)
 
-1.  DBファイルの配置場所、アクセス権を正しく設定する （必須）
+#### Set DB File Location and Access Right Correctly (Required)
 
-1.  他アプリとDBデータを共有する場合はContent Providerでアクセス制御する （必須）
+Considering the protection of DB file data, DB file location and
+access right setting is the very important elements that need to be
+considered together.
 
-2.  DB 操作時に可変パラメータを扱う場合はプレースホルダを使用する （必須）
+For example, even if file access right is set correctly, a DB file can
+be accessed from anybody in case that it is arranged in a location
+which access right cannot be set, e.g. SD card. And in case that it\'s
+arranged in application directory, if the access right is not
+correctly set, it will eventually allow the unexpected access.
+Following are some points to be met regarding the correct allocation
+and access right setting, and the methods to realize them.
 
+About location and access right setting, considering in terms of
+protecting DB file (data), it\'s necessary to execute 2 points as per below.
 
-
-#### DBファイルの配置場所、アクセス権を正しく設定する （必須）
-
-DBファイルのデータの保護を考えた場合、DBファイルの配置場所とアクセス権の設定は合わせて考慮すべき重要な要素である。
-
-例えば、ファイルのアクセス権を正しく設定したつもりでも、SD
-カードなどアクセス権の設定を行えない場所に配置している場合には、誰からでもアクセス可能なDBファイルになってしまう。また、アプリディレクトリに配置した場合でも、アクセス権を正しく設定しないと意図しないアクセスを許してしまうことになる。ここでは、配置場所とアクセス権設定について守るべき点を挙げた後、それを実現するための方法について説明する。
-
-まず配置場所とアクセス権設定については、DBファイル(データ)を保護する観点から考えると、以下の2点を実施する必要がある。
 ```eval_rst
-1. 配置場所
+1. Location
 
-Context\#getDatabasePath(String name)で取得できるファイルパスや場合によってはContext\#getFilesDir で取得できるディレクトリの場所に配置する [14]_
+Locate in file path that can be obtained by
+Context#getDatabasePath(String name), or in some cases, directory
+that can be obtained by Context#getFilesDir [14]_.
 
-2. アクセス権
+2. Access right
 
-MODE_PRIVATE（=ファイルを作成したアプリのみがアクセス可能）モードに設定する
+Set to MODE_PRIVATE ( = it can be accessed only by the application
+which creates file) mode.
 
-.. [14] どちらのメソッドも該当するアプリだけが読み書き権限を与えられ、他のアプリからはアクセスができないディレクトリ（パッケージディレクトリ）のサブディレクトリ以下のパスが取得できる。
+.. [14] Both methods provide the path under (package) directory which is
+    able to be read and written only by the specified application.
 ```
-この2点を実施することで、他のアプリからアクセスできないDBファイルの作成を行うことができる。これらを実施するためには以下の方法が挙げられる。
 
-1\. SQLiteOpenHelperを使用する
+By executing following 2 points, DB file which cannot be accessed by
+other applications can be created. Here are some methods to execute them.
 
-2\. Context\#openOrCreateDatabaseを使用する
+1\. Use SQLiteOpenHelper
 
-DBファイルの作成に際しては、SQLiteDatabase\#openOrCreateDatabaseを使用することもできる。しかし、このメソッドを使用した場合、Androidスマートフォンの機種によっては、他のアプリから読み取り可能なDBファイルが作成されることが分かっている。そのため、このメソッドの使用は避けて、他の方法を利用することを推奨する。上に挙げた2つの方法について、それぞれの特徴を以下で説明する。
+2\. Use Context\#openOrCreateDatabase
 
-##### SQLiteOpenHelperを使用する
+When creating DB file, SQLiteDatabase\#openOrCreateDatabase can be
+used. However, when using this method, DB files which can be read out
+from other applications are created, in some Android smartphone
+devices. So it is recommended to avoid this method, and using other
+methods. Each characteristics for the above 2 methods are as per below.
+
+##### Using SQLiteOpenHelper
+
 ```eval_rst
-SQLiteOpenHelperを使用する場合、開発者はあまり多くのことを考えなくてもよい。SQLiteOpenHelperを派生したクラスを作成し、コンストラクタの引数にDBの名前（ファイル名に使われる） [15]_ を指定すれば、自動的に上記のセキュリティ要件を満たすDBファイルを作成してくれる。
+When using SQLiteOpenHelper, developers don't need to be worried
+about many things. Create a class derived from SQLiteOpenHelper, and
+specify DB name (which is used for file name) [15]_ to constructer's
+parameter, then DB file which meets above security requirements, are
+to be created automatically.
 
-「4.5.1.1 データベースの作成と操作」に具体的な使用方法を示しているので参照すること。
+Refer to specific usage method for "4.5.1.1 Creating/Operating Database" for how to use.
 
-.. [15] （ドキュメントに記述はないが）SQLiteOpenHelper
-    の実装ではDBの名前にはファイルのフルパスを指定できるので、SDカードなどアクセス権の設定できない場所のパスが意図せず入力されないように注意が必要である。
+.. [15] (Undocumented in Android reference) Since the full file path can
+    be specified as the database name in SQLiteOpenHelper
+    implementation, need attention that specifying the place (path)
+    which does not have access control feature (e.g. SD cards) unintentionally.
 ```
-##### Context\#openOrCreateDatabaseを使用する
 
-Context\#openOrCreateDatabaseメソッドを使用してDBの作成を行う場合、ファイルのアクセス権をオプションで指定する必要があり、明示的にMODE\_PRIVATEを指定する。
+##### Using Context\#openOrCreateDatabase
 
-ファイルの配置に関しては、DB名（ファイル名に使用される）の指定をSQLiteOpenHelperと同様に行えるので、自動的に前述のセキュリティ要件を満たすファイルパスにファイルが作成される。ただし、フルパスも指定できるのでSDカードなどを指定した場合、MODE\_PRIVATEを指定しても他アプリからアクセス可能になってしまうため注意が必要である。
+When creating DB by using Context\#openOrCreateDatabase method, file
+access right should be specified by option, in this case specify
+MODE\_PRIVATE explicitly.
 
-DBに対して明示的にアクセス許可設定を行う例：MainActivity.java
+Regarding file arrangement, specifying DB name (which is to be used to
+file name) can be done as same as SQLiteOpenHelper, a file is to be
+created automatically, in the file path which meets the above
+mentioned security requirements. However, full path can be also
+specified, so it\'s necessary to pay attention that when specifying SD
+card, even though specifying MODE\_PRIVATE, other applications can
+also access.
+
+Example to execute accsee permission setting to DB explicitly: MainActivity.java
+
 ```java
 public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        
-        //データベースの構築
+
+        //Construct database
         try {
-           //MODE_PRIVATEを設定してDBを作成
-           db = Context.openOrCreateDatabase("Sample.db", 
-                                                     MODE_PRIVATE, null);
+            //Create DB by setting MODE_PRIVATE
+            db = Context.openOrCreateDatabase("Sample.db", MODE_PRIVATE, null);
         } catch (SQLException e) {
-            //データベース構築に失敗した場合ログ出力
+            //In case failed to construct DB, log output
             Log.e(this.getClass().toString(), getString(R.string.DATABASE_OPEN_ERROR_MESSAGE));
             return;
         }
-        //省略 その他の初期化処理
+        //Omit other initial process
     }
 ```
+
 ```eval_rst
-なお、アクセス権の設定はMODE_PRIVATEと合わせて以下の3種類があり、MODE\_WORLD\_READABLEとMODE\_WORLD\_WRITEABLEはOR演算で同時指定することもできる。ただし、MODE\_PRIVATE以外はAPI Level 17以降ではdeprecatedとなっており、API Level 24 以降ではセキュリティ例外が発生する。API Level 15以降を対象とする場合でも、通常はこのフラグを使用しないことが望ましい [16]_。
+There are three possible settings for access privileges:
+MODE_PRIVATE, MODE_WORLD_READABLE, and MODE_WORLD_WRITEABLE.
+These constants can be specified together by "OR" operator. However,
+all settings other than MODE_PRIVATE are deprecated in API Level 17
+and later versions, and will result in a security exception in API
+Level 24 and later versions. Even for apps intended for API Level 15
+and earlier, it is generally best not to use these flags. [16]_
 
--   MODE\_PRIVATE 作成アプリのみ読み書き可能
+- MODE_PRIVATE Only creator application can read and write
+- MODE_WORLD_READABLE Creator application can read and write, Others can only read in
+- MODE_WORLD_WRITEABLE Creator application can read and write, Others can only write in
 
--   MODE\_WORLD\_READABLE 作成アプリは読み書き可能、他は読み込みのみ
-
--   MODE\_WORLD\_WRITEABLE 作成アプリは読み書き可能、他は書き込みのみ
-
-.. [16] MODE\_WORLD\_READABLEおよびMODE\_WORLD\_WRITEABLEの性質と注意点については、「4.6.3.2
-    ディレクトリのアクセス権設定」を参照
+.. [16] For more information as to MODE_WORLD_READABLE and
+    MODE_WORLD_WRITEABLE and points of caution regarding their use,
+    see Section "4.6.3.2 Access Permission Setting for the Directory"
 ```
-#### 他アプリとDBデータを共有する場合はContent Providerでアクセス制御する （必須）
 
-他のアプリとDBデータを共有する手段として、DBファイルをWORLD\_READABLE、WORLD\_WRITABLEとして作成し、他のアプリから直接アクセスできるようにするという方法がある。しかし、この方法ではDBにアクセスするアプリやDBへの操作を制限できないため、意図しない相手（アプリ）にデータを読み書きされることもある。結果として、データの機密性や整合性に問題が生じたり、マルウェアの攻撃対象となったりする可能性も考えられる。
+#### Use Content Provider for Access Control When Sharing DB Data with Other Application (Required)
 
-以上のことから、AndroidにおいてDBデータを他のアプリと共有する場合は、Content
-Providerを使うことを強くお勧めする。Content
-Providerを使うことにより、DBに対するアクセス制御を実現できるというセキュリティの観点からのメリットだけでなく、DBスキーマ構造をContent
-Provider内に隠ぺいできるといった設計観点のメリットもある。
+The method to share DB data with other application is that create DB
+file as WORLD\_READABLE, WORLD\_WRITEABLE, to other applications to
+access directly. However, this method cannot limit applications which
+access to DB or operations to DB, so data can be read-in or written by
+unexpected party (application). As a result, it can be considered that
+some problems may occur in confidentiality or consistency of data, or
+it may be an attack target of Malware.
 
-#### DB 操作時に可変パラメータを扱う場合はプレースホルダを使用する （必須）
+As mentioned above, when sharing DB data with other applications in
+Android, it\'s strongly recommended to use Content Provider. By using
+Content Provider, there are some merits, not only the merits from the
+security point of view which is the access control on DB can be
+achieved, but also merits from the designing point of view which is DB
+scheme structure can be hidden into Content Provider.
 
-SQLインジェクションを防ぐという意味で、任意の入力値を　SQL文に組み込む時はプレースホルダを使用するべきである。プレースホルダを使用したSQLの実行方法としては以下の2つの方法を挙げることができる。
+#### Place Holder Must Be Used in the Case Handling Variable Parameter during DB Operation. (Required)
 
-1.  SQLiteDatabase\#compileStatement()を使用して SQLiteStatement
-    を取得する。その後、
-    SQLiteStatement\#bindString()、bindLong()などを使用してパラメータをプレースホルダに配置する
+In the sense that preventing from SQL injection, when incorporating
+the arbitrary input value to SQL statement, placeholder should be
+used. There are 2 methods as per below to execute SQL using placeholder.
 
-2.  SQLiteDatabeseクラスのexecSQL()、insert()、update()、delete()、query()、rawQuery()、replace()などを呼び出す際にプレースホルダを持ったSQL文を使用する
+1.  Get SQLiteStatement by using SQLiteDatabase\#compileStatement(), and
+    after that place parameter to placeholder by using
+    SQLiteStatement\#bindString() or bindLong() etc.
 
-なお、SQLiteDatabase\#compileStatement()を使用して、SELECT
-コマンドを実行する場合、
+2.  When calling execSQL(), insert(), update(), delete(), query(),
+    rawQuery() and replace() in SQLiteDatabese class, use SQL statement
+    which has placeholder.
 
-「SELECTコマンドの結果として先頭の1要素(1行1列目)しか取得できない」
+In addition, when executing SELECT command, by using
+SQLiteDatabase\#compileStatement(), there is a limitation that \"only
+the top 1 element can be obtained as a result of SELECT command,\" so
+usages are limited.
 
-という制限があるので用途が限られる。
+In either method, the data content which is given to placeholder is
+better to be checked in advance according the application
+requirements. Following is the further explanation for each method.
 
-どちらの方式を使う場合でも、プレースホルダに与えるデータの内容は事前にアプリ要件に従ってチェックされていることが望ましい。以下で、それぞれの方法について説明する。
+##### When Using SQLiteDatabase\#compileStatement():
 
-##### SQLiteDatabase\#compileStatement()を使用する場合：
+Data is given to placeholder in the following steps.
 
-以下の手順でプレースホルダへデータを渡す。
+1.  Get the SQL statement which includes placeholder by using
+    SQLiteDatabase\#compileStatement(), as SQLiteStatement.
+2.  Set the created as SQLiteStatement objects to placeholder by using
+    the method like bindLong() and bindString().
+3.  Execute SQL by method like execute() of ExecSQLiteStatement object.
 
-1.  SQLiteDatabase\#compileStatement()を使用してプレースホルダを含んだSQL文をSQLiteStatementとして取得する。
+Use case of placeholder: DataInsertTask.java (an extra)
 
-2.  作成したSQLiteStatementオブジェクトに対して、bindLong()、bindString()などのメソッドを使用してプレースホルダに設定する。
-
-3.  SQLiteStatementオブジェクトのexecute()などのメソッドによってSQLを実行する。
-
-プレースホルダ使用例：DataInsertTask.java（抜粋）
 ```java
-//データ追加タスク
+//Adding data task
 public class DataInsertTask extends AsyncTask<String, Void, Void> {
     private MainActivity    mActivity;
     private SQLiteDatabase  mSampleDB;
@@ -3479,13 +3742,13 @@ public class DataInsertTask extends AsyncTask<String, Void, Void> {
         String  name = params[1];
         String  info = params[2];
 
-        //★ポイント3★ アプリケーション要件に従って入力値をチェックする
-       if (!DataValidator.validateData(idno, name, info))
+        // *** POINT 3 *** Validate the input value according the application requirements.
+        if (!DataValidator.validateData(idno, name, info))
         {
-        	return null;
+            return null;
         }
-        //データ追加処理
-        //プレースホルダを使用する
+        // Adding data task
+        // *** POINT 2 *** Use place holder
         String commandString = "INSERT INTO " + CommonData.TABLE_NAME + " (idno, name, info) VALUES (?, ?, ?)";
         SQLiteStatement sqlStmt = mSampleDB.compileStatement(commandString);
         sqlStmt.bindString(1, idno);
@@ -3496,53 +3759,59 @@ public class DataInsertTask extends AsyncTask<String, Void, Void> {
         } catch (SQLException e) {
             Log.e(DataInsertTask.class.toString(), mActivity.getString(R.string.UPDATING_ERROR_MESSAGE));
         } finally {
-        	sqlStmt.close();
+            sqlStmt.close();
         }
         return null;
     }
-
-    // ～省略～
+    ... Abbreviation ...
 }
 ```
 
-あらかじめ実行するSQL文をオブジェクトとして作成しておきパラメータを当てはめる形である。実行する処理が確定しているので、SQLインジェクションが発生する余地はない。また、SQLiteStatementオブジェクトを再利用することで処理効率を高めることができるというメリットもある。
+This is a type that SQL statement to be executed as object is created
+in advance, and parameters are allocated to it. The process to execute
+is fixed, so there\'s no room for SQL injection to occur. In addition,
+there is a merit that process efficiency is enhanced by reutilizing SQLiteStatement object.
 
-##### SQLiteDatabaseが提供する各処理用のメソッドを使用する場合：
+##### In the Case Using Method for Each Process which SQLiteDatabase provides:
 
-SQLiteDatabaseが提供するDB操作メソッドには、SQL文を使用するものとそうでないものがある。SQL文を使用するメソッドにSQLiteDatabase\#
-execSQL()/rawQuery()などがあり、以下の手順で実行する。
+There are 2 types of DB operation methods that SQLiteDatabase
+provides. One is what SQL statement is used, and another is what SQL
+statement is not used. Methods that SQL statement is used are
+SQLiteDatabase\#execSQL()/rawQuery() and it\'s executed in the following steps.
 
-1.  プレースホルダを含んだSQL文を用意する。
+1.  Prepare SQL statement which includes placeholder.
+2.  Create data to allocate to placeholder.
+3.  Send SQL statement and data as parameter, and execute a method for process.
 
-2.  プレースホルダに割り当てるデータを作成する。
+On the other hand,
+SQLiteDatabase\#insert()/update()/delete()/query()/replace() is the
+method that SQL statement is not used. When using them, data should be
+sent as per the following steps.
 
-3.  SQL文とデータを引数として渡して処理用メソッドを実行する。
+1.  In case there\'s data to insert/update to DB, register to ContentValues.
+2.  Send ContentValues as parameter, and execute a method for each
+    process (In the following example, SQLiteDatabase\#insert())
 
-一方、SQL文を使用しないメソッドには、SQLiteDatabase\#insert()/update()/delete()/query()/replace()などがある。これらを使用する場合には、以下の手順でデータを渡す。
+Use case of metod for each process (SQLiteDatabase\#insert())
 
-1.  DBに対して挿入/更新するデータがある場合には、ContentValuesに登録する。
-
-2.  ContentValuesを引数として渡して、各処理用メソッド（以下の例ではSQLiteDatabase\#insert()）を実行する。
-
-各処理用メソッド（SQLiteDatabase\#insert()）を使用する例
 ```java
     private SQLiteDatabase  mSampleDB;
     private void addUserData(String idno, String name, String info) {
 
-       //値の妥当性（型、範囲）チェック、エスケープ処理
-       if (!validateInsertData(idno, name, info)) {
-           //バリデーションを通過しなかった場合、ログ出力
-           Log.e(this.getClass().toString(), getString(R.string.VALIDATION_ERROR_MESSAGE));
-           return 
-       }
+        // Validity check of the value(Type, range), escape process
+        if (!validateInsertData(idno, name, info)) {
+            // If failed to pass the validation, log output
+            Log.e(this.getClass().toString(), getString(R.string.VALIDATION_ERROR_MESSAGE));
+            return;
+        }
 
-        //挿入するデータの準備
+        // Prepare data to insert
         ContentValues insertValues = new ContentValues();
         insertValues.put("idno", idno);
         insertValues.put("name", name);
         insertValues.put("info", info);
 
-        //Insert実行
+        // Execute Insert
         try {
             mSampleDb.insert("SampleTable", null, insertValues);
         } catch (SQLException e) {
@@ -3552,19 +3821,28 @@ execSQL()/rawQuery()などがあり、以下の手順で実行する。
     }
 ```
 
-この例では、SQLコマンドを直接記述せず、SQLiteDatabaseが提供する挿入用のメソッドを使用している。SQLコマンドを直接使用しないため、この方法もSQLインジェクションの余地はないと言える。
+In this example, SQL command is not directly written, for instead, a
+method for inserting which SQLiteDatabase provides, is used. SQL
+command is not directly used, so there\'s no room for SQL injection in this method, too.
 
-### アドバンスト<!-- 6461be2f -->
+### Advanced Topics<!-- 6461be2f -->
 
-#### SQL文のLIKE述語でワイルドカードを使用する際にエスケープ処理を施す
+#### When Using Wild Card in LIKE Predicate of SQL Statement, Escape Process Should Be Implemented
 
-LIKE述語のワイルドカード（%、\_）を含む文字列をプレースホルダの入力値として使用した場合、そのままだとワイルドカードとして機能するため、必要に応じて事前にエスケープ処理を施す必要がある。必要なケースとしてはワイルドカードを単体の文字（\"%\"や\"\_\"）として扱いたい場合が当てはまる。
+When using character string which includes wild card (%, \_) of LIKE
+predicate, as input value of place holder, it will work as a wild card
+unless it is processed properly, so it\'s necessary to implement
+escape process in advance according the necessity. It is the case
+which escape process is necessary that wild card should be used as a
+single character (\"%\" or \"\_\").
 
-実際のエスケープ処理は、以下のサンプルコードのようにESCAPE句を使用して行うことができる。
+The actual escape process is executed by using ESCAPE clause as per
+below sample code.
 
-LIKEを利用した場合のエスケープ処理の例
+Example of ESCAPE process in case of using LIKE
+
 ```java
-//データ検索タスク
+// Data search task
 public class DataSearchTask extends AsyncTask<String, Void, Cursor> {
     private MainActivity        mActivity;
     private SQLiteDatabase      mSampleDB;
@@ -3584,17 +3862,17 @@ public class DataSearchTask extends AsyncTask<String, Void, Cursor> {
 
         Cursor cur;
 
-        // ～省略～
+        ... Abbreviation ...
 
-        //infoを条件にしてlike検索（部分一致）
-        //ポイント：ワイルドカードに相当する文字はエスケープ処理する
-        String argString = info.replaceAll("@", "@@"); //入力として受け取ったinfo内の$をエスケープ
-        argString = argString.replaceAll("%", "@%"); //入力として受け取ったinfo内の%をエスケープ
-        argString = argString.replaceAll("_", "@_"); //入力として受け取ったinfo内の_をエスケープ
+        // Execute like search(partly match) with the condition of info
+        // Point: Escape process should be performed on characters which is applied to wild card
+        String argString = info.replaceAll("@", "@@"); // Escape $ in info which was received as input
+        argString = argString.replaceAll("%", "@%"); // Escape % in info which was received as input
+        argString = argString.replaceAll("_", "@_"); // Escape _ in info which was received as input
         String selectionArgs[] = {argString};
 
         try {
-            //ポイント：プレースホルダを使用する
+            // Point: Use place holder
             cur = mSampleDB.query("SampleTable", cols, "info LIKE '%' || ? || '%' ESCAPE '@'", 
                                    selectionArgs, null, null, null);
         } catch (SQLException e) {
@@ -3603,7 +3881,7 @@ public class DataSearchTask extends AsyncTask<String, Void, Cursor> {
         }
         return cur;
     }
-    
+
     @Override
     protected void onPostExecute(Cursor resultCur) {
         mProgressDialog.dismiss();
@@ -3612,194 +3890,240 @@ public class DataSearchTask extends AsyncTask<String, Void, Cursor> {
 }
 ```
 
-#### プレースホルダを使用できないSQLコマンドに対して外部入力を使う
+#### Use External Input to SQL Command in which Place Holder Cannot Be Used
 
-テーブルの作成や削除などのDBオブジェクトを処理対象としたSQL文を実行する場合、テーブル名などの値に対してプレースホルダを使うことはできない。基本的には、プレースホルダの使用できない値に対して、外部から入力された任意の文字列を使用するようなデータベースの設計はすべきでない。
+When executing SQL statement which process targets are DB objects like
+table creation/deletion etc., placeholder cannot be used for the value
+of table name. Basically, DB should not be designed using arbitrary
+character string which was input from outside in case that placeholder
+cannot be used for the value.
 
-仕様や機能上の制限でプレースホルダを使用できない場合は、入力値に危険が無いかどうか実行前に確認し、必要な処理を施すことが必須となる。
+When placeholder cannot be used due to the restriction of
+specifications or features, whether the Input value is dangerous or
+not, should be verified before execution, and it\'s necessary to
+implement necessary processes.
 
-基本的には、
+Basically,
 
-1.  文字列パラメータとして使用する場合、文字のエスケープやクォート処理を施す
+1.  When using as character string parameter, escape or quote process
+    for character should be made.
+2.  When using as numeric value parameter, verify that characters other
+    than numeric value are not included.
+3.  When using as identifier or command, verify whether characters which
+    cannot be used are not included, along with 1.
 
-2.  数値パラメータとして使用する場合、数字以外の文字が混入していないことを確認する
+should be executed.
 
-3.  識別子、コマンドとして使用する場合、1．に加え、使用できない文字が含まれていないことを確認する
+> Reference: [http://www.ipa.go.jp/security/vuln/documents/website\_security\_sql.pdf](http://www.ipa.go.jp/security/vuln/documents/website_security_sql.pdf) (Japanese)
 
-を実施する。
+#### Take a Countermeasure that Database Is Not Overwritten Unexpectedly
 
-> 参照：[http://www.ipa.go.jp/security/vuln/documents/website\_security\_sql.pdf](http://www.ipa.go.jp/security/vuln/documents/website_security_sql.pdf)
-
-#### 不用意にデータベースの書き換えが行われないための対策を行う
 ```eval_rst
-SQLiteOpenHelper\#getReadableDatabase、getWritableDatabaseを使用してDBのインスタンスを取得した場合、どちらのメソッドを利用してもDBは読み書き可能な状態でオープンされる [17]_。また、Context\#openOrCreateDatabase、SQLiteDatabase\#openOrCreateDatabaseなども同様である。
+In case getting instance of DB by
+SQLiteOpenHelper#getReadableDatabase, getWriteableDatabase,
+DB is to be opened in readable/WRITEABLE state by using either
+method [17]_. In addition, it's same to Context#openOrCreateDatabase,
+SQLiteDatabase#openOrCreateDatabase, etc.
 
-.. [17] getReableDatabase
-    は基本的にはgetWritableDatabaseで取得するのと同じオブジェクトを返す。ディスクフルなどの状況で書き込み可能オブジェクトを生成できない場合にリードオンリーのオブジェクトを返すという仕様である（getWritableDatabaseはディスクフルなどの状況では実行エラーとなる）。
+.. [17] getReableDatabase() returns the same object which can be got by
+    getWritableDatabase. This spec is, in case writable object cannot be
+    generated due to disc full etc., it will return Read- only object.
+    (getWritableDatabase() will be execution error under the situation
+    like disc full etc.)
 ```
-これは、アプリ操作や実装の不具合により意図せずDBの中身を書き換えてしまう（書き換えられてしまう）可能性を意味している。基本的にはアプリの仕様と実装の範囲で対応できると考えられるが、アプリの検索機能など、読み取りしか必要のない機能を実装する場合は、データベースを読み取り専用でオープンすることで、設計や検証の簡素化ひいてはアプリ品質の向上に繋がる場合があるので、状況に応じて検討をお勧めする。
 
-具体的には、SQLiteDatabase\#openDatabaseにOPEN\_READONLYを指定してデータベースをオープンする。
+It means that contents of DB may be overwritten unexpectedly by application operation or by
+defects in implementation. Basically, it can be supported by the
+application's spec and range of implementation, but when implementing
+the function which requires only read in function like application's
+searching function etc., opening database by read-only, it may lead to
+simplify designing or inspection and furthermore, lead to enhance
+application quality, so it's recommended depends on the situation.
 
-読み取り専用でデータベースをオープンする
+Specifically, open database by specifying OPEN\_READONLY to SQLiteDatabase\#openDatabase.
+
+Open database by read-only.
+
 ```java
-    // ～省略～
+    ... Abbreviation ...
 
-    // データベースのオープン(データベースは作成済みとする)
-    SQLiteDatabase db 
-           = SQLiteDatabase.openDatabase(SQLiteDatabase.getDatabasePath("Sample.db"), null, OPEN_READONLY);
+    // Open DB(DB should be created in advance)
+    SQLiteDatabase db
+        = SQLiteDatabase.openDatabase(SQLiteDatabase.getDatabasePath("Sample.db"), null, OPEN_READONLY);
 ```
 
-> 参照：[http://developer.android.com/reference/android/database/sqlite/SQLiteOpenHelper.html - getReadableDatabase()](http://developer.android.com/reference/android/database/sqlite/SQLiteOpenHelper.html#getReadableDatabase())
+> Reference: [http://developer.android.com/reference/android/database/sqlite/SQLiteOpenHelper.html - getReadableDatabase()](http://developer.android.com/reference/android/database/sqlite/SQLiteOpenHelper.html#getReadableDatabase())
 
-#### アプリの要件に従ってDBの入出力データの妥当性をチェックする
+#### Verify the Validity of Input/Output Data of DB, According to Application\'s Requirement 
 
-SQLiteは型に寛容なデータベースであり、DB上でIntegerとして宣言されているカラムに対して文字型のデータを格納することが可能である。DB内のデータは、数値型を含む全てのデータが平文の文字データとしてDB内に格納されている。このため、Integer型のカラムに対して文字列型の検索（　LIKE
-'%123%' など）を行うことも可能である。また、VARCHAR(100)
-のようにデータの最大長を記述してもそれ以上の長さのデータが入力可能であるなど、SQLiteでの値の制限（正当性確認）は期待できない。
+SQLite is the database which is tolerant types, and it can store
+character type data into columns which is declared as Integer in DB.
+Regarding data in database, all data including numeric value type is
+stored in DB as character data of plain text. So searching of
+character string type, can be executed to Integer type column. (LIKE
+\'%123%\' etc.) In addition, the limitation for the value in SQLite
+(validity verification) is untrustful since data which is longer than
+limitation can be input in some case, e.g. VARCHAR(100).
 
-このため、SQLiteを使用するアプリは、このようなDBの特性に注意して予期せぬデータをDBに格納したり取得したりしないようにアプリの要件に従って対処する必要がある。対処の方法としては次の2つがある。
+So, applications which use SQLite, need to be very careful about this
+characteristics of DB, and it is necessary take actions according to
+application requirements, not to store unexpected data to DB or not to
+get unexpected data. Countermeasures are as per below 2 points.
 
-1.  データをデータベースに格納する際、型や長さなどの条件が一致しているか確認する
+1.  When storing data in database, verify that type and length are matched.
+2.  When getting the value from database, verify whether data is beyond
+    the supposed type and length, or not.
 
-2.  データベースから値を取得した際、データが想定外の型や長さでないか確認する
+Following is an example of the code which verifies that the Input
+value is more than 1.
 
-以下では、例として入力値が1以上の数字であることを検証するコードを示す。
+Verify that the Input value is more than 1 (Extract from MainActivity.java)
 
-例：入力データが1以上の数字であることを確認する（MainActivity.javaより抜粋）
 ```java
 public class MainActivity extends Activity {
 
-    // ～省略～
+    ... Abbreviation ...
 
-    //追加処理
+    // Process for adding
     private void addUserData(String idno, String name, String info) {
-        //Noのチェック
+        // Check for No
         if (!validateNo(idno, CommonData.REQUEST_NEW)) {
             return;
         }
 
-        //データ追加処理
+        // Inserting data process
         DataInsertTask task = new DataInsertTask(mSampleDb, this);
-        task.execute(idno, name, info);        
+        task.execute(idno, name, info);
     }
 
-    // ～省略～
+    ... Abbreviation ...
 
     private boolean validateNo(String idno, int request) {
         if (idno == null || idno.length() == 0) {
             if (request == CommonData.REQUEST_SEARCH) {
-                //検索処理の時は未指定をOKにする
+                // When search process, unspecified is considered as OK.
                 return true;
-            } else {   
-                //検索処理以外の時はnull、空文字はエラー
+            } else {
+                // Other than search process, null and blank are error.
                 Toast.makeText(this, R.string.IDNO_EMPTY_MESSAGE, Toast.LENGTH_LONG).show();
                 return false;
             }
         }
 
-        //数字であることを確認する
+        // Verify that it's numeric character
         try {
-            // 1以上の値
+            // Value which is more than 1
             if (!idno.matches("[1-9][0-9]*")) {
-                //数字以外の時はエラー
+                // In case of not numeric character, error
                 Toast.makeText(this, R.string.IDNO_NOT_NUMERIC_MESSAGE, Toast.LENGTH_LONG).show();
                 return false;
             }
         } catch (NullPointerException e) {
-            //今回のケースではあり得ない
+            // It never happen in this case
             return false;
         }
-
         return true;
     }
 
-    // ～省略～
+    ... Abbreviation ...
 }
 ```
 
-#### DBに格納するデータについての考察
+#### Consideration - the Data Stored into Database
 
-SQLiteでは、データをファイルに格納する際に以下のような実装になっている。
+In SQLite implementation, when storing data to file is as per below.
 
--   数値型を含む全てのデータが平文の文字データとしてDBファイル内に格納される
+-   All data including numeric value type are stored into DB file as
+    character data of plain text.
+-   When executing data deletion to DB, data itself is not deleted form
+    DB file. (Only deletion mark is added.)
+-   When updating data, data before updating has not been deleted, and
+    still remains there in DB file.
 
--   DBに対してデータの削除を行ってもデータ自体はDBファイルから削除されない（削除マークが付くのみ）
+So, the information which \"must have\" been deleted may still remain
+in DB file. Even in this case, take counter-measures according this
+Guidebook, and when Android security function is enabled, data/file
+may not be directly accessed by the third party including other
+applications. However, considering the case that files are picked out
+by passing through Android\'s protection system like root privilege is
+taken, in case the data which gives huge influence on business is
+stored, data protection which doesn\'t depend on Android protection
+system, should be considered.
 
--   データを更新した場合もDBファイル内には更新前のデータも削除されず残っている
+As above reasons, the important data which is necessary to be
+protected even when device\'s root privilege is taken, should not be
+stored in DB of SQLite, as it is. In case need to store the important
+data, it\'s necessary to implement counter-measures, or encrypt overall DB.
 
-よって、削除された「はず」の情報がDBファイル内に残ったままの状態になっている可能性がある。この場合でも、本文書に従って対策を施し、Android
-のセキュリティ機能が有効であれば、他アプリを含む第三者からデータ・ファイルに直接アクセスされる心配はない。ただし、root権限を奪取されるなどAndroidの保護機構を迂回してファイルを抜き出される可能性を考えると、ビジネスに大きな影響を与えるデータが格納されている場合には、Android保護機構に頼らないデータ保護も検討しなければならない。
+When encryption is necessary, there are so many issues that are beyond
+the range of this Guidebook, like handling the key which is used for
+encryption or code obfuscation, so as of now it\'s recommended to
+consult the specialist when developing an application which handles
+data that has huge business impact.
 
-これらの理由により、端末のroot権限が奪取された場合でも守る必要があるような重要なデータはSQLiteのDBにそのまま格納すべきではない。どうしても重要なデータを格納せざるを得ない場合には暗号化したデータを格納する、DB全体を暗号化する、などの対策が必要となる。
+Please refer to \"4.5.3.6 \[Reference\] Encrypt SQLite Database
+(SQLCipher for Android)\" library which encrypts database is introduced here.
 
-実際に暗号化が必要な場合、暗号化に使う鍵の扱いやコードの難読化など本文書の範囲を超える課題が多いので、現時点でビジネスインパクトの大きなデータを扱うアプリの開発には専門家への相談をお勧めする。
+#### \[Reference\] Encrypt SQLite Database (SQLCipher for Android)
 
-参考として「4.5.3.6 \[参考\]SQLiteデータベースを暗号化する(SQLCipher for
-Android)」に、データベースを暗号化するライブラリを紹介しておく。
+SQLCipher is the SQLite extension that provides encryption of
+transparent 256 bit AES for database. It is open sourced (BSD license),
+and maintained/managed by Zetetic LLC. In a world of mobile,
+SQLCipher is widely used in Nokia/QT, Apple\'s iOS.
 
-#### \[参考\]SQLiteデータベースを暗号化する(SQLCipher for Android)
+SQLCipher for Android project is aiming to support the standard
+integrated encryption for SQLite database in Android environment. By
+creating the standard SQLite\'s API for SQLCipher, developers can use
+the encrypted database with the same coding as per usual.
 
-SQLCipherは、データベースファイルの透過的な256ビットAESの暗号化を提供するSQLite拡張である。現在は、オープンソース(BSDライセンス)化され、Zetetic
-LLCによって維持・管理されている。モバイルの世界では、SQLCipherは、ノキア/QT
-、アップルのiOSで広く使用されている。
+Reference: [https://guardianproject.info/code/sqlcipher/](https://guardianproject.info/code/sqlcipher/)
 
-SQLCipher for
-Androidプロジェクトは、Android環境におけるSQLiteデータベースの標準の統合化された暗号化をサポートすることを目的としている。標準のSQLiteのAPIをSQLCipher用に作成することで、開発者は通常と同じコーディングで暗号化されたデータベースを利用できるようになっている。
+##### How to Use
 
-参照：[https://guardianproject.info/code/sqlcipher/](https://guardianproject.info/code/sqlcipher/)
+Application developers can use SQLCipher by following 3 steps below.
 
-##### 使い方
+1.  Locate sqlcipher.jar, libdatabase\_sqlcipher.so,
+    libsqlcipher\_android.so and libstlport\_shared.so in application\'s lib directory.
+2.  Regarding all source files, change all android.database.sqlite.\*
+    which is specified by import, to
+    info.guardianproject.database.sqlite.\*. In addition,
+    android.database.Cursor can be used as it is.
+3.  Initialize database in onCreate(), and set password when opening database.
 
-アプリ開発者は以下の３つの作業をすることでSQLCipherの利用が可能になる。
+Easy code example
 
-1.  アプリの lib ディレクトリに sqlcipher.jar
-    および、libdatabase\_sqlcipher.so、libsqlcipher\_android.so、libstlport\_shared.soを配置する。
-
-2.  全てのソースファイルについて、import で指定されている
-    android.database.sqlite.\*
-    を全てinfo.guardianproject.database.sqlite.\*
-    に変更する。なお、android.database.Cursorはそのまま使用可能である。
-
-3.  onCreate()の中でデータベースを初期化し、データベースをオープンする際にパスワードを設定する。
-
-簡単なコード例
 ```java
-SQLiteDatabase.loadLibs(this);                   //まず ライブラリをContextを使用して初期化する
-SQLiteOpenHelper.getWritableDatabase(passwoed):  //引数はパスワード（String型 セキュアに取得したものと仮定）
+SQLiteDatabase.loadLibs(this);                   // First, Initialize library by using context.
+SQLiteOpenHelper.getWritableDatabase(passwoed);  // Parameter is password(Suppose that it's string type and it's got in a secure way.)
 ```
 
-SQLiteDatabase.loadLibs(this); //まず
-ライブラリをContextを使用して初期化する
+SQLCipher for Android was version 1.1.0 at the time of writing, and
+now version 2.0.0 is under developing, and RC4 is disclosed now. In
+terms of the past usage in Android and stability of API, it\'s
+necessary to be verified later, but currently still there\'s a room to
+consider as encryption solution of SQLite, which can be used in Android.
 
-SQLiteOpenHelper.getWritableDatabase(passwoed):
-//引数はパスワード（String型 セキュアに取得したものと仮定）
+##### Library Structure
 
-SQLCipher for
-Androidは執筆時点でバージョン1.1.0であり、2.0.0版が開発進行中でRC4が公開されている状況である。Android
-における使用実績やAPIの安定性という点で今後検証が必要となるが、現時点でAndroidで利用可能なSQLiteの暗号化ソリューションとして検討する余地はある。
-
-##### ライブラリ構成
-
-SQLCipherを使用するためにはSDKとして含まれている以下のファイルが必要となる。
+The following files which are included as SDK, are necessary, to use SQLCipher.
 
 -   assets/icudt46l.zip 2,252KB<br/>
-    端末の /system/usr/icu/ 以下にicudt46l.datが存在しない場合に必要となる。<br/>
-    icudt46l.datが見つからない場合、このzipが解凍されて使用される。
+    It\'s necessary when icudt46l.dat doesn\'t exist below /system/usr/icu/ and its earlier version.<br/>
+    When icudt46l.dat cannot be found, this zip is unzipped and to be used.
 -   libs/armeabi/libdatabase\_sqlcipher.so 44KB
 -   libs/armeabi/libsqlcipher\_android.so 1,117KB
 -   libs/armeabi/libstlport\_shared.so 555KB<br/>
-    Nativeライブラリ。<br/>
-    SQLCipherの初期ロード時（SQLiteDatabase\#loadLibs()呼び出し時）に読み込まれる。
+    Native Library.<br/>
+    It\'s read out when SQLCipher\'s initial load(When calling SQLiteDatabase\#loadLibs()).
 -   libs/commons-codec.jar 46KB
 -   libs/guava-r09.jar 1,116KB
 -   libs/sqlcipher.jar 102KB<br/>
-    Nativeライブラリを呼び出すJavaライブラリ。<br/>
-    sqlcipher.jarがメイン。あとはsqlcipher.jarから参照されている。
+    Java library which calls Native library.<br/>
+    sqlcipher.jar is main. Others are referred from sqlcipher.jar.
 
-合計：約5.12MB
+Total: about 5.12MB
 
-ただし、icudt46l.zipは解凍されると7MB程度になる。
+However, when icudt46l.zip is unzipped, it amounts to around 7MB.
 
 ファイルを扱う
 --------------
