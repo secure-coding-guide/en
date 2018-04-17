@@ -3498,7 +3498,7 @@ of MIC's SPI including features such as search tags. In the sample
 code below, we will demonstrate the use of this tool to present
 application privacy policy using the HTML files prepared by this tool.
 
-.. [47] http://www.kddilabs.jp/tech/public-tech/appgen.html
+.. [47] http://www.kddi-research.jp/newsrelease/2013/090401.html
 ```
 
 ```eval_rst
