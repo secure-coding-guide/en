@@ -5112,12 +5112,12 @@ scenario in which keys created using fingerprint authentication
 functions can become unusable. In Nexus5X, if fingerprint
 authentication features are used to create a key and this key is then
 newly registered as an addition to the fingerprint information, keys
-created earlier have been observed to become unusable. [50]_ In
+created earlier have been observed to become unusable. [48]_ In
 addition, one cannot exclude the possibility that a key which would
 ordinarily allow correct use may become unusable due to erroneous
 identification by a fingerprint sensor.
 
-.. [50] Information current as of the September 1, 2016 version. This may be revised in the future.
+.. [48] Information current as of the September 1, 2016 version. This may be revised in the future.
 ```
 
 #### Notify users that fingerprint registration will be required to create a key. (Recommended) 
