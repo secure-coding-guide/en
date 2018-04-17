@@ -1633,17 +1633,23 @@ running Android 6.0 (API Level 23) or later(Table 5.2‑1).
 
 Table 5.2‑1
 ```eval_rst
-============================ ======================= =============================================== =========================
-Terminal Android OS Version   App targetSDKVersion   Times at which app is granted permissions       User has control over permissions?
-============================ ======================= =============================================== =========================
-≧8.0                         | ≧26                   | App execution (granted individually)          | Yes
-                             | ＜26                  | App execution (granted by Permission Group)   | Yes
-                             | ＜23                  | App installation                              | Yes (rapid response required)
-≧6.0                         | ≧23                   | App execution (granted by Permission Group)   | Yes
-                             | ＜23                  | App installation                              | Yes (rapid response required)
-≦5.1                         | ≧23                   | App installation                                | No
-                             | ＜23                  | App installation                                | No
-============================ ======================= =============================================== =========================
++-----------------------------+----------------------+----------------------------------------------+------------------------------------+
+| Terminal Android OS Version | App targetSDKVersion | Times at which app is granted permissions    | User has control over permissions? |
++=============================+======================+==============================================+====================================+
+| ≧8.0                        | ≧26                  | App execution (granted individually)         | Yes                                |
+|                             +----------------------+----------------------------------------------+------------------------------------+
+|                             | ＜26                 | App execution (granted by Permission Group)  | Yes                                |
+|                             +----------------------+----------------------------------------------+------------------------------------+
+|                             | ＜23                 | App installation                             | Yes (rapid response required)      |
++-----------------------------+----------------------+----------------------------------------------+------------------------------------+
+| ≧6.0                        | ≧23                  | App execution (granted by Permission Group)  | Yes                                |
+|                             +----------------------+----------------------------------------------+------------------------------------+
+|                             | ＜23                 | App installation                             | Yes (rapid response required)      |
++-----------------------------+----------------------+----------------------------------------------+------------------------------------+
+| ≦5.1                        | ≧23                  | App installation                             | No                                 |
+|                             +----------------------+----------------------------------------------+------------------------------------+
+|                             | ＜23                 | App installation                             | No                                 |
++-----------------------------+----------------------+----------------------------------------------+------------------------------------+
 ```
 However, it should be noted that the effect of maxSdkVersion is
 limited.　When the value of maxSdkVersion is set 22 or earlier,
@@ -2095,57 +2101,57 @@ Table 5.3‑1 Function of Account Manager and Permission
 +------------------------------+---------------------------------------------------------------------+
 |                              | Functions that Account Manager provides                             |
 +------------------------------+--------------------------------+------------------------------------+
-|| Permission                  | Method                         || Explanation                       |
+|| Permission                  || Method                        || Explanation                       |
 +==============================+================================+====================================+
 || AUTHENTICATE_ACCOUNTS       | getPassword()                  || To get password                   |
 || (Only Packages which are    +--------------------------------+------------------------------------+
 || signed by the same key of   | getUserData()                  || To get user information           |
 || Authenticator, can use.)    +--------------------------------+------------------------------------+
-|                              | addAccountExplicitly()         || To add accounts to DB             |
-|                              +--------------------------------+------------------------------------+
-|                              | peekAuthToken()                || To get cached token               |
-|                              +--------------------------------+------------------------------------+
-|                              | setAuthToken()                 || To register authentication token  |
-|                              +--------------------------------+------------------------------------+
-|                              | setPassword()                  || To change password                |
-|                              +--------------------------------+------------------------------------+
-|                              | setUserData()                  || To set user information           |
-|                              +--------------------------------+------------------------------------+
-|                              | renameAccount()                || To rename account                 |
+||                             | addAccountExplicitly()         || To add accounts to DB             |
+||                             +--------------------------------+------------------------------------+
+||                             | peekAuthToken()                || To get cached token               |
+||                             +--------------------------------+------------------------------------+
+||                             | setAuthToken()                 || To register authentication token  |
+||                             +--------------------------------+------------------------------------+
+||                             | setPassword()                  || To change password                |
+||                             +--------------------------------+------------------------------------+
+||                             | setUserData()                  || To set user information           |
+||                             +--------------------------------+------------------------------------+
+||                             | renameAccount()                || To rename account                 |
 +------------------------------+--------------------------------+------------------------------------+
 || GET_ACCOUNTS                | getAccounts()                  || To get a list of all accounts     |
-|                              +--------------------------------+------------------------------------+
-|                              | getAccountsByType()            || To get a list of all accounts     |
-|                              |                                || which account types are same      |
-|                              +--------------------------------+------------------------------------+
-|                              | getAccountsByTypeAndFeatures() || To get a list of all accounts     |
-|                              |                                || which have the specified function |
-|                              +--------------------------------+------------------------------------+
-|                              | addOnAccountsUpdatedListener() || To register event listener        |
-|                              +--------------------------------+------------------------------------+
-|                              | hasFeatures()                  || Whether it has the specified      |
-|                              |                                || function or not                   |
+||                             +--------------------------------+------------------------------------+
+||                             | getAccountsByType()            || To get a list of all accounts     |
+||                             |                                || which account types are same      |
+||                             +--------------------------------+------------------------------------+
+||                             | getAccountsByTypeAndFeatures() || To get a list of all accounts     |
+||                             |                                || which have the specified function |
+||                             +--------------------------------+------------------------------------+
+||                             | addOnAccountsUpdatedListener() || To register event listener        |
+||                             +--------------------------------+------------------------------------+
+||                             | hasFeatures()                  || Whether it has the specified      |
+||                             |                                || function or not                   |
 +------------------------------+--------------------------------+------------------------------------+
 || MANAGE_ACCOUNTS             | getAuthTokenByFeatures()       || To get authentication token of    |
-|                              |                                || the accounts which have the       |
-|                              |                                || specified function                |
-|                              +--------------------------------+------------------------------------+
-|                              | addAccount()                   || To request a user to add accounts |
-|                              +--------------------------------+------------------------------------+
-|                              | removeAccount()                || To remove an account              |
-|                              +--------------------------------+------------------------------------+
-|                              | clearPassword()                || Initialize password               |
-|                              +--------------------------------+------------------------------------+
-|                              | updateCredentials()            || Request a user to change password |
-|                              +--------------------------------+------------------------------------+
-|                              | editProperties()               || Change Authenticator setting      |
-|                              +--------------------------------+------------------------------------+
-|                              | confirmCredentials()           || Request a user to input password  |
-|                              |                                || again                             |
+||                             |                                || the accounts which have the       |
+||                             |                                || specified function                |
+||                             +--------------------------------+------------------------------------+
+||                             | addAccount()                   || To request a user to add accounts |
+||                             +--------------------------------+------------------------------------+
+||                             | removeAccount()                || To remove an account              |
+||                             +--------------------------------+------------------------------------+
+||                             | clearPassword()                || Initialize password               |
+||                             +--------------------------------+------------------------------------+
+||                             | updateCredentials()            || Request a user to change password |
+||                             +--------------------------------+------------------------------------+
+||                             | editProperties()               || Change Authenticator setting      |
+||                             +--------------------------------+------------------------------------+
+||                             | confirmCredentials()           || Request a user to input password  |
+||                             |                                || again                             |
 +------------------------------+--------------------------------+------------------------------------+
 || USE_CREDENTIALS             | getAuthToken()                 || To get authentication token       |
-|                              +--------------------------------+------------------------------------+
-|                              | blockingGetAuthToken()         || To get authentication token       |
+||                             +--------------------------------+------------------------------------+
+||                             | blockingGetAuthToken()         || To get authentication token       |
 +------------------------------+--------------------------------+------------------------------------+
 || MANAGE_ACCOUNTS             | invalidateAuthToken()          || To delete cached token            |
 || or                          |                                |                                    |
@@ -2335,23 +2341,18 @@ sample codes.
 Table 5.4‑1 Comparison between HTTP communication method and HTTPS
 communication method
 ```eval_rst
-+-----------------+---------------------------------------+-----------------------+------------------------+
-|                 |                                       | HTTP                  | HTTPS                  |
-+=================+=======================================+=======================+========================+
-| Characteristics | URL                                   | Starting with http:// | Starting with https:// |
-|                 |                                       |                       |                        |
-|                 | Encrypting contents                   | Not available         | Available              |
-|                 |                                       |                       |                        |
-|                 | Tampering detection of contents       | Impossible            | Possible               |
-|                 |                                       |                       |                        |
-|                 | Authenticating a server               | Impossible            | Possible               |
-+-----------------+---------------------------------------+-----------------------+------------------------+
-|| Damage         | Reading contents by attackers         | High                  | Low                    |
-|| Risk           |                                       |                       |                        |
-|                 | Modifying contents by attackers       | High                  | Low                    |
-|                 |                                       |                       |                        |
-|                 | Application's access to a fake server | High                  | Low                    |
-+-----------------+---------------------------------------+-----------------------+------------------------+
++------------------+----------------------------------------+------------------------+-------------------------+
+|                  |                                        || HTTP                  || HTTPS                  |
++==================+========================================+========================+=========================+
+|| Characteristics || URL                                   || Starting with http:// || Starting with https:// |
+||                 || Encrypting contents                   || Not available         || Available              |
+||                 || Tampering detection of contents       || Impossible            || Possible               |
+||                 || Authenticating a server               || Impossible            || Possible               |
++------------------+----------------------------------------+------------------------+-------------------------+
+|| Damage          || Reading contents by attackers         || High                  || Low                    |
+|| Risk            || Modifying contents by attackers       || High                  || Low                    |
+||                 || Application's access to a fake server || High                  || Low                    |
++------------------+----------------------------------------+------------------------+-------------------------+
 ```
 Table 5.4‑2 Explanation of HTTP/HTTPS communication Sample code
 ```eval_rst
@@ -2414,7 +2415,7 @@ application specs
     2016. Thus, to execute the sample code as is requires switching to
     an equivalent service.
 ```
-ポイント：
+Points:
 
 1.  Sensitive information must not be contained in send data.
 2.  Suppose that received data may be sent from attackers.
@@ -3497,7 +3498,7 @@ of MIC's SPI including features such as search tags. In the sample
 code below, we will demonstrate the use of this tool to present
 application privacy policy using the HTML files prepared by this tool.
 
-.. [47] http://www.kddilabs.jp/tech/public-tech/appgen.html
+.. [47] http://www.kddi-research.jp/newsrelease/2013/090401.html
 ```
 
 ```eval_rst
@@ -3917,9 +3918,19 @@ MainActivity.java
 		}
 ```
 
-#### 利用者情報を端末内のみで利用する場合、外部送信しない旨をユーザーに通知する （推奨）
+#### If you will only be using user data within the device, notify the user that data will not be transmitted externally. (Recommended)
 
-利用者の端末内部で一時的に利用者情報にアクセスするのみの場合であっても、利用者の理解を助け透明性を高めるために、その旨を伝えることが望ましい。具体的には、アクセスした利用者情報は、ある決まった目的のために端末内部で一時的に使用するのみであり、端末内に保存したり、外部サーバに送信したりしない旨をを利用者に通知すると良い。通知方法としては、マーケットプレイス上でのアプリ説明欄に記載するなどの方法が考えられる。なお、端末内での一時利用のみの場合は、アプリ・プライバシーポリシーへの記載は必須ではない。
+Even in cases in which user data will only be accessed temporarily
+within the user's device, it is a good idea to communicate this fact
+to the user to ensure that the user's understanding of the
+application's behavior remains full and transparent. More
+specifically, users should be informed that the user data accessed by
+an application will only be used within the device for a certain
+specific purpose and will not be stored or sent. Possible methods for
+communicating this content to users include specifying it within the
+description of the application on the application marketplace.
+Information that is only used temporarily within a device need not be
+discussed in the application privacy policy.
 
 ```eval_rst
 .. image:: media/image81.png
@@ -3969,35 +3980,35 @@ JSSEC Smartphone Applications"
 
 Table 5.5‑1
 ```eval_rst
-+---------------------------------------------+------------------------------------------------------------------------+
-| Term                                        | Description                                                            |
-+=============================================+========================================================================+
-|| Enterprise Privacy Policy                  || A privacy policy that defines a corporation's policies for protecting |
-|                                             || personal data. Created in accordance with Japan's Personal            |
-|                                             || Information Protection Law.                                           |
-+---------------------------------------------+------------------------------------------------------------------------+
-|| Application Privacy Policy                 || An application-specific privacy policy.                               |
-|                                             || Created in accordance with the guidelines of the Smartphone           |
-|                                             || Privacy Initiative (SPI) of Japan's Ministry of Internal Affairs and  |
-|                                             || detailed versions containing easily understandable explanations.      |
-+---------------------------------------------+------------------------------------------------------------------------+
-|| Summary version of the Application         || A brief document that concisely summarizes what user information      |
-|| Privacy Policy                             || an application will use, for what purpose, and whether or not this    |
-|                                             || information will be provided to third parties.                        |
-+---------------------------------------------+------------------------------------------------------------------------+
-|| Detailed version of the Application        || A detailed document that complies with the 8 items specified by the   |
-|| Privacy Policy                             || Smartphone Privacy Initiative (SPI) and the Smartphone Privacy        |
-|                                             || Initiative II (SPI II) of Japan's Ministry of Internal Affairs and    |
-|                                             || Communications (MIC).                                                 |
-+---------------------------------------------+------------------------------------------------------------------------+
-|| User data that is easy for users to change || Cookies, UUIDs, etc.                                                  |
-+---------------------------------------------+------------------------------------------------------------------------+
-|| User data that is difficulty for users to  || IMEIs, IMSIs, ICCIDs, MAC addresses, OS-generated IDs, etc.           |
-|| change                                     |                                                                        |
-+---------------------------------------------+------------------------------------------------------------------------+
-|| User data requiring particularly delicate  || Location information, address books, telephone numbers, email         |
-|| handling                                   || addresses, etc.                                                       |
-+---------------------------------------------+------------------------------------------------------------------------+
++-------------------------------------------------+------------------------------------------------------------------------+
+| Term                                            | Description                                                            |
++=================================================+========================================================================+
+|| **Enterprise Privacy Policy**                  || A privacy policy that defines a corporation's policies for protecting |
+|                                                 || personal data. Created in accordance with Japan's Personal            |
+|                                                 || Information Protection Law.                                           |
++-------------------------------------------------+------------------------------------------------------------------------+
+|| **Application Privacy Policy**                 || An application-specific privacy policy.                               |
+|                                                 || Created in accordance with the guidelines of the Smartphone           |
+|                                                 || Privacy Initiative (SPI) of Japan's Ministry of Internal Affairs and  |
+|                                                 || detailed versions containing easily understandable explanations.      |
++-------------------------------------------------+------------------------------------------------------------------------+
+|| **Summary version of the Application**         || A brief document that concisely summarizes what user information      |
+|| **Privacy Policy**                             || an application will use, for what purpose, and whether or not this    |
+|                                                 || information will be provided to third parties.                        |
++-------------------------------------------------+------------------------------------------------------------------------+
+|| **Detailed version of the Application**        || A detailed document that complies with the 8 items specified by the   |
+|| **Privacy Policy**                             || Smartphone Privacy Initiative (SPI) and the Smartphone Privacy        |
+|                                                 || Initiative II (SPI II) of Japan's Ministry of Internal Affairs and    |
+|                                                 || Communications (MIC).                                                 |
++-------------------------------------------------+------------------------------------------------------------------------+
+|| **User data that is easy for users to change** || Cookies, UUIDs, etc.                                                  |
++-------------------------------------------------+------------------------------------------------------------------------+
+|| **User data that is difficulty for users to**  || IMEIs, IMSIs, ICCIDs, MAC addresses, OS-generated IDs, etc.           |
+|| **change**                                     |                                                                        |
++-------------------------------------------------+------------------------------------------------------------------------+
+|| **User data requiring particularly delicate**  || Location information, address books, telephone numbers, email         |
+|| **handling**                                   || addresses, etc.                                                       |
++-------------------------------------------------+------------------------------------------------------------------------+
 ```
 
 #### Version-dependent differences in handling of Android IDs
@@ -4530,33 +4541,33 @@ Increase the Strengths of Passwords (Recommended)".
 Table 5.6‑4 Comparison of cryptographic methods for encryption and
 decryption
 ```eval_rst
-+-------------------------+--------------------------------------------------------------+
-|                         |  Encryption method                                           |
-+-------------------------+-------------------+-----------------+------------------------+
-| Item                    || Public key       || Shared key     || Password-based        |
-+=========================+===================+=================+========================+
-|| Processing of          || NO (processing   || OK             || OK                    |
-|| large-scale data       || cost too high)   |                 |                        |
-+-------------------------+-------------------+-----------------+------------------------+
-|| Protecting application || OK               || OK             || NO (allows            |
-|| (or service) assets    |                   |                 || eavesdropping         |
-|                         |                   |                 || by users)             |
-+-------------------------+-------------------+-----------------+------------------------+
-|| Protecting user assets || OK               || OK             || OK                    |
-+-------------------------+-------------------+-----------------+------------------------+
-|| Strength of encryption || Depends on key   || Depends on key || Depends on strength   |
-|                         || length           || length         || of password, on Salt, |
-|                         |                   |                 || and on the number of  |
-|                         |                   |                 || hash repetitions      |
-+-------------------------+-------------------+-----------------+------------------------+
-|| Key storage            || Easy (only       || Difficult      || Easy                  |
-|                         || public keys)     |                 |                        |
-+-------------------------+-------------------+-----------------+------------------------+
-|| Processing carried out || Encryption       || Encryption and || Encryption and        |
-|| by application         || (decryption is   || decryption     || decryption            |
-|                         || done on servers  |                 |                        |
-|                         || or elsewhere)    |                 |                        |
-+-------------------------+-------------------+-----------------+------------------------+
++-----------------------------+--------------------------------------------------------------+
+|                             |  Encryption method                                           |
++-----------------------------+-------------------+-----------------+------------------------+
+| Item                        || Public key       || Shared key     || Password-based        |
++=============================+===================+=================+========================+
+|| **Processing of**          || NO (processing   || OK             || OK                    |
+|| **large-scale data**       || cost too high)   |                 |                        |
++-----------------------------+-------------------+-----------------+------------------------+
+|| **Protecting application** || OK               || OK             || NO (allows            |
+|| **(or service) assets**    |                   |                 || eavesdropping         |
+|                             |                   |                 || by users)             |
++-----------------------------+-------------------+-----------------+------------------------+
+|| **Protecting user assets** || OK               || OK             || OK                    |
++-----------------------------+-------------------+-----------------+------------------------+
+|| **Strength of encryption** || Depends on key   || Depends on key || Depends on strength   |
+|                             || length           || length         || of password, on Salt, |
+|                             |                   |                 || and on the number of  |
+|                             |                   |                 || hash repetitions      |
++-----------------------------+-------------------+-----------------+------------------------+
+|| **Key storage**            || Easy (only       || Difficult      || Easy                  |
+|                             || public keys)     |                 |                        |
++-----------------------------+-------------------+-----------------+------------------------+
+|| **Processing carried out** || Encryption       || Encryption and || Encryption and        |
+|| **by application**         || (decryption is   || decryption     || decryption            |
+|                             || done on servers  |                 |                        |
+|                             || or elsewhere)    |                 |                        |
++-----------------------------+-------------------+-----------------+------------------------+
 ```
 -   Comparison of cryptographic methods for detecting data falsification
 
@@ -4567,31 +4578,31 @@ to data size is no longer relevant.
 Table 5.6‑5 Comparison of cryptographic methods for detecting data
 falsification
 ```eval_rst
-+-------------------------+--------------------------------------------------------------------+
-|                         |  Encryption method                                                 |
-+-------------------------+-------------------+---------------------+--------------------------+
-| Item                    || Public key       || Shared key         || Password-based          |
-+=========================+===================+=====================+==========================+
-|| Protecting application || OK               || OK                 || NO (allows              |
-|| (or service) assets    |                   |                     || falsification by users) |
-+-------------------------+-------------------+---------------------+--------------------------+
-|| Protecting user assets || OK               || OK                 || OK                      |
-+-------------------------+-------------------+---------------------+--------------------------+
-|| Strength of encryption || Depends on key   || Depends on key     || Depends on strength     |
-|                         || length           || length             || of password, on Salt,   |
-|                         |                   |                     || and on the number of    |
-|                         |                   |                     || hash repetitions        |
-+-------------------------+-------------------+---------------------+--------------------------+
-|| Key storage            || Easy (only       || Difficult          || Easy                    |
-|                         || public keys)     || Please refer to    |                          |
-|                         |                   || "5.6.3.4Protecting |                          |
-|                         |                   || Key"               |                          |
-+-------------------------+-------------------+---------------------+--------------------------+
-|| Processing carried out || Encryption       || MAC computation;   || MAC computation;        |
-|| by application         || (decryption is   || MAC verification   || MAC verification        |
-|                         || done on servers  |                     |                          |
-|                         || or elsewhere)    |                     |                          |
-+-------------------------+-------------------+---------------------+--------------------------+
++-----------------------------+--------------------------------------------------------------------+
+|                             |  Encryption method                                                 |
++-----------------------------+-------------------+---------------------+--------------------------+
+| Item                        || Public key       || Shared key         || Password-based          |
++=============================+===================+=====================+==========================+
+|| **Protecting application** || OK               || OK                 || NO (allows              |
+|| **(or service) assets**    |                   |                     || falsification by users) |
++-----------------------------+-------------------+---------------------+--------------------------+
+|| **Protecting user assets** || OK               || OK                 || OK                      |
++-----------------------------+-------------------+---------------------+--------------------------+
+|| **Strength of encryption** || Depends on key   || Depends on key     || Depends on strength     |
+|                             || length           || length             || of password, on Salt,   |
+|                             |                   |                     || and on the number of    |
+|                             |                   |                     || hash repetitions        |
++-----------------------------+-------------------+---------------------+--------------------------+
+|| **Key storage**            || Easy (only       || Difficult          || Easy                    |
+|                             || public keys)     || Please refer to    |                          |
+|                             |                   || "5.6.3.4Protecting |                          |
+|                             |                   || Key"               |                          |
++-----------------------------+-------------------+---------------------+--------------------------+
+|| **Processing carried out** || Encryption       || MAC computation;   || MAC computation;        |
+|| **by application**         || (decryption is   || MAC verification   || MAC verification        |
+|                             || done on servers  |                     |                          |
+|                             || or elsewhere)    |                     |                          |
++-----------------------------+-------------------+---------------------+--------------------------+
 ```
 
 MAC: Message authentication code
@@ -4761,35 +4772,35 @@ of Android OS.
 Table 5.6‑6 Android OS version and feature influenced by each
 vulnerabilities
 ```eval_rst
-+-------------------------+----------------------------------------------------------------------------+
-|                         |  Vulnerability                                                             |
-+-------------------------+-----------------------------------+----------------------------------------+
-| Android OS              || Insufficient entropy in the      || Can guess the random number seeds     |
-|                         || “Crypto” Provider implementation || used by OpenSSL in other applications |
-|                         || of SecureRandom                  ||                                       |
-+=========================+===================================+========================================+
-|| Android 4.1.x and      || -Default implementation of       || No impact                             |
-|| before                 || SecureRandom                     ||                                       |
-||                        || -Explicit use of Crypto Provider ||                                       |
-||                        || -Encryption functionality        ||                                       |
-||                        || provided by the Cipher class     ||                                       |
-||                        || -HTTPS communication             ||                                       |
-||                        || functionality, etc.              ||                                       |
-+-------------------------+-----------------------------------+----------------------------------------+
-|| Android 4.2 - 4.3.x    || -Use a clearly identified Crypto || -Default implementation of            |
-||                        || Provider                         || SecureRandom                          |
-||                        ||                                  || -Explicit use of AndroidOpenSSL       |
-||                        ||                                  || Provider                              |
-||                        ||                                  || -Direct use of random-number          |
-||                        ||                                  || generation functionality              |
-||                        ||                                  || provided by OpenSSL                   |
-||                        ||                                  || -Encryption functionality provided    |
-||                        ||                                  || by the Cipher class                   |
-||                        ||                                  || -HTTPS communication functionality,   |
-||                        ||                                  || etc.                                  |
-+-------------------------+-----------------------------------+----------------------------------------+
-|| Android 4.4 and later  || No impact                        || No impact                             |
-+-------------------------+-----------------------------------+----------------------------------------+
++---------------------------+----------------------------------------------------------------------------+
+|                           |  Vulnerability                                                             |
++---------------------------+-----------------------------------+----------------------------------------+
+| Android OS                || Insufficient entropy in the      || Can guess the random number seeds     |
+|                           || “Crypto” Provider implementation || used by OpenSSL in other applications |
+|                           || of SecureRandom                  ||                                       |
++===========================+===================================+========================================+
+|| **Android 4.1.x and**    || -Default implementation of       || No impact                             |
+|| **before**               || SecureRandom                     ||                                       |
+||                          || -Explicit use of Crypto Provider ||                                       |
+||                          || -Encryption functionality        ||                                       |
+||                          || provided by the Cipher class     ||                                       |
+||                          || -HTTPS communication             ||                                       |
+||                          || functionality, etc.              ||                                       |
++---------------------------+-----------------------------------+----------------------------------------+
+|| **Android 4.2 - 4.3.x**  || -Use a clearly identified Crypto || -Default implementation of            |
+||                          || Provider                         || SecureRandom                          |
+||                          ||                                  || -Explicit use of AndroidOpenSSL       |
+||                          ||                                  || Provider                              |
+||                          ||                                  || -Direct use of random-number          |
+||                          ||                                  || generation functionality              |
+||                          ||                                  || provided by OpenSSL                   |
+||                          ||                                  || -Encryption functionality provided    |
+||                          ||                                  || by the Cipher class                   |
+||                          ||                                  || -HTTPS communication functionality,   |
+||                          ||                                  || etc.                                  |
++---------------------------+-----------------------------------+----------------------------------------+
+|| **Android 4.4 and later**|| No impact                        || No impact                             |
++---------------------------+-----------------------------------+----------------------------------------+
 ```
 
 Since August 2013, patches that remove these Android OS
@@ -4842,27 +4853,31 @@ asset owners. For more information on asset classes, please refer to
 
 Table 5.6‑7 Asset classification and protective countermeasures
 ```eval_rst
-+--------------------+----------------+----------------+----------------+----------------+
-| 資産のオーナー     | 端末のユーザー                  | アプリ・サービス提供者          |
-+--------------------+----------------+----------------+----------------+----------------+
-| 資産レベル         | 高位           | 中低位         | 高位           | 中低位         |
-+--------------------+----------------+----------------+----------------+----------------+
-| 鍵の保存場所       | 保護方針                                                          |
-+--------------------+----------------+----------------+----------------+----------------+
-| ユーザーの記憶     | パスワードの強度の向上          | ユーザーパスワードの利用不可    |
-+--------------------+----------------+----------------+----------------+----------------+
-| アプリディレクトリ | 鍵データの     | アプリ以外から | 鍵データの     | アプリ以外から |
-|                    |                |                |                |                |
-| (非公開ストレージ) | 暗号化・難読化 | の読み書き禁止 | 暗号化・難読化 | の読み書き禁止 |
-+--------------------+----------------+----------------+----------------+----------------+
-| APKファイル        | | 鍵データの難読化                                                |
-|                    | | ※ ProguardなどJavaの難読化ツールの多くは、                      |
-|                    | | データ(文字)列を難読化しないことに注意                          |
-+--------------------+----------------+----------------+----------------+----------------+
-| SDカードなど       | | 鍵データの暗号化・難読化                                        |
-|                    |                                                                   |
-| (公開ストレージ)   |                                                                   |
-+--------------------+----------------+----------------+----------------+----------------+
++-----------------------+-----------------+------------------+-----------------+------------------+
+|| Asset owner          |  Device User                       |  Application / Service Provider    |
++-----------------------+-----------------+------------------+-----------------+------------------+
+|| Asset level          |  High           |  Medium / Low    |  High           |  Medium / Low    |
++-----------------------+-----------------+------------------+-----------------+------------------+
+|| Key storage          || Protection policy                                                      |
+|| location             ||                                                                        |
++=======================+=================+==================+=================+==================+
+|| **User's memory**    | Improve password strength          | Disallow the use of user passwords |
++-----------------------+-----------------+------------------+-----------------+------------------+
+|| **Application**      || Encryption or  || Forbid          || Encryption or  || Forbid          |
+|| **directory**        || obfuscation of || read/write      || obfuscation of || read/write      |
+|| **(non-public**      || key data       || operations      || key data       || operations      |
+|| **storage)**         ||                || from outside    ||                || from outside    |
+||                      ||                || the application ||                || the application |
++-----------------------+-----------------+------------------+-----------------+------------------+
+|| **APK file**         || Obfuscation of key data                                                |
+|                       || **Note:**                                                              |
+|                       || Be aware that most Java obfuscation tools, such as Proguard, do not    |
+|                       || obfuscate data (character) strings.                                    |
++-----------------------+-----------------+------------------+-----------------+------------------+
+|| **SD card or**       || Encryption or obfuscation of key data                                  |
+|| **elsewhere**        ||                                                                        |
+|| **(public storage)** ||                                                                        |
++-----------------------+-----------------+------------------+-----------------+------------------+
 ```
 
 In what follows, we will augment the discussion of protective measures
