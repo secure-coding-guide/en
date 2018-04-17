@@ -4805,26 +4805,42 @@ countermeasures (implementations) discussed in the following site.
 
 [http://android-developers.blogspot.jp/2013/08/some-securerandom-thoughts.html](http://android-developers.blogspot.jp/2013/08/some-securerandom-thoughts.html)
 
-#### 鍵の保護
+#### Protecting Key
 
-　　
+When using encryption techniques to ensure the security
+(confidentiality and integrity) of sensitive data, even the most
+robust encryption algorithm and key lengths will not protect data from
+third-party attacks if the data content of the keys themselves are
+readily available. For this reason, the proper handling of keys is
+among the most important items to consider when using encryption. Of
+course, depending on the level of the assets you are attempting to
+protect, the proper handling of keys may require extremely
+sophisticated design and implementation techniques which exceed the
+scope of these guidelines. Here we can only offer some basic ideas
+regarding the secure handling of keys for various applications and key
+storage locations; our discussion does not extend to specific
+implementation methods, and as necessary we recommend that you consult
+an expert in secure design and implementation for Android.
 
-センシティブな情報の安全性(機密性、完全性)を実現するために暗号技術を利用する際に、堅牢な暗号化アルゴリズムや鍵長を選んでも、鍵そのもののデータが簡単に取得できる状態では、第三者から情報の安全性を保つことはできない。そのため、暗号技術を利用する際の鍵の取り扱いは、もっとも重要な検討項目の一つである。一方で、守るべき資産のレベルによっては鍵の取り扱いは非常に高度な設計・実装を必要とするため本ガイドの範囲を超える。そこで本ガイドでは、鍵の配置場所と用途ごとに安全な鍵の取り扱いをするための基本的な考え方を示すにとどめ、具体的な実現方法に関しては言及しない。必要に応じてAndroidセキュリティ設計・実装に詳しい専門家に相談することをお勧めする。
+To begin, "Figure 5.6‑4 Places of encrypt keys and strategies for
+protecting them." illustrates the various places in which keys used
+for encryption and related purposes in Android smartphones and tablets
+may exist, and outlines strategies for protecting them.
 
-まずは、Androidスマートフォン/タブレットにおいて暗号化等に使う鍵が存在する可能性のある場所とその保護方針の概観を「図
-5.6‑4　暗号鍵が存在する場所と保護方針」に示す。
-
-![](media/image92.png)
+![](media/image85.png)
 ```eval_rst
 .. {width="5.642125984251969in"
 .. height="3.719685039370079in"}
 ```
 
-図 5.6‑4　暗号鍵が存在する場所と保護方針
+Figure 5.6‑4 Places of encrypt keys and strategies for protecting them.
 
-また、鍵によって守る資産の資産分類やオーナーによる保護方針の違いを表にまとめておく。資産レベルについては「3.1.3　資産分類と保護施策」を参照すること。
+The table below summarizes the asset classes of the assets protected
+by keys, as well as the protection policies appropriate for various
+asset owners. For more information on asset classes, please refer to
+"3.1.3 Asset Classification and Protective Countermeasures".
 
-表 5.6‑7　資産分類と保護方針
+Table 5.6‑7 Asset classification and protective countermeasures
 ```eval_rst
 +--------------------+----------------+----------------+----------------+----------------+
 | 資産のオーナー     | 端末のユーザー                  | アプリ・サービス提供者          |
@@ -4848,59 +4864,118 @@ countermeasures (implementations) discussed in the following site.
 | (公開ストレージ)   |                                                                   |
 +--------------------+----------------+----------------+----------------+----------------+
 ```
-以下、鍵の存在場所ごとに保護方針の補足を示す。
 
-##### ユーザーの記憶
+In what follows, we will augment the discussion of protective measures
+appropriate for the various places in which keys may be stored.
 
-この項ではパスワードベース暗号を想定している。パスワードから生成される鍵の場合は、鍵の保管場所はユーザーの記憶の中にあるため、保存場所からマルウェア等に漏洩することはない。ただし、パスワードの強度によっては簡単に鍵が再現されてしまうため、サービスへのログインパスワード等と同様にユーザーに対して一定のパスワード強度になるようにUIによって制限したり、メッセージによる注意喚起したりすることが必要となる。「5.5.2.8利用者情報を端末内のみで利用する場合、外部送信しない旨をユーザーに通知する
-（推奨）」も参照すること。また、ユーザーの記憶にあるパスワードは忘れる可能性も考慮にいれておかなければならない。パスワードを忘れた場合でもデータの復元が必要な場合は、バックアップデータを端末以外の安全な場所(サーバーなど)に保存しておく必要がある。
+##### Keys stored in a user's memory
 
-##### アプリディレクトリ内
+Here we are considering password-based encryption. When keys are
+generated from passwords, the key storage location is the user's
+memory, so there is no danger of leakage due to malware. However,
+depending on the strength of the password, it may be easy to reproduce
+keys. For this reason, it is necessary to take steps---similar to
+those taken when asking users to specify service login passwords---to
+ensure the strength of passwords; for example, passwords may be
+restricted by the UI, or warning messages may be used. Please refer to
+"5.6.2.6 Take Steps to Increase the Strengths of Passwords
+(Recommended)". Of course, when passwords are stored in a user's
+memory one must keep in mind the possibility that the password will be
+forgotten. To ensure that data may be recovered in the event of a
+forgotten password, it is necessary to store backup data in a secure
+location other than the device (for example, on a server).
 
-アプリのディレクトリ内にPrivateモードで保存した場合は他のアプリから鍵データを読み取られることはない。また、バックアップ機能をアプリで無効にした場合には、ユーザーも参照できなくなるので、アプリの資産を守る鍵をアプリディレクトリ内に保存する場合はバックアップを無効にすれば良い。
+##### Keys stored in application directories
 
-ただし、root権限を持つアプリやユーザーからも鍵を保護したい場合は、鍵データを暗号化もしくは難読化する必要がある。ユーザー資産を守る鍵を暗号化する場合にはパスワードベース暗号が利用できる。ユーザーにも秘密にしたいアプリの資産を暗号化する鍵を保護する場合には、APKファイルに鍵暗号化鍵を埋める必要があり、鍵暗号化鍵データを難読化する必要がある。
+When keys are stored in Private mode in application directories, the
+key data cannot be read by other applications. In addition, if the
+application has disabled backup functionality, users will also be
+unable to access the data. Thus, when storing keys used to protect
+application assets in application directories, you should disable backups.
 
-##### APKファイル内
+However, if you also need to protect keys from applications or users
+with root privileges, you must encrypt or obfuscate the keys. For keys
+used to protect user assets, you may use password-based encryption.
+For keys used to encrypt application assets that you wish to keep
+private from users as well, you must store the key used for key
+encryption in an APK file, and the key data must be obfuscated.
 
-APKファイル内に存在するデータは読み取り可能であるため、基本的には鍵のような秘匿データを含めるべきではない。鍵を含める場合は鍵データを難読化して、容易にAPKファイルから鍵データが取得されないように対策を講じる必要がある。
+##### Keys stored in APK Files
 
-##### 公開ストレージ(SDカードなど)内
+Because data in APK files may be accessed, in general this is not an
+appropriate place to store confidential data such as keys. When
+storing keys in APK files, you must obfuscate the key data and take
+steps to ensure that the data may not be easily read from the APK file.
 
-公開ストレージはすべてのアプリから読み取り可能なため、基本的には鍵のような秘匿データを含めるべきではない。鍵を含める場合は鍵データを暗号化・難読化して容易に鍵データが取得されないように対策する必要がある。「アプリディレクトリ内」のroot権限を持つアプリやユーザーからも鍵を保護したい場合の対策も参照すること。
+##### Keys stored in public storage locations (such as SD cards)
 
-##### プロセスメモリ内の鍵の扱い
+Because public storage can be accessed by all applications, in general
+it is not an appropriate place to store confidential data such as
+passwords. When storing keys in public locations, it is necessary to
+encrypt or obfuscate the key data to ensure that the data cannot be
+easily accessed. See also the protections suggested above under "Keys
+stored in application directories" for cases in which keys must also
+be protected from applications or users with root privileges.
 
-Androidの持つ暗号技術を使用する場合、上図におけるアプリプロセス以外の場所で暗号化もしくは難読化されていた鍵データは暗号処理の手前で必ず復号(パスワードベース鍵の場合は生成)が必要なため、プロセスメモリ内に鍵データが生のまま存在することになる。一方、アプリプロセスのメモリは通常別のアプリから読み書きすることはできないので、資産分類が本ガイドの対象範囲であれば、特別な対策を講じる必要性は少なく安全と言える。もし、アプリの扱う資産レベルや用途からプロセスメモリ内であっても鍵データがそのまま出現してはならない場合は、鍵データ・暗号ロジックの難読化など対策が必要であるが、一般にJava層での実現は難しく、JNI層での難読化ツールを使用することになる。これらの対応は本ガイドの範囲を超えるため、セキュア設計・実装の専門家と相談して対応すること。
+##### Handling of keys within process memory
 
-#### Google Play開発者サービスによるSecurity Providerの脆弱性対策
+When using the cryptographic technologies available in Android, key
+data that have been encrypted or obfuscated somewhere other than the
+application process shown in the figure above must be decrypted (or,
+for password-based keys, generated) in advance of the encryption
+procedure; in this case, key data will reside in process memory in
+unencrypted form. On the other hand, the memory of an application
+process may not generally be read by other applications, so if the
+asset class falls within the range covered by these guidelines there
+is no particular need to take specific steps to ensure security. In
+cases where---due to the specific objective in question or to the
+level of the assets handled by an application---it is unacceptable for
+key data to appear in unencrypted form (even though they are present
+that way in process memory), it may be necessary to resort to
+obfuscation or other techniques for key data and encryption logic.
+However, these methods are difficult to realize at the Java level;
+instead, you will use obfuscation tools at the JNI level. Such
+measures fall outside the scope of these guidelines; consult an expert
+in secure design and implementation.
 
-Google Play開発者サービス（バージョン5.0以降）では、Provider
-Installerという仕組みが提供されており、Security
-Providerの脆弱性対策に利用できる。
+#### Addressing Vulnerabilities with Security Provider from Google Play Services
 
-まず、Security Providerとは、Java Cryptography
-Architecture（JCA）に基づいて各種暗号関連アルゴリズムの実装を提供するものである。Androidアプリで暗号技術を用いる際には、Cipher、Signature、Macといったクラスを通じてこのSecurity
-Providerを利用できる。一般に、暗号技術関連の実装で脆弱性が明らかになったときは迅速な対応が求められる。なぜなら脆弱性が悪用された際に大きな被害に繋がる可能性があるためである。Security
-Providerも暗号技術が関係するため、脆弱性への修正がいち早く反映されることが望ましい。
+Google Play Services (Version 5.0 and later) provides a framework
+known as *Provider Installer* that may be used to address
+vulnerabilities in Security Provider.
 
-Security
-Providerの修正を反映する方法としては端末のアップデートが一般的である。端末のアップデートによる修正の反映は、メーカーがアップデートを用意し、ユーザーが用意されたアップデートを端末に適用するといったプロセスを経て行われる。そのため、アプリから、修正を含む最新の状態のSecurity
-Providerを使えるかどうかは、メーカーとユーザーの対応に左右される実態がある。それに対して、Google
-Play開発者サービスのProvider
-Installerを利用すると、自動更新されるSecurity
-Providerを使用できるようになる。
+First, Security Provider provides implementations of various
+encryption-related algorithms based on Java Cryptography Architecture
+(JCA). These Security Provider algorithms may be used via classes such
+as Cipher, Signature, and Mac to make use of encryption technology in
+Android apps. In general, rapid response is required whenever
+vulnerabilities are discovered in encryption-technology-related
+implementations. Indeed, the exploitation of such vulnerabilities for
+malicious purposes could result in major damage. Because encryption
+technologies are also relevant for Security Provider, it is desirable
+that revisions designed to address vulnerabilities be reflected as quickly as possible.
 
-Google Play開発者サービスのProvider Installerでは、アプリからProvider
-Installerを呼び出すことで、Google Play開発者サービスが提供するSecurity
-Providerを使用できるようになる。Google Play開発者サービスは、Google
-Playストアを通じて自動的にアップデートされるので、Provider
-Installerで提供されるSecurity
-Providerも、メーカーとユーザーの対応状況に関わらず、最新の状態に更新されている。
+The most common method of reflecting Security Provider revisions is to
+use device updates. The process of reflecting revisions via device
+updates begins with the device manufacturer preparing an update, after
+which users apply this update to their devices. Thus, the question of
+whether or not an app has access to an up-to-date version of Security
+Provider---including the most recent revisions---depends in practice
+on compliance from both manufacturers and users. In contrast, using
+Provider Installer from Google Play Services ensures that apps have
+access to automatically-updated versions of Security Provider.
 
-以下に、Provider Installerを呼び出すサンプルコードを示す。
+With Provider Installer from Google Play Services, calling Provider
+Installer from an app allows access to Security Provider as provided
+by Google Play Services. Google Play Services is automatically updated
+via the Google Play Store, and thus the Security Provider provided by
+Provider Installer will be automatically updated to the latest
+version, with no dependence on compliance from manufacturers or users.
 
-Provider Installerを呼び出す
+Sample code that calls Provider Installer is shown below.
+
+Call Provider Installer
+
 ```java
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.security.ProviderInstaller;
@@ -4918,13 +4993,12 @@ public class MainActivity extends Activity
 
     @Override
     public void onProviderInstalled() {
-        // Security Providerが最新、またはインストールが済んだときに呼ばれる
+        // Called when Security Provider is the latest version, or when installation completes.
     }
 
     @Override
     public void onProviderInstallFailed(int errorCode, Intent recoveryIntent) {
         GoogleApiAvailability.getInstance().showErrorNotification(this, errorCode);
-
     }
 }
 ```
