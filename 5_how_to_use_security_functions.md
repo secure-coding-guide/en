@@ -4497,172 +4497,311 @@ least one letter, one numeral, and one symbol.
 
 #### Choosing encryption methods
 
-「サンプルコード」では、暗号化・復号、改ざん検知の各々について3つの暗号方式の実装例を示した。用途によってどの暗号方式を使用するかも、「図
-5.6‑1 盗聴からデータを守るサンプルコードを選択するフローチャート」、「図
-5.6‑2　データの改ざんを検知するサンプルコードを選択するフローチャート」を利用して大まかに判断することができる。一方で、暗号方式の選択は、その特徴を比較することでより細やかに判断することもできる。以下に比較を示す。
+In the above sample codes, we showed implementation examples involving
+three types of cryptographic methods each for encryption and
+decryption and for detecting data falsification. You may use "Figure
+5.6‑1", "Figure 5.6‑2" to make a coarse-grained choice of which
+cryptographic method to use based on your application. On the other
+hand, more fine-tuned choices of cryptographic methods require more
+detailed comparisons of the features of various methods. In what
+follows we consider some of these comparisons.
 
--   暗号化・復号における暗号方式の比較
+-   Comparison of cryptographic methods for encryption and decryption
 
-公開鍵暗号は、処理コストが高いため大きなサイズのデータ処理には向かないが、暗号化と復号に使う鍵が異なるため、公開鍵のみアプリ側で扱い（暗号化のみ行い）、復号を別の（安全な）場所で行うような場合は鍵の管理が比較的容易である。共通鍵暗号は、制限の少ない万能な暗号方式であるが、暗号化・復号ともに同じ鍵を使用するため、アプリ内に鍵を安全に保持する必要があり、鍵の保護が難しい。パスワードベース暗号(パスワードを元にした共通鍵暗号)は、ユーザーのパスワードから鍵を生成するため、端末内に鍵に関する秘密を保存する必要がない。用途としては、ユーザーの資産を保護する場合のみに使える。また、暗号の強度がパスワードの強度に依存するため、資産の保護レベルに応じてパスワードを複雑にする必要がある。「5.6.2.6
-パスワードの強度を高める工夫をする （推奨）」も参照すること。
+Public-key cryptography has high processing cost and thus is not well
+suited for large-scale data processing. However, because the keys used
+for encryption and for decryption are different, it is relatively easy
+to manage keys in cases where you handle only the public key on the
+application side (i.e. you only perform encryption) and perform
+decryption in a separate (secure) location. Shared-key cryptography is
+an all-purpose encryption scheme with few limitations, but in this
+case the same key is used for encryption and decryption, and thus it
+is necessary to store the key securely within the application, making
+key management difficult. Password-based cryptography (shared-key
+cryptography based on a password) generates keys from user-specified
+passwords, obviating the need to store key-related secrets within
+devices. This method is used for applications protecting only user
+assets but not application assets. Because the strength of the
+encryption depends on the strength of the password, it is necessary to
+choose passwords whose complexity grows in proportion to the value of
+assets to be protected. Please refer to "5.6.2.6 Take Steps to
+Increase the Strengths of Passwords (Recommended)".
 
-表 5.6‑4 暗号化・復号における暗号方式の比較
+Table 5.6‑4 Comparison of cryptographic methods for encryption and
+decryption
 ```eval_rst
-+---------------------+-------------------+----------------+--------------------+
-|| 暗号方式           || 公開鍵           || 共通鍵        || パスワードベース  |
-+=====================+===================+================+====================+
-|| サイズの大きな     || NG(処理コストが  || OK            || OK                |
-|| データの処理       || 高い)            |                |                    |
-+---------------------+-------------------+----------------+--------------------+
-|| アプリ(サービス)   || OK               || OK            || NG(ユーザーによる |
-|| 資産の保護         |                   |                || 盗聴が可能)       |
-+---------------------+-------------------+----------------+--------------------+
-|| ユーザー           || OK               || OK            || OK                |
-|| 資産の保護         |                   |                |                    |
-+---------------------+-------------------+----------------+--------------------+
-|| 暗号の強度         || 鍵の長さに依存   || 鍵の長さに依存|| パスワードの強度、|
-|                     |                   |                || Salt、ハッシュの  |
-|                     |                   |                || 繰り返し回数に依存|
-+---------------------+-------------------+----------------+--------------------+
-|| 鍵の保護           || 容易(公開鍵のみ) || 困難          || 容易              |
-+---------------------+-------------------+----------------+--------------------+
-|| アプリで行う処理   || 暗号化(復号は    || 暗号化・復号  || 暗号化・復号      |
-|                     || サーバーなど)    ||               |                    |
-+---------------------+-------------------+----------------+--------------------+
++-------------------------+--------------------------------------------------------------+
+|                         |  Encryption method                                           |
++-------------------------+-------------------+-----------------+------------------------+
+| Item                    || Public key       || Shared key     || Password-based        |
++=========================+===================+=================+========================+
+|| Processing of          || NO (processing   || OK             || OK                    |
+|| large-scale data       || cost too high)   |                 |                        |
++-------------------------+-------------------+-----------------+------------------------+
+|| Protecting application || OK               || OK             || NO (allows            |
+|| (or service) assets    |                   |                 || eavesdropping         |
+|                         |                   |                 || by users)             |
++-------------------------+-------------------+-----------------+------------------------+
+|| Protecting user assets || OK               || OK             || OK                    |
++-------------------------+-------------------+-----------------+------------------------+
+|| Strength of encryption || Depends on key   || Depends on key || Depends on strength   |
+|                         || length           || length         || of password, on Salt, |
+|                         |                   |                 || and on the number of  |
+|                         |                   |                 || hash repetitions      |
++-------------------------+-------------------+-----------------+------------------------+
+|| Key storage            || Easy (only       || Difficult      || Easy                  |
+|                         || public keys)     |                 |                        |
++-------------------------+-------------------+-----------------+------------------------+
+|| Processing carried out || Encryption       || Encryption and || Encryption and        |
+|| by application         || (decryption is   || decryption     || decryption            |
+|                         || done on servers  |                 |                        |
+|                         || or elsewhere)    |                 |                        |
++-------------------------+-------------------+-----------------+------------------------+
 ```
--   改ざん検知における暗号方式の比較
+-   Comparison of cryptographic methods for detecting data falsification
 
-データのサイズの項を除いた以外は、暗号化・復号における暗号方式の比較とほぼ同様である。
+The comparison here is similar to that discussed above for encryption
+and decryption, with the exception that that table item corresponding
+to data size is no longer relevant.
 
-表 5.6‑5　改ざん検知における暗号方式の比較
+Table 5.6‑5 Comparison of cryptographic methods for detecting data
+falsification
 ```eval_rst
-+-------------------+-------------------+-----------------+---------------------+
-|| 暗号方式         || 公開鍵           || 共通鍵         || パスワードベース   |
-+===================+===================+=================+=====================+
-|| アプリ(サービス) || OK               || OK             || NG(ユーザーによ    |
-|| 資産の保護       |                   |                 || る改ざんが可能)    |
-+-------------------+-------------------+-----------------+---------------------+
-|| ユーザー         || OK               || OK             || OK                 |
-|| 資産の保護       |                   |                 |                     |
-+-------------------+-------------------+-----------------+---------------------+
-|| 暗号の強度       || 鍵の長さに依存   | 鍵の長さに依存  || パスワードの強度、 |
-|                   |                   |                 || Salt、ハッシュの   |
-|                   |                   |                 || 繰り返し回数に依存 |
-+-------------------+-------------------+-----------------+---------------------+
-|| 鍵の保護         || 容易(公開鍵のみ) || 困難「5.6.3.4  || 容易               |
-|                   |                   || 鍵の保護」参照 |                     |
-+-------------------+-------------------+-----------------+---------------------+
-|| アプリで行う処理 || 署名検証(署名は  || MAC計算・      || MAC計算・          |
-|                   || サーバーなど)    || MAC検証        || MAC検証            |
-+-------------------+-------------------+-----------------+---------------------+
++-------------------------+--------------------------------------------------------------------+
+|                         |  Encryption method                                                 |
++-------------------------+-------------------+---------------------+--------------------------+
+| Item                    || Public key       || Shared key         || Password-based          |
++=========================+===================+=====================+==========================+
+|| Protecting application || OK               || OK                 || NO (allows              |
+|| (or service) assets    |                   |                     || falsification by users) |
++-------------------------+-------------------+---------------------+--------------------------+
+|| Protecting user assets || OK               || OK                 || OK                      |
++-------------------------+-------------------+---------------------+--------------------------+
+|| Strength of encryption || Depends on key   || Depends on key     || Depends on strength     |
+|                         || length           || length             || of password, on Salt,   |
+|                         |                   |                     || and on the number of    |
+|                         |                   |                     || hash repetitions        |
++-------------------------+-------------------+---------------------+--------------------------+
+|| Key storage            || Easy (only       || Difficult          || Easy                    |
+|                         || public keys)     || Please refer to    |                          |
+|                         |                   || "5.6.3.4Protecting |                          |
+|                         |                   || Key"               |                          |
++-------------------------+-------------------+---------------------+--------------------------+
+|| Processing carried out || Encryption       || MAC computation;   || MAC computation;        |
+|| by application         || (decryption is   || MAC verification   || MAC verification        |
+|                         || done on servers  |                     |                          |
+|                         || or elsewhere)    |                     |                          |
++-------------------------+-------------------+---------------------+--------------------------+
 ```
 
-MAC：メッセージ認証コード
+MAC: Message authentication code
 
-なお本ガイドでは、「3.1.3
-資産分類と保護施策」における資産レベル低中位の資産を主な保護対象としている。暗号の使用は鍵の管理問題など一般の保護施策(アクセス制御など)と比べて多くの検討事項を伴うため、Android
-OSのセキュリティモデルでは資産の保護を充分にできない場合のみ、暗号の使用を検討することが望ましい。
+Note that these guidelines are primarily concerned with the protection
+of assets deemed low-level or medium-level assets according to the
+classification discussed in Section "3.1.3 Asset Classification and
+Protective Countermeasures". Because the use of encryption involves
+the consideration of a greater number of issues---such as the problem
+of key storage---than other preventative measures (such as access
+controls), encryption should only be considered for cases in which
+assets cannot be adequately protected within the Android OS security
+mode.
 
-#### 乱数の生成
+#### Generation of random numbers
 
-暗号技術の利用おいて、強固な暗号アルゴリズムや暗号モードを選択し、十分な長さの鍵を使用することは、アプリやサービスで扱うデータのセキュリティを確保する上で非常に重要である。しかし、これらの選択が適切であっても秘密の起点となる鍵が漏洩したり、予測されたりすると、アルゴリズム等で保証するセキュリティの強度が全く意味をなさなくなってしまう。また、AES等の共通暗号で使用する初期化ベクトル(IV)やパスワードベース暗号で使用するSalt(ソルト)に関しても、偏りが大きいと第三者による攻撃が容易になり、情報の漏洩や改ざんなどの被害に繋がる可能性が高くなる。このような事態を防ぐには、第三者に鍵やIVの値の予測が困難な方法で生成する必要があり、それを実現するために極めて重要な役割を果たすのが乱数である。乱数を生成する装置は乱数生成器と呼ばれ、センサー等を用いて予測・再現が不可能とされる自然状態を観測することで乱数を生成するハードウェアの乱数生成器(RNG)に対して、ソフトウェアで実現する乱数生成器を疑似乱数生成器(PRNG)と呼ぶのが一般的である。
+When using cryptographic technologies, it is extremely important to
+choose strong encryption algorithms and encryption modes and
+sufficiently long keys in order to ensure the security of the data
+handled by applications and services. However, even if all of these
+choices are made appropriately, the strength of the security
+guaranteed by the algorithms in use plummets immediately to zero when
+the keys that form the linchpin of the security protocol are leaked or
+guessed.
 
-Androidアプリでは、暗号用途での利用に対して十分セキュアな乱数をSecureRandomクラス経由で取得することができる。SecureRandomクラスの機能は、Providerと呼ばれる実装によって提供される。また、内部に複数のProvider(実装)を持つことが可能であり、Providerを明示的に指定しない場合はデフォルトのProviderが選ばれる。そのため、実装時にProviderの存在を意識しないでSecureRandomを使うことも可能である。以下に、SecureRandomの使い方の例を示す。
+Even for the initial vector (IV) used for shared-key encryption under
+AES and similar protocols, or the Salt used for password-based
+encryption, large biases can make it easy for third parties to launch
+attacks, heightening the risk of exposure to data leakage or
+corruption. To prevent such situations, it is necessary to generate
+keys and IVs in such a way as to make it difficult for third parties
+to guess their values, and random numbers play an immensely important
+role in ensuring the realization of this imperative. A device that
+generates random numbers is called a random-number generator. Whereas
+hardware random-number generators (RNGs) may use sensors or other
+devices to produce random numbers by measuring natural phenomena that
+cannot be predicted or reproduced, it is more common to encounter
+software-implemented random-number generators, known as
+pseudorandom-number generators (PRNGS).
 
-なお、SecureRandomにはAndroidのバージョンによっていくつか脆弱性があり、実装上の対策が必要になる。「5.6.3.3　乱数生成における脆弱性と対策」を参照すること。
+In Android applications, random numbers of sufficient security for use
+in encryption may be generated via the SecureRandom class. The
+functionality of the SecureRandom class is provided by an
+implementation known as Provider. It is possible for multiple
+Providers (implementations) to exist internally, and if no Provider is
+clearly specified than the default Provider will be selected. For this
+reason, it is also possible to use SecureRandom in implementation
+without being aware of the existence of Providers. In what follows we
+offer examples to demonstrate the use of SecureRandom.
 
-SecureRandomの使用(デフォルトの実装を使用する)
+Note that SecureRandom may exhibit a number of weaknesses depending on
+the Android version, requiring preventative measures to be put in
+place in implementations. Please refer to "5.6.3.3　Measures to
+Protect against Vulnerabilities in Random-Number Generators".
+
+Using SecureRandom (using the default implementation)
+
 ```java
 import java.security.SecureRandom;
-// ～省略～
+[...]
 	SecureRandom random = new SecureRandom();
 	byte[] randomBuf = new byte [128];
 	
 	random.nextBytes(randomBuf);
-// ～省略～
+[...]
 ```
 
-SecureRandomの使用(明示的にアルゴリズムを指定する)
+Using SecureRandom (with explicit specification of the algorithm)
 ```java
 import java.security.SecureRandom;
-// ～省略～
+[...]
 	SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
 	byte[] randomBuf = new byte [128];
 	
 	random.nextBytes(randomBuf); 
-// ～省略～
+[...]
 ```
 
-SecureRandomの使用(明示的に実装(Provider)を指定する)
+Using SecureRandom (with explicit specification of the implementation
+(Provider))
 ```java
 import java.security.SecureRandom;
-// ～省略～
+[...]
 	SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "Crypto");
 	byte[] randomBuf = new byte [128];
 	
 	random.nextBytes(randomBuf); 
-// ～省略～
+[...]
 ```
 
-SecureRandomのようなプログラムで実現されている疑似乱数生成器は一般に「図
-5.6‑3　疑似乱数生成器の内部プロセス」のように動作しており、乱数の種を入力して内部状態を初期化すると、乱数を生成する度に内部状態を一定のアルゴリズムで更新することで、次々と乱数列の生成が可能になる。
+The pseudorandom-number generators found in programs like SecureRandom
+typically operate on the basis of a process like that illustrated in
+"Figure 5.6‑3 Inner process of pseudorandom number generator". A
+random number seed is entered to initialize the internal state;
+thereafter, the internal state is updated each time a random number is
+generated, allowing the generation of a sequence of random numbers.
 
-![](media/image91.png)
+![](media/image84.png)
 ```eval_rst
 .. {width="5.697916666666667in"
 .. height="1.9430555555555555in"}
 ```
 
-図 5.6‑3　疑似乱数生成器の内部プロセス
+Figure 5.6‑3 Inner process of pseudorandom number generator
 
-##### 乱数の種
+##### Random number seeds
 
-疑似乱数生成器において乱数の種の役割は極めて重要である。
+The seed plays an extremely important role in a pseudorandom number
+generator (PRNG).
 
-既に説明したように疑似乱数生成器は乱数の種による初期化が必要である。また、乱数の種で初期化された後は決められたアルゴリズムで乱数の生成が行われるので、同じ乱数の種からは同じ乱数列が生成されることになる。これは乱数の種が第三者に知られ(盗聴され)たり、予測可能であったりすると、第三者が同じ乱数列を取得することになり、乱数を起点にした機密性や完全性が失われることを意味している。
+As noted above, PRNGs must be initialized by specifying a seed.
+Thereafter, the process used to generate random numbers is a
+deterministic algorithm, so if you specify the same seed you will get
+the same sequence of random numbers. This means that if a third party
+gains access to (that is, eavesdrops upon) or guesses the seed of a
+PRNG, he can produce the same sequence of random numbers, thus
+destroying the properties of confidentiality and integrity that the
+random numbers provide.
 
-そのため、乱数の種はそれ自身機密性の高い情報であり、かつ予測困難でなければならない。例えば時刻情報や端末固有値(MACアドレス、IMEI、Android
-IDなど)を乱数の種として使うべきではない。多くのAndroid端末においては、/dev/urandom,
-/dev/random等が利用可能であり、Androidデフォルトで提供されるSecureRandomの実装もそれらのデバイスファイルを使って乱数の種を設定している。また、機密性に関しては、乱数の種がメモリ内にのみ存在するならば、root権限を取得したマルウェア・ツールでない限り、盗聴の危険性は低い。仮に、root化された端末でも安全にする必要の場合は、セキュア設計・実装の専門家と相談して対応すること。
+For this reason, the seed of a random number generator is itself a
+highly confidential piece of information---and one which must be
+chosen in such a way as to be impossible to predict or guess. For
+example, time information or device-specific data (such as a MAC
+address, IMEI, or Android ID) should not be used to construct RNG
+seeds. On many Android devices, /dev/urandom or /dev/random is
+available, and the default implementation of SecureRandom provided by
+Android uses these device files to determine seeds for random number
+generators. As far as confidentiality is concerned, as long as the RNG
+seed exists only in memory, there is little risk of discovery by third
+parties with the exception of malware tools that acquire root
+privileges. If you need to implement security measures that remain
+effective even on rooted devices, consult an expert in secure design
+and implementation.
 
-##### 疑似乱数生成器の内部状態
+##### The internal state of a pseudorandom number generator
 
-疑似乱数生成器の内部状態は、乱数の種によって初期化され、乱数を生成する毎に状態が更新される。また、乱数の種と同様に、同じ内部状態の疑似乱数生成器が存在した場合は、その後に生成される乱数列はどちらもまったく同じものになる。よって、内部状態も第三者に対して、盗聴されないように気を付けなければならない。ただし、内部状態はメモリ内に存在するため、root権限を取得したマルウェア・ツールでない限り、盗聴の危険性は低い。root化された端末でも安全にする必要の場合は、セキュア設計・実装の専門家と相談して対応すること。
+The internal state of a pseudorandom number generator is initialized
+by the seed, then updated each time a random number is generated. Just
+as for the case of PRNGs initialized by the same seed, two PRNGs with
+the same internal state will subsequently produce precisely the same
+sequence of random numbers. Consequently, it is also important to
+protect the internal state against eavesdropping by third parties.
+However, because the internal state exists in memory, there is little
+risk of discovery by third parties except in cases involving malware
+tools that acquire root access. If you need to implement security
+measures that remain effective even on rooted devices, consult an
+expert in secure design and implementation.
 
-#### 乱数生成における脆弱性と対策
+#### Measures to Protect against Vulnerabilities in Random-Number Generators
 
-Android 4.3.x以前の"Crypto\"
-ProviderのSecureRandom実装には、内部状態のエントロピー(Randomness)が充分に確保されないという不具合がある。特にAndroid
-4.1.x以前は、SecureRandomの実装が"Crypto\"
-Providerしかなく、SecureRandomを直接・間接的に使用するほとんどのアプリはこの脆弱性の影響を受ける。また、Android
-4.2以降にSecureRandomのデフォルト実装となる"AndroidOpenSSL\"
-Providerでは、OpenSSLが「乱数の種」として使うデータの大部分がアプリ間で共有されるという不具合(対象はAnroid
-4.2.x-4.3.x)により、あるアプリが別のアプリの生成する乱数を推測しやすくなるという脆弱性を抱えている。以下にAndroid
-OSバージョンと各脆弱性の影響を受ける機能の整理しておく。
+The "Crypto" Provider implementation of SecureRandom, found in Android
+versions 4.3.x and earlier, suffered from the defect of insufficient
+entropy (randomness) of the internal state. In particular, in Android
+versions 4.1.x and earlier, the "Crypto" Provider was the only
+available implementation of SecureRandom, and thus most applications
+that use SecureRandom either directly or indirectly were affected by
+this vulnerability. Similarly, the "AndroidOpenSSL" Provider offered
+as the default implementation of SecureRandom in Android versions 4.2
+and later exhibited the defect that the majority of the data items
+used by OpenSSL as random-number seeds were shared between
+applications (Android versions 4.2.x---4.3.x), creating a
+vulnerability in which any one application can easily predict the
+random numbers generated by other applications. The table below
+details the impact of the vulnerabilities present in various versions
+of Android OS.
 
-表 5.6‑6　 Android OSバージョンと各脆弱性の影響を受ける機能
+Table 5.6‑6 Android OS version and feature influenced by each
+vulnerabilities
 ```eval_rst
-==================== ================================== =================================
-      脆弱性         | "Crypto" Provider SecureRandom   | 別アプリのOpenSSLの
-                     | の実装におけるエントロピー不足   | 乱数の種が推測可能
-==================== ================================== =================================
-Android 4.1.x以前    | - SecureRandomのデフォルト実装   | 影響なし
-                     | - Crypto Providerの明示的な使用
-                     | - Cipherクラスの提供する暗号機能
-                     | - HTTPS通信機能 etc.
-Android 4.2 - 4.3.x  | Crypto Providerの明示的な使用    | - SecureRandomのデフォルト実装
-                                                        | - AndroidOpenSSL Providerの
-                                                        | 明示的な使用
-                                                        | - OpenSSLの乱数機能の直接使用
-                                                        | - Cipherクラスの提供する暗号
-                                                        | 機能
-                                                        | - HTTPS通信機能etc.
-Android 4.4以降      | 影響なし                         | 影響なし
-==================== ================================== =================================
++-------------------------+----------------------------------------------------------------------------+
+|                         |  Vulnerability                                                             |
++-------------------------+-----------------------------------+----------------------------------------+
+| Android OS              || Insufficient entropy in the      || Can guess the random number seeds     |
+|                         || “Crypto” Provider implementation || used by OpenSSL in other applications |
+|                         || of SecureRandom                  ||                                       |
++=========================+===================================+========================================+
+|| Android 4.1.x and      || -Default implementation of       || No impact                             |
+|| before                 || SecureRandom                     ||                                       |
+||                        || -Explicit use of Crypto Provider ||                                       |
+||                        || -Encryption functionality        ||                                       |
+||                        || provided by the Cipher class     ||                                       |
+||                        || -HTTPS communication             ||                                       |
+||                        || functionality, etc.              ||                                       |
++-------------------------+-----------------------------------+----------------------------------------+
+|| Android 4.2 - 4.3.x    || -Use a clearly identified Crypto || -Default implementation of            |
+||                        || Provider                         || SecureRandom                          |
+||                        ||                                  || -Explicit use of AndroidOpenSSL       |
+||                        ||                                  || Provider                              |
+||                        ||                                  || -Direct use of random-number          |
+||                        ||                                  || generation functionality              |
+||                        ||                                  || provided by OpenSSL                   |
+||                        ||                                  || -Encryption functionality provided    |
+||                        ||                                  || by the Cipher class                   |
+||                        ||                                  || -HTTPS communication functionality,   |
+||                        ||                                  || etc.                                  |
++-------------------------+-----------------------------------+----------------------------------------+
+|| Android 4.4 and later  || No impact                        || No impact                             |
++-------------------------+-----------------------------------+----------------------------------------+
 ```
-2013年8月以降、これらAndroid
-OSの脆弱性を修正するパッチがGoogleからパートナー(端末メーカーなど)に配布されている。しかし、これらSecureRandomに関する脆弱性は暗号機能、HTTPS通信機能を含めて広い範囲に影響する上に、パッチが適用されていない端末が多数存在することも考えられるため、Android
-4.3.x以前のOSを対象とするアプリでは、以下のサイトで紹介されている対策(実装)を組み込んでおくことをお薦めする。
+
+Since August 2013, patches that remove these Android OS
+vulnerabilities have been distributed by Google to its partners
+(device makers, etc.)
+
+However, these vulnerabilities associated with SecureRandom affected a
+wide range of applications---including encryption functionality and
+HTTPS communication functionality---and presumably many devices remain
+unpatched. For this reason, when designing applications targeted at
+Android 4.3.x and earlier, we recommend that you incorporate the
+countermeasures (implementations) discussed in the following site.
 
 [http://android-developers.blogspot.jp/2013/08/some-securerandom-thoughts.html](http://android-developers.blogspot.jp/2013/08/some-securerandom-thoughts.html)
 
