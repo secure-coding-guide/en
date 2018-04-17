@@ -3866,7 +3866,7 @@ public class DataSearchTask extends AsyncTask<String, Void, Cursor> {
 
         // Execute like search(partly match) with the condition of info
         // Point: Escape process should be performed on characters which is applied to wild card
-        String argString = info.replaceAll("@", "@@"); // Escape $ in info which was received as input
+        String argString = info.replaceAll("@", "@@"); // Escape @ in info which was received as input
         argString = argString.replaceAll("%", "@%"); // Escape % in info which was received as input
         argString = argString.replaceAll("_", "@_"); // Escape _ in info which was received as input
         String selectionArgs[] = {argString};
@@ -4094,7 +4094,7 @@ Easy code example
 
 ```java
 SQLiteDatabase.loadLibs(this);                   // First, Initialize library by using context.
-SQLiteOpenHelper.getWritableDatabase(passwoed);  // Parameter is password(Suppose that it's string type and it's got in a secure way.)
+SQLiteOpenHelper.getWritableDatabase(password);  // Parameter is password(Suppose that it's string type and it's got in a secure way.)
 ```
 
 SQLCipher for Android was version 1.1.0 at the time of writing, and
@@ -5050,7 +5050,7 @@ For more details about logging method, refer to the following document.
 
 Code Style Guidebook for Contributors / Log Sparingly
 
-> [http://source.android.com/source/code-style.html\#log-sparingly](http://source.android.com/source/code-style.html#log-sparingly)
+> [https://source.android.com/setup/contribute/code-style\#log-sparingly](https://source.android.com/setup/contribute/code-style#log-sparingly)
 
 #### Selection Standards of Log Level and Log Output Method
 
@@ -5103,7 +5103,7 @@ For more details about logging method, refer to the following document.
 
 Code Style Guidelines for Contributors / Log Sparingly
 
-> [http://source.android.com/source/code-style.html\#log-sparingly](http://source.android.com/source/code-style.html#log-sparingly)
+> [https://source.android.com/setup/contribute/code-style\#log-sparingly](https://source.android.com/setup/contribute/code-style#log-sparingly)
 
 #### DEBUG Log and VERBOSE Log Are Not Always Deleted Automatically
 
