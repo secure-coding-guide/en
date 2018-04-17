@@ -4790,27 +4790,44 @@ public class MainActivity extends Activity
 }
 ```
 
-指紋認証機能を利用する
-----------------------
+Using fingerprint authentication features
+-----------------------------------------
 
-生体認証の分野では、顔、声紋をはじめ、様々な方式が研究・開発されている。中でも、指紋認証は本人を特定する方法として古くから存在しており、署名（拇印）や犯罪捜査の目的で利用されてきた。コンピューターの世界においても様々な分野で応用が進み、近年ではスマートフォンの所有者識別（主に画面ロック解除）に採用されるなど、（入力の容易さなど）利便性の高い機能としての認識が浸透しつつある。
+A variety of methods for biological authentication are currently under
+research and development, with methods using facial information and
+vocal signatures particularly prominent. Among these methods, methods
+for using fingerprint authentication to identify individuals have been
+used since ancient times, and are used today for purposes such as
+signatures (by thumbprint) and crime investigation. Applications of
+fingerprinting have also advanced in several areas of the computer
+world, and in recent years these methods have begun to enjoy wide
+recognition as highly convenient techniques (offering advantages such
+as ease of input) for use in areas such as identifying the owner of a
+smartphone (primarily for unlocking screens).
 
-そのような流れを受けて、Android 6.0(API Level
-23)では端末に指紋認証のフレームワークが組み込まれ、アプリから指紋認証（本人確認）機能が利用できるようになった。以下に、指紋認証を使った際のセキュリティ上の注意事項を記す。
+Capitalizing on these trends, Android 6.0(API Level 23) incorporates a
+framework for fingerprint authentication on terminals, which allows
+apps to make use of fingerprint authentication features to identify
+individuals. In what follows we discuss some security precautions to
+keep in mind when using fingerprint authentication.
 
-### サンプルコード<!-- 077e2daa -->
+### Sample Code<!-- 077e2daa -->
 
-以下に、Androidの指紋認証機能をアプリから利用するためのサンプルコードを示す。
+Below we present sample code to allow an app to use Android\'s
+fingerprint authentication features.
 
-ポイント：
+Points:
 
-1.  USE\_FINGERPRINTパーミッションを利用宣言する
-2.  \"AndroidKeyStore\" Providerからインスタンスを取得する
-3.  鍵を生成するためには指紋の登録が必要である旨をユーザーに伝える
-4.  鍵生成(登録)時、暗号アルゴリズムは脆弱でないもの（基準を満たすもの）を使用する
-5.  鍵生成(登録)時、ユーザー(指紋)認証の要求を有効にする（認証の有効期限は設定しない）
-6.  鍵を作る時点と鍵を使う時点で指紋の登録状況が変わることを前提に設計を行う
-7.  暗号化するデータは、指紋認証以外の手段で復元（代替）可能なものに限る
+1.  Declare the use of the USE\_FINGERPRINT permission.
+2.  Obtain an instance from the \"AndroidKeyStore\" Provider.
+3.  Notify users that fingerprint registration will be required to create a key.
+4.  When creating (registering) keys, use an encryption algorithm that is not vulnerable (meets standards).
+5.  When creating (registering) keys, enable requests for user
+    (fingerprint) authentication (do not specify the duration over which authentication is enabled).
+6.  Design your app on the assumption that the status of fingerprint
+    registration will change between when keys are created and when keys are used.
+7.  Restrict encrypted data to items that can be restored (replaced) by
+    methods other than fingerprint authentication.
 
 MainActivity.java
 ```eval_rst
@@ -4819,14 +4836,12 @@ MainActivity.java
    :encoding: shift-jis
 ```
 
-
 FingerprintAuthentication.java
 ```eval_rst
 .. literalinclude:: CodeSamples/FingerprintAuthentication.FingerprintAuthentication.java
    :language: java
    :encoding: shift-jis
 ```
-
 
 AndroidManifest.xml
 ```eval_rst
@@ -4835,103 +4850,151 @@ AndroidManifest.xml
    :encoding: shift-jis
 ```
 
+### Rule Book<!-- 02779659 -->
 
-### ルールブック<!-- 02779659 -->
+Observe the following rules when using fingerprint authentication.
 
-指紋認証機能を利用する場合には以下のルールを守ること。
+1.  When creating (registering) keys, use an encryption algorithm that
+    is not vulnerable (meets standards). (Required)
+2.  Restrict encrypted data to items that can be restored (replaced) by
+    methods other than fingerprint authentication. (Required)
+3.  Notify users that fingerprint registration will be required to create a key. (Recommended)
 
-1.  鍵生成(登録)時、暗号アルゴリズムは脆弱でないもの（基準を満たすもの）を使用する （必須）
+####  When creating (registering) keys, use an encryption algorithm that is not vulnerable (meets standards). (Required)
 
-1.  暗号化するデータは、指紋認証以外の手段で復元（代替）可能なものに限る （必須）
+Like the password keys and public keys discussed in Section "5.6 Using
+Cryptography", when using fingerprint authentication features to
+create keys it is necessary to use encryption algorithms that are not
+vulnerable\-\--that is, algorithms that meet certain standards
+adequate to prevent eavesdropping by third parties. Indeed, safe and
+non-vulnerable choices must be made not only for encryption algorithms
+but also for encryption modes and padding.
 
-2.  鍵を生成するためには指紋の登録が必要であり、ユーザーにその旨を伝える （推奨）
+For more information on selecting algorithms, see Section "5.6.2.2 Use
+Strong Algorithms (Specifically, Algorithms that Meet the Relevant Criteria) (Required)".
 
-#### 鍵生成(登録)時、暗号アルゴリズムは脆弱でないもの（基準を満たすもの）を使用する （必須）
+####  Restrict encrypted data to items that can be restored (replaced) by methods other than fingerprint authentication. (Required)
 
-「5.6　暗号技術を利用する」で解説したパスワード鍵や公開鍵等と同様に、指紋認証機能を用いて鍵を生成する場合においても、第三者による盗聴を防ぐため一定の基準を満たした脆弱でない暗号アルゴリズムを設定すること。また、暗号アルゴリズムだけではなく、暗号モードやパディングについても脆弱でない安全な方式を選択すること。
+When an app uses fingerprint authentication features for the
+encryption of data within the app, the app must be designed in such a
+way as to allow the data to be recovered (replaced) by methods other
+than fingerprint authentication.
 
-暗号アルゴリズムの選択については「5.6.2.2　脆弱でないアルゴリズム（基準を満たすもの）を使用する
-（必須）」を参照すること。
+In general, the use of biological information entails various
+problems\-\--including secrecy, the difficulty of making
+modifications, and erroneous identifications\-\--and it is thus best
+to avoid relying solely on biological information for authentication.
 
-#### 暗号化するデータは、指紋認証以外の手段で復元（代替）可能なものに限る （必須）
+For example, suppose that data internal to an app is encrypted with a
+key generated using fingerprint authentication features, but that the
+fingerprint data stored within the terminal is subsequently deleted by
+the user. Then the key used to encrypt the data is not available for
+use, nor is it possible to copy the data. If the data cannot be
+recovered by some means other than fingerprint-authentication
+functionality, there is substantial risk that the data will be made useless.
 
-アプリ内データの暗号化に際して指紋認証機能を利用する場合は、そのデータが指紋認証機能以外の手段でも復元（代替）できるようにアプリを設計すること。一般に、生体情報には秘匿や変更の困難性、誤認識といった問題が付随しているため、認証を生体情報のみに頼ることは避けるべきである。
-
-例えば、指紋認証機能を利用して生成した鍵を用いてアプリ内のデータを暗号化した後、端末に登録されていた指紋情報がユーザーによって削除されると、データの暗号化に用いていた鍵が使用できなくなり、データを復号することもできなくなる。データの復元が指紋認証機能以外の手段でも行えなければ、可用性が損なわれる可能性が生じるのである。
 ```eval_rst
-また、指紋認証機能を利用して生成した鍵が使用できなくなる状況は指紋情報の削除以外でも生じうる。Nexus5Xにおいては、指紋認証機能を利用して鍵を生成した後に新たに指紋情報を追加登録すると、それ以前に生成した鍵が使用できなくなることが確認されている [50]_。また、本来正しく使用できるべき鍵が指紋センサーの誤認識により使用できなくなる可能性も否定できない。
+Moreover, the deletion of fingerprint information is not the only
+scenario in which keys created using fingerprint authentication
+functions can become unusable. In Nexus5X, if fingerprint
+authentication features are used to create a key and this key is then
+newly registered as an addition to the fingerprint information, keys
+created earlier have been observed to become unusable. [50]_ In
+addition, one cannot exclude the possibility that a key which would
+ordinarily allow correct use may become unusable due to erroneous
+identification by a fingerprint sensor.
 
-.. [50] 2016年9月1日版執筆時点の情報。後日、修正される可能性がある。
+.. [50] Information current as of the September 1, 2016 version. This may be revised in the future.
 ```
-#### 鍵を生成するためには指紋の登録が必要であり、ユーザーにその旨を伝える （推奨）
 
-指紋認証機能を利用して鍵を生成するためには端末にユーザーの指紋が登録されている必要がある。指紋登録ユーザーに促すため、設定メニューへ誘導する際には、指紋が重要な個人情報であることに留意し、ユーザーに対してアプリが指紋を利用する必要性や利便性について説明することが望ましい。
+#### Notify users that fingerprint registration will be required to create a key. (Recommended) 
 
-指紋認証の登録が必要である旨、ユーザーに伝える
+In order to create a key using fingerprint authentication, it is
+necessary that a user\'s fingerprints be registered on the terminal.
+When designing apps to guide users to the Settings menu to encourage
+fingerprint registration, developers must keep in mind that
+fingerprints represent important personal data, and it is desirable to
+explain to users why it is necessary or convenient for the app to use fingerprint information.
+
+Notify users the fingerprint registration will be required.
+
 ```java
         if (!mFingerprintAuthentication.isFingerprintAuthAvailable()) {
-            // ★ポイント★ 鍵を生成するためには指紋の登録が必要である旨をユーザーに伝える
+            // *** Point *** Notify users that fingerprint registration will be required to create a key.
             new AlertDialog.Builder(this)
                     .setTitle(R.string.app_name)
-                    .setMessage("指紋情報が登録されていません。\n" +
-                            "設定メニューの「セキュリティ」で指紋を登録してください。\n" +
-                            "指紋を登録することにより、簡単に認証することができます。")
+                    .setMessage("No fingerprint information has been registered.\n" +
+                            "Click \"Security\" on the Settings menu to register fingerprints.\n" +
+                            "Registering fingerprints allows easy authentication.")
                     .setPositiveButton("OK", null)
                     .show();
             return false;
         }
 ```
 
-### アドバンスト<!-- 2f9aa719 -->
+### Advanced Topics<!-- 2f9aa719 -->
 
-#### Androidアプリにおける指紋認証機能利用の前提条件
+The following two conditions must be satisfied in order for an app to
+use fingerprint authentication.
 
-アプリで指紋認証機能を利用するためには以下の2点が必要である。
+-   User fingerprints must be registered within the terminal.
+-   An (application-specific) key must be associated with registered fingerprints.
 
--   端末にユーザーの指紋が登録されていること
+##### Registering user fingerprints
 
--   登録された指紋に（アプリ固有の）鍵が紐づいていること
+User fingerprint information can only be registered via the
+\"Security\" option in the Settings menu; ordinary applications may
+not perform the fingerprint registration procedure. For this reason,
+if no fingerprints have been registered when an app attempts to use
+fingerprint authentication features, the app must guide the user to
+the Settings menu and encourage the user to register fingerprints. At
+this time, it is desirable for the app to offer the user some
+explanation of why it is necessary and convenient to use fingerprint information.
 
-##### ユーザーの指紋登録
+In addition, as a necessary precondition for fingerprint registration
+to be possible, the terminal must be configured with an alternative
+screen-locking mechanism. If the screen lock is disabled in a state in
+which fingerprints have been registered in the terminal, the
+registered fingerprint information will be deleted.
 
-ユーザーの指紋情報は設定メニューの「セキュリティ」からしか登録することができず、一般のアプリが指紋登録処理を行うことはできない。そのため、アプリが指紋認証機能を利用する時点で端末に指紋が登録されていなければ、ユーザーを設定メニューに誘導し指紋の登録を促す必要がある。その際、アプリが指紋を利用する必要性や利便性についての説明がユーザーに対して行われることが望ましい。
+##### Creating and registering keys
 
-なお、指紋登録が可能となる前提として、端末に予備の画面ロック方式が設定されていることが必要である。端末に指紋が登録されている状態で画面ロックを無効にすると、登録済みの指紋情報も削除される。
+To associate a key with fingerprints registered in a terminal, use a
+KeyStore instance provided by an \"AndroidKeyStore\" Provider to
+create and register a new key or to register an existing key.
 
-##### 鍵の生成・登録
+To create a key associated with fingerprint information, configure the
+parameter settings when creating a KeyGenerator to enable requests for user authentication.
 
-端末に登録された指紋と鍵を紐付けるためには、\"AndroidKeyStore\"
-Providerが提供するKeyGeneratorやKeyStoreインスタンス等を使用する際に、ユーザー（指紋）認証の要求を有効にして、新しい鍵の生成と登録、あるいは既存の鍵の登録を行う。
-
-指紋情報と紐づいた鍵を生成する場合は、KeyGeneratorを生成する際のパラメータとして、ユーザー認証の要求を有効にするよう設定する。
-
-指紋情報と紐づいた鍵の生成と登録
+Creating and registering a key associated with fingerprint information.
 ```java
     try {
-        // "AndroidKeyStore" ProviderからKeyGeneratorインスタンスを取得する
+        // Obtain an instance from the "AndroidKeyStore" Provider.
         KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
         keyGenerator.init(
             new KeyGenParameterSpec.Builder(KEY_NAME, KeyProperties.PURPOSE_ENCRYPT)
             .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
             .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
-            .setUserAuthenticationRequired(true)  // ユーザー（指紋）認証の要求を有効にする
+            .setUserAuthenticationRequired(true) // Enable requests for user (fingerprint) authentication.
             .build());
         keyGenerator.generateKey();
     } catch (IllegalStateException e) {
-        // 端末に指紋が登録されていない
-	  throw new RuntimeException("No fingerprint registered", e);
+        // no fingerprints have been registered in this terminal.
+        throw new RuntimeException("No fingerprint registered", e);
     } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException
                 | CertificateException | KeyStoreException | IOException e) {
-        // 鍵の生成に失敗
-        throw new RuntimeException("Failed to generate a key", e); 
+        // failed to generate a key.
+        throw new RuntimeException("Failed to generate a key", e);
     }
 ```
 
-既存の鍵に指紋情報を紐づける場合は、ユーザー認証の要求を有効にする設定を加えたKeyStoreエントリーに鍵を登録する。
+To associate fingerprint information with an existing key, register
+the key with a KeyStore entry to which has been added a setting to
+enable user authentication requests.
 
-既存の鍵に指紋情報を紐付ける
+Associating fingerprint information with an existing key.
 ```java
-    SecretKey key = existingKey;  // 既存の鍵
+    SecretKey key = existingKey;  // existing key
 
     KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
     keyStore.load(null);
@@ -4939,6 +5002,6 @@ Providerが提供するKeyGeneratorやKeyStoreインスタンス等を使用す�
         "alias_for_the_key",
         new KeyStore.SecretKeyEntry(key),
         new KeyProtection.Builder(KeyProperties.PURPOSE_ENCRYPT)
-                .setUserAuthenticationRequired(true)  // ユーザー（指紋）認証の要求を有効にする
+                .setUserAuthenticationRequired(true)  // Enable requests for user
                 .build());
 ```
