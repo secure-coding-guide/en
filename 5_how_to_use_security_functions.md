@@ -3127,10 +3127,13 @@ handshake, the app may not obtain the expected certificate chain,
 posing a risk that the pinning may not function properly
 [36]_.
 
+
 .. [36] The following article explains this risk in detail:
 
- https://www.cigital.com/blog/ineffective-certificate-pinning-implementations/
+    https://www.cigital.com/blog/ineffective-certificate-pinning-implementations/
+
 ```
+
 -   javax.net.ssl.SSLSession.getPeerCertificates()
 
 -   javax.net.ssl.SSLSession.getPeerCertificateChain()
@@ -3229,8 +3232,8 @@ enabled only during debugging
 [37]_.
 
 .. [37] For more information on Network Security Configuration, see
-
     https://developer.android.com/training/articles/security-config.html
+
 ```
 The various types of functionality offered by Network Security
 Configuration may be accessed simply by configuring settings in xml
@@ -3341,7 +3344,6 @@ that these settings may *not* be applied to WebView in Android 7.0
 
 .. [38] See the following API reference about how the Network Security
     Configuration works for non-HTTP connections.
-
     https://developer.android.com/reference/android/security/NetworkSecurityPolicy.html\#isCleartextTrafficPermitted()
 
 ```
@@ -3540,9 +3542,9 @@ obtained immediately prior to the transmission of specific user data.
 
 #### Both broad consent and specific consent are granted: Applications that incorporate application privacy policy
 
-Points: (Both broad consent and specific consent are granted:
-Applications that incorporate application privacy policy)
-
+```eval_rst
+**Points: (Both broad consent and specific consent are granted: Applications that incorporate application privacy policy)**
+```
 1.  On first launch (or application update), obtain broad consent to
     transmit user data that will be handled by the application.
 
@@ -3592,8 +3594,9 @@ WebViewAssetsActivity.java
 
 #### Broad consent is granted: Applications that incorporate application privacy policy
 
-Points: (Broad consent is granted: Applications that incorporate
-application privacy policy)
+```eval_rst
+**Points: (Broad consent is granted: Applications that incorporate application privacy policy)**
+```
 
 1.  On first launch (or application update), obtain broad consent to
     transmit user data that will be handled by the application.
@@ -3640,8 +3643,9 @@ WebViewAssetsActivity.java
 
 #### Broad consent is not needed: Applications that incorporate application privacy policy
 
-Points: (Broad consent is not needed: Applications that incorporate
-application privacy policy)
+```eval_rst
+**Points: (Broad consent is not needed: Applications that incorporate application privacy policy)**
+```
 
 1.  Provide methods by which the user can review the application privacy
     policy.
@@ -3675,8 +3679,9 @@ WebViewAssetsActivity.java
 
 #### Applications that do not incorporate an application privacy policy
 
-Points: (Applications that do not incorporate an application privacy
-policy)
+```eval_rst
+**Points: (Applications that do not incorporate an application privacy policy)**
+```
 
 1.  You do not need to display an application privacy policy if your
     application will only use the information it obtains within the
@@ -4155,7 +4160,9 @@ Figure 5.6‑2
 You may use password-based key encryption for the purpose of
 protecting a user's confidential data assets.
 
-Points:
+```eval_rst
+**Points:**
+```
 
 1.  Explicitly specify the encryption mode and the padding.
 
@@ -4187,8 +4194,9 @@ a separate safe location (such as a server) under a private key. In
 cases such as this, it is possible to use public-key (asymmetric-key)
 encryption.
 
-Points:
-
+```eval_rst
+**Points:**
+```
 1.  Explicitly specify the encryption mode and the padding
 
 2.  Use strong encryption methods (specifically, technologies that meet
@@ -4211,8 +4219,9 @@ RsaCryptoAsymmetricKey.java
 Pre shared keys may be used when working with large data sets or to
 protect the confidentiality of an application's or a user's assets.
 
-Points:
-
+```eval_rst
+**Points:**
+```
 1.  Explicitly specify the encryption mode and the padding
 
 2.  Use strong encryption methods (specifically, technologies that meet
@@ -4235,8 +4244,9 @@ AesCryptoPreSharedKey.java
 You may use password-based (shared-key) encryption to verify the
 integrity of a user's data.
 
-Points:
-
+```eval_rst
+**Points:**
+```
 1.  Explicitly specify the encryption mode and the padding.
 
 2.  Use strong encryption methods (specifically, technologies that meet
@@ -4266,8 +4276,9 @@ utilize public-key (asymmetric-key) encryption for applications
 involving the storage of public keys on the application side solely
 for the purpose of authenticating data signatures.
 
-Points:
-
+```eval_rst
+**Points:**
+```
 1.  Explicitly specify the encryption mode and the padding.
 
 2.  Use strong encryption methods (specifically, technologies that meet
@@ -4289,8 +4300,9 @@ RsaSignAsymmetricKey.java
 You may use pre-shared keys to verify the integrity of application
 assets or user assets.
 
-Points:
-
+```eval_rst
+**Points:**
+```
 1.  Explicitly specify the encryption mode and the padding.
 
 2.  Use strong encryption methods (specifically, technologies that meet
@@ -5061,8 +5073,9 @@ keep in mind when using fingerprint authentication.
 Below we present sample code to allow an app to use Android\'s
 fingerprint authentication features.
 
-Points:
-
+```eval_rst
+**Points:**
+```
 1.  Declare the use of the USE\_FINGERPRINT permission.
 2.  Obtain an instance from the \"AndroidKeyStore\" Provider.
 3.  Notify users that fingerprint registration will be required to create a key.
