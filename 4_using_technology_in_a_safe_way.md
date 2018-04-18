@@ -2438,7 +2438,7 @@ Figure 4.3‑2
 Next is the example of Activity which uses In house only Content Provider.
 
 Point (Using a Content Provider):
-
+```eval_rst
 8.  Declare to use the in-house signature permission.
 9.  Verify if the in-house signature permission is defined by an
     in-house application.0
@@ -2449,7 +2449,7 @@ Point (Using a Content Provider):
     the data comes from an in-house application.
 13. When exporting an APK, sign the APK with the same developer key as
     that of the destination application.
-
+```
 AndroidManifest.xml
 ```eval_rst
 .. literalinclude:: CodeSamples/Provider InhouseUser.providerInhouseUser.src.main.AndroidManifest.xml
