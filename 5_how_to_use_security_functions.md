@@ -1638,8 +1638,9 @@ modified specifications or set the maxSDKVersion of their app to 22 or
 earlier to ensure that the app cannot be installed on terminals
 running Android 6.0 (API Level 23) or later(Table 5.2‑1).
 
-Table 5.2‑1
 ```eval_rst
+**Table 5.2‑1**
+
 +-----------------------------+----------------------+----------------------------------------------+------------------------------------+
 | Terminal Android OS Version | App targetSDKVersion | Times at which app is granted permissions    | User has control over permissions? |
 +=============================+======================+==============================================+====================================+
@@ -2106,9 +2107,9 @@ versions, privileges such as AUTHENTICATE\_ACCOUNTS, GET\_ACCOUNTS, or
 MANAGE\_ACCOUNTS are required; the privileges corresponding to various
 methods are shown in Table 5.3‑1.
 
-Table 5.3‑1 Function of Account Manager and Permission
-
 ```eval_rst
+**Table 5.3‑1 Function of Account Manager and Permission**
+
 +------------------------------+----------------------------------------------------------------------+
 |                              | Functions that Account Manager provides                              |
 +------------------------------+---------------------------------+------------------------------------+
@@ -2349,9 +2350,9 @@ considering the whole \"system\". Table 5.4‑1 is for a comparison
 between HTTP and HTTPS. And Table 5.4‑2 is for the differences in
 sample codes.
 
-Table 5.4‑1 Comparison between HTTP communication method and HTTPS
-communication method
 ```eval_rst
+**Table 5.4‑1 Comparison between HTTP communication method and HTTPS communication method**
+
 +------------------+----------------------------------------+------------------------+-------------------------+
 |                  |                                        || HTTP                  || HTTPS                  |
 +==================+========================================+========================+=========================+
@@ -2364,9 +2365,10 @@ communication method
 || Risk            || Modifying contents by attackers       || High                  || Low                    |
 ||                 || Application's access to a fake server || High                  || Low                    |
 +------------------+----------------------------------------+------------------------+-------------------------+
-```
-Table 5.4‑2 Explanation of HTTP/HTTPS communication Sample code
-```eval_rst
+
+
+**Table 5.4‑2 Explanation of HTTP/HTTPS communication Sample code**
+
 +-----------------------+-----------+------------------------+--------------------------------+
 || Sample code          || Communi- || Sending/Receiving     || Server certificate            |
 ||                      || cation   || sensitive information |                                |
@@ -4000,8 +4002,9 @@ JSSEC Smartphone Applications"
 ([http://www.jssec.org/event/20140206/03-1\_app\_policy.pdf](http://www.jssec.org/event/20140206/03-1_app_policy.pdf))
 (Japanese only).
 
-Table 5.5‑1
 ```eval_rst
+**Table 5.5‑1**
+
 +-------------------------------------------------+------------------------------------------------------------------------+
 | Term                                            | Description                                                            |
 +=================================================+========================================================================+
@@ -4386,8 +4389,9 @@ period during which you expect an application to remain in operation.
 Standards for actual encryption technologies differ from country to
 country, as detailed in the tables below.
 
-Table 5.6‑1 NIST(USA) NIST SP800-57
 ```eval_rst
+**Table 5.6‑1 NIST(USA) NIST SP800-57**
+
 +---------------+----------------+-----------------+-----------------+-------------+-----------------+
 || Algorithm    || Symmetric-key || Asymmetric-key || Elliptic-curve || HASH       || HASH (HMA, KD, |
 || Lifetime     || encryption    || encryption     || encryption     || (digital   || random-number  |
@@ -4403,8 +4407,9 @@ Table 5.6‑1 NIST(USA) NIST SP800-57
 ```
 Unit: bit
 
-Table 5.6‑2 ECRYPT II (EU)
 ```eval_rst
+**Table 5.6‑2 ECRYPT II (EU)**
+
 +---------------------+----------------+-----------------+-----------------+-------+
 || Algorithm lifetime || Symmetric-key || Asymmetric-key || Elliptic-curve | HASH  |
 |                     || encryption    || encryption     || encryption     |       |  
@@ -4422,8 +4427,9 @@ Table 5.6‑2 ECRYPT II (EU)
 ```
 Unit: bit
 
-Table 5.6‑3 CRYPTREC(Japan) CRYPTREC Ciphers List
 ```eval_rst
+**Table 5.6‑3 CRYPTREC(Japan) CRYPTREC Ciphers List**
+
 +------------------------------------------------------+-------------------------------------+
 | Technology family                                    |Name                                 |
 +======================+===============================+=====================================+
@@ -4567,9 +4573,9 @@ choose passwords whose complexity grows in proportion to the value of
 assets to be protected. Please refer to "5.6.2.6 Take Steps to
 Increase the Strengths of Passwords (Recommended)".
 
-Table 5.6‑4 Comparison of cryptographic methods for encryption and
-decryption
 ```eval_rst
+**Table 5.6‑4 Comparison of cryptographic methods for encryption and decryption**
+
 +-----------------------------+--------------------------------------------------------------+
 |                             |  Encryption method                                           |
 +-----------------------------+-------------------+-----------------+------------------------+
@@ -4604,9 +4610,9 @@ The comparison here is similar to that discussed above for encryption
 and decryption, with the exception that that table item corresponding
 to data size is no longer relevant.
 
-Table 5.6‑5 Comparison of cryptographic methods for detecting data
-falsification
 ```eval_rst
+**Table 5.6‑5 Comparison of cryptographic methods for detecting data falsification**
+
 +-----------------------------+--------------------------------------------------------------------+
 |                             |  Encryption method                                                 |
 +-----------------------------+-------------------+---------------------+--------------------------+
@@ -4798,9 +4804,9 @@ random numbers generated by other applications. The table below
 details the impact of the vulnerabilities present in various versions
 of Android OS.
 
-Table 5.6‑6 Android OS version and feature influenced by each
-vulnerabilities
 ```eval_rst
+**Table 5.6‑6 Android OS version and feature influenced by each vulnerabilities**
+
 +---------------------------+----------------------------------------------------------------------------+
 |                           |  Vulnerability                                                             |
 +---------------------------+-----------------------------------+----------------------------------------+
@@ -4880,8 +4886,9 @@ by keys, as well as the protection policies appropriate for various
 asset owners. For more information on asset classes, please refer to
 "3.1.3 Asset Classification and Protective Countermeasures".
 
-Table 5.6‑7 Asset classification and protective countermeasures
 ```eval_rst
+**Table 5.6‑7 Asset classification and protective countermeasures**
+
 +-----------------------+-----------------+------------------+-----------------+------------------+
 || Asset owner          |  Device User                       |  Application / Service Provider    |
 +-----------------------+-----------------+------------------+-----------------+------------------+
