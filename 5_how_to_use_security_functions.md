@@ -632,12 +632,23 @@ Figure 5.2‑3
 
 Points: Application Using Component
 
-6.  The same signature permission that the application uses must not be defined.
+```eval_rst
+6.  The same signature permission that the application uses must not be
+    defined.
+
 7.  Declare the in-house permission with uses-permission tag.
-8.  Verify if the in-house signature permission is defined by the application that provides the component on the program code.
+
+8.  Verify if the in-house signature permission is defined by the
+    application that provides the component on the program code.
+
 9.  Verify if the destination application is an in-house application.
-10.  Use an explicit intent when the destination component is an activity.
-11.  When exporting an APK, sign the APK with the same developer key that the destination application uses.
+
+10. Use an explicit intent when the destination component is an
+    activity.
+
+11. When exporting an APK, sign the APK with the same developer key that
+    the destination application uses.
+```
 
 AndroidManifest.xml
 ```eval_rst
