@@ -1899,6 +1899,7 @@ PkgCert.java
 
 Follow the rules below when implementing Authenticator application.
 
+```eval_rst
 1.  Service that Provides Authenticator Must Be Private (Required)
 
 2.  Login Screen Activity Must Be Implemented by Authenticator
@@ -1917,12 +1918,12 @@ Follow the rules below when implementing Authenticator application.
 
 7.  HTTPS Should Be Used for Communication Between an Authenticator and
     the Online Service (Required)
-&nbsp;
+
 Follow the rules below when implementing user application.
-&nbsp;
-&nbsp;
+
 8.  Account Process Should Be Executed after verifying if the
     Authenticator is the regular one (Required)
+```
 
 #### Service that Provides Authenticator Must Be Private (Required)
 
@@ -2008,12 +2009,15 @@ Two of authentication information, password and authentication token,
 can be saved in an account to be register to AccountManager. This
 information is to be stored in accounts.db under the following
 directories, in a plain text (i.e. without encryption).
-- Android 4.1 or earlier<br/>
-/data/system/accounts.db
-- Android 4.2 to Android 6.0<br/>
-/data/system/0/accounts.db or /data/system/\<UserId\>/accounts.db
+
+```eval_rst
+- Android 4.1 or earlier
+    /data/system/accounts.db
+- Android 4.2 to Android 6.0
+    /data/system/0/accounts.db or /data/system/\<UserId\>/accounts.db
 - Android 7.0以降
-/data/system\_ce/0/accounts\_ce.db<br/>
+    /data/system\_ce/0/accounts\_ce.db
+```
 
 Note: Because multiuser functionality is supported on Android 4.2 and
 later versions, this has been changed to save the content to a
@@ -2105,65 +2109,65 @@ methods are shown in Table 5.3‑1.
 Table 5.3‑1 Function of Account Manager and Permission
 
 ```eval_rst
-+------------------------------+---------------------------------------------------------------------+
-|                              | Functions that Account Manager provides                             |
-+------------------------------+--------------------------------+------------------------------------+
-|| Permission                  || Method                        || Explanation                       |
-+==============================+================================+====================================+
-|| AUTHENTICATE_ACCOUNTS       | getPassword()                  || To get password                   |
-|| (Only Packages which are    +--------------------------------+------------------------------------+
-|| signed by the same key of   | getUserData()                  || To get user information           |
-|| Authenticator, can use.)    +--------------------------------+------------------------------------+
-||                             | addAccountExplicitly()         || To add accounts to DB             |
-||                             +--------------------------------+------------------------------------+
-||                             | peekAuthToken()                || To get cached token               |
-||                             +--------------------------------+------------------------------------+
-||                             | setAuthToken()                 || To register authentication token  |
-||                             +--------------------------------+------------------------------------+
-||                             | setPassword()                  || To change password                |
-||                             +--------------------------------+------------------------------------+
-||                             | setUserData()                  || To set user information           |
-||                             +--------------------------------+------------------------------------+
-||                             | renameAccount()                || To rename account                 |
-+------------------------------+--------------------------------+------------------------------------+
-|| GET_ACCOUNTS                | getAccounts()                  || To get a list of all accounts     |
-||                             +--------------------------------+------------------------------------+
-||                             | getAccountsByType()            || To get a list of all accounts     |
-||                             |                                || which account types are same      |
-||                             +--------------------------------+------------------------------------+
-||                             | getAccountsByTypeAndFeatures() || To get a list of all accounts     |
-||                             |                                || which have the specified function |
-||                             +--------------------------------+------------------------------------+
-||                             | addOnAccountsUpdatedListener() || To register event listener        |
-||                             +--------------------------------+------------------------------------+
-||                             | hasFeatures()                  || Whether it has the specified      |
-||                             |                                || function or not                   |
-+------------------------------+--------------------------------+------------------------------------+
-|| MANAGE_ACCOUNTS             | getAuthTokenByFeatures()       || To get authentication token of    |
-||                             |                                || the accounts which have the       |
-||                             |                                || specified function                |
-||                             +--------------------------------+------------------------------------+
-||                             | addAccount()                   || To request a user to add accounts |
-||                             +--------------------------------+------------------------------------+
-||                             | removeAccount()                || To remove an account              |
-||                             +--------------------------------+------------------------------------+
-||                             | clearPassword()                || Initialize password               |
-||                             +--------------------------------+------------------------------------+
-||                             | updateCredentials()            || Request a user to change password |
-||                             +--------------------------------+------------------------------------+
-||                             | editProperties()               || Change Authenticator setting      |
-||                             +--------------------------------+------------------------------------+
-||                             | confirmCredentials()           || Request a user to input password  |
-||                             |                                || again                             |
-+------------------------------+--------------------------------+------------------------------------+
-|| USE_CREDENTIALS             | getAuthToken()                 || To get authentication token       |
-||                             +--------------------------------+------------------------------------+
-||                             | blockingGetAuthToken()         || To get authentication token       |
-+------------------------------+--------------------------------+------------------------------------+
-|| MANAGE_ACCOUNTS             | invalidateAuthToken()          || To delete cached token            |
-|| or                          |                                |                                    |
-|| USE_CREDENTIALS             |                                |                                    |
-+------------------------------+--------------------------------+------------------------------------+
++------------------------------+----------------------------------------------------------------------+
+|                              | Functions that Account Manager provides                              |
++------------------------------+---------------------------------+------------------------------------+
+|| Permission                  || Method                         || Explanation                       |
++==============================+=================================+====================================+
+|| AUTHENTICATE_ACCOUNTS       || getPassword()                  || To get password                   |
+|| (Only Packages which are    +---------------------------------+------------------------------------+
+|| signed by the same key of   || getUserData()                  || To get user information           |
+|| Authenticator, can use.)    +---------------------------------+------------------------------------+
+||                             || addAccountExplicitly()         || To add accounts to DB             |
+||                             +---------------------------------+------------------------------------+
+||                             || peekAuthToken()                || To get cached token               |
+||                             +---------------------------------+------------------------------------+
+||                             || setAuthToken()                 || To register authentication token  |
+||                             +---------------------------------+------------------------------------+
+||                             || setPassword()                  || To change password                |
+||                             +---------------------------------+------------------------------------+
+||                             || setUserData()                  || To set user information           |
+||                             +---------------------------------+------------------------------------+
+||                             || renameAccount()                || To rename account                 |
++------------------------------+---------------------------------+------------------------------------+
+|| GET_ACCOUNTS                || getAccounts()                  || To get a list of all accounts     |
+||                             +---------------------------------+------------------------------------+
+||                             || getAccountsByType()            || To get a list of all accounts     |
+||                             ||                                || which account types are same      |
+||                             +---------------------------------+------------------------------------+
+||                             || getAccountsByTypeAndFeatures() || To get a list of all accounts     |
+||                             ||                                || which have the specified function |
+||                             +---------------------------------+------------------------------------+
+||                             || addOnAccountsUpdatedListener() || To register event listener        |
+||                             +---------------------------------+------------------------------------+
+||                             || hasFeatures()                  || Whether it has the specified      |
+||                             ||                                || function or not                   |
++------------------------------+---------------------------------+------------------------------------+
+|| MANAGE_ACCOUNTS             || getAuthTokenByFeatures()       || To get authentication token of    |
+||                             ||                                || the accounts which have the       |
+||                             ||                                || specified function                |
+||                             +---------------------------------+------------------------------------+
+||                             || addAccount()                   || To request a user to add accounts |
+||                             +---------------------------------+------------------------------------+
+||                             || removeAccount()                || To remove an account              |
+||                             +---------------------------------+------------------------------------+
+||                             || clearPassword()                || Initialize password               |
+||                             +---------------------------------+------------------------------------+
+||                             || updateCredentials()            || Request a user to change password |
+||                             +---------------------------------+------------------------------------+
+||                             || editProperties()               || Change Authenticator setting      |
+||                             +---------------------------------+------------------------------------+
+||                             || confirmCredentials()           || Request a user to input password  |
+||                             ||                                || again                             |
++------------------------------+---------------------------------+------------------------------------+
+|| USE_CREDENTIALS             || getAuthToken()                 || To get authentication token       |
+||                             +---------------------------------+------------------------------------+
+||                             || blockingGetAuthToken()         || To get authentication token       |
++------------------------------+---------------------------------+------------------------------------+
+|| MANAGE_ACCOUNTS             || invalidateAuthToken()          || To delete cached token            |
+|| or                          ||                                ||                                   |
+|| USE_CREDENTIALS             ||                                ||                                   |
++------------------------------+---------------------------------+------------------------------------+
 ```
 
 In case using methods group which AUTHENTICATE\_ACCOUNTS Permission is
@@ -2422,7 +2426,9 @@ application specs
     2016. Thus, to execute the sample code as is requires switching to
     an equivalent service.
 ```
-Points:
+```eval_rst
+**Points:**
+```
 
 1.  Sensitive information must not be contained in send data.
 2.  Suppose that received data may be sent from attackers.
@@ -2508,7 +2514,9 @@ targeting a vulnerability in SSLv3 (known as POODLE).
     server side.
 ```
 
-Points:
+```eval_rst
+**Points:**
+```
 
 1.  URI starts with https://.
 
@@ -2553,7 +2561,9 @@ sensitive here. To show the sample code simply, no special handling
 for SSLException is performed. It is necessary to handle the
 exceptions properly depending on the application specifications.
 
-Points:
+```eval_rst
+**Points:**
+```
 
 1.  Verify a server certificate with the root certificate of a private
     certificate authority.
