@@ -2222,7 +2222,7 @@ and later.
 Figure 5.3‑3: When displaying Android standard authentication token
 license screen.
 
-#### Cases in which Authenticator accounts with non-matching signatures may be read in Android 8.0 (API Level 26) or later {#cases-in-which-authenticator-accounts-with-non-matching-signatures-may-be-read-in-android-8.0-api-level-26-or-later-1}
+#### Cases in which Authenticator accounts with non-matching signatures may be read in Android 8.0 (API Level 26) or later
 
 In Android 8.0 (API Level 26) and later versions,
 account-information-fetching methods that required GET\_ACCOUNTS
@@ -2444,7 +2444,7 @@ AndroidManifest.xml
 ```
 
 
-#### Communicating via HTTPS
+#### Communicating via HTTPS<!-- 2b8c337d -->
 
 In HTTPS communication, a server is checked whether it is trusted or
 not as well as data transferred is encrypted. To authenticate the
