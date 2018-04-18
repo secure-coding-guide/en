@@ -25,29 +25,23 @@ another articles is planned to be published is future edition.
 
 Figure 5.1‑1
 
-Points:
+```eval_rst
+**Points:**
 
 1.  The input password should be mask displayed (Display with \*)
 
 2. Provide the option to display the password in a plain text.
 
 3. Alert a user that displaying password in a plain text has a risk.
-&nbsp;
-Points: When handling the last Input password, pay attention the
-following points along with the above points.
-&nbsp;
-&nbsp;
-4. In the case there is the last input password in an initial display,
-    display the fixed digit numbers of black dot as dummy in order not
-    that the digits number of last password is guessed.
 
-5. When the dummy password is displayed and the \"Show password\"
-    button is pressed, clear the last input password and provide the
-    state for new password input.
+**Points: When handling the last Input password, pay attention the following points along with the above points.**
 
-6. When last input password is displayed with dummy, in case user tries
-    to input password, clear the last input password and treat new user
-    input as a new password.
+4. In the case there is the last input password in an initial display, display the fixed digit numbers of black dot as dummy in order not that the digits number of last password is guessed.
+
+5. When the dummy password is displayed and the \"Show password\" button is pressed, clear the last input password and provide the state for new password input.
+
+6. When last input password is displayed with dummy, in case user tries to input password, clear the last input password and treat new user input as a new password.
+```
 
 
 password_activity.xml
@@ -1011,6 +1005,7 @@ The following are the steps for using in-house-defined signature
 permission securely and correctly.
 
 First, write as the followings in AndroidManifest.xml:
+```eval_rst
 1.  Define an in-house signature permission in the AndroidManifest.xml
     of the provider-side application. (definition of permission)<br/>
     Example: \<permission android:name=\"xxx\"
@@ -1027,9 +1022,9 @@ First, write as the followings in AndroidManifest.xml:
     application to access the Component to be protected. (declaration
     of using permission)<br/>
     Example: \<uses-permission android:name=\"xxx\" /\>
-&nbsp;
+
 Next, implement the followings in the source code.
-&nbsp;
+
 4.  Before processing a request to the Component, first verify that the
     in-house-defined signature permission has been defined by an
     in-house application. If not, ignore the request. (protection in the
@@ -1039,12 +1034,13 @@ Next, implement the followings in the source code.
     in-house-defined signature permission has been defined by an
     in-house application. If not, do not access the Component
     (protection in the user-side component).
-&nbsp;
+
 Lastly, execute the following with the Signing function of Android
 Studio.
-&nbsp;
+
 6.  Sign APKs of all inter-communicating applications with the same
     developer key.
+```
 
 Here, for specific points on how to implement \"Verify that the
 in-house-defined signature permission has been defined by an In house
@@ -1541,7 +1537,7 @@ permissions for the installation to proceed. At this point, all
 permissions declared by the app (including permissions other than
 Dangerous Permissions) were granted to the app; once these permissions
 were granted to the app, they remained in effect until the app was
->uninstalled from the terminal.
+uninstalled from the terminal.
 ```eval_rst
 However, in the specifications for Android 6.0 and later versions, the
 granting of permissions takes place when an app is executed. The
