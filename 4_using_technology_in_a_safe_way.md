@@ -2788,6 +2788,7 @@ PrivateStartService.java
 >
 > Points (Using a Service):
 
+```eval_rst
 4. Use the explicit intent with class specified to call a service in
    the same application.
 
@@ -2796,6 +2797,7 @@ PrivateStartService.java
 
 6. Handle the received result data carefully and securely, even though
    the data came from a service in the same application.
+```
 
 PrivateUserActivity.java
 ```eval_rst
@@ -2838,8 +2840,10 @@ Next is sample code for Activity which uses Public Service.
 
 Points (Using a Service):
 
+```eval_rst
 4. Do not send sensitive information.
 5. When receiving a result, handle the result data carefully and securely.
+```
 
 AndroidManifest.xml
 ```eval_rst
@@ -2956,6 +2960,7 @@ Next is sample code of Activity which uses partner only Service.
 
 Points (Using a Service):
 
+```eval_rst
 6. Verify if the certificate of the target application has been
    registered in the own white list.
 7. Return only information that is granted to be disclosed to a partner
@@ -2963,6 +2968,7 @@ Points (Using a Service):
 8. Use the explicit intent to call a partner service.
 9. Handle the received result data carefully and securely, even though
    the data came from a partner application.
+```
 
 PartnerAIDLUserActivity.java
 ```eval_rst
@@ -3052,6 +3058,7 @@ Next is the sample code of Activity which uses in house only Service.
 
 Points (Using a Service):
 
+```eval_rst
 8. Declare to use the in-house signature permission.
 9. Verify that the in-house signature permission is defined by an
    in-house application.
@@ -3062,6 +3069,7 @@ Points (Using a Service):
     the data came from an in-house application.
 14. When exporting an APK, sign the APK with the same developer key as
     the destination application.
+```
 
 AndroidManifest.xml
 ```eval_rst
