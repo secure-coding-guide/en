@@ -435,7 +435,7 @@ AndroidManifest.xml
 
 ``` xml
         <!-- Private activity -->
-        <!-- *** POINT 3 *** Explicitly set the exported attribute to false. -->
+        <!-- *** POINT 1 *** Activities that are Used Only Internally to the Application Must be Set Private -->
         <activity
             android:name=".PrivateActivity"
             android:label="@string/app_name"
@@ -455,7 +455,7 @@ AndroidManifest.xml(Not recommended)
 
 ``` xml
         <!-- Private activity -->
-        <!-- *** POINT 3 *** Explicitly set the exported attribute to false. -->
+        <!-- *** POINT 1 *** Activities that are Used Only Internally to the Application Must be Set Private -->
         <activity
             android:name=".PictureActivity"
             android:label="@string/picture_name"
@@ -494,12 +494,12 @@ Private Activities.
 AndroidManifest.xml
 
 ``` xml
-    <!-- *** POINT 1 *** Do not specify taskAffinity -->
+    <!-- *** POINT 2 *** Do not specify taskAffinity -->
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
 
-        <!-- *** POINT 1 *** Do not specify taskAffinity -->
+        <!-- *** POINT 2 *** Do not specify taskAffinity -->
         <activity
             android:name=".PrivateUserActivity"
             android:label="@string/app_name" >
@@ -510,7 +510,7 @@ AndroidManifest.xml
         </activity>
 
         <!-- Private activity -->
-        <!-- *** POINT 1 *** Do not specify taskAffinity -->
+        <!-- *** POINT 2 *** Do not specify taskAffinity -->
         <activity
             android:name=".PrivateActivity"
             android:label="@string/app_name"
@@ -550,7 +550,7 @@ Activity declaration and the value should be kept as the default
 AndroidManifest.xml
 
 ``` xml
-        <!-- *** POINT 2 *** Do not specify launchMode -->
+        <!-- *** POINT 3 *** Do not specify launchMode -->
         <activity
             android:name=".PrivateUserActivity"
             android:label="@string/app_name" >
@@ -561,7 +561,7 @@ AndroidManifest.xml
         </activity>
 
         <!-- Private activity -->
-        <!-- *** POINT 2 *** Do not specify launchMode -->
+        <!-- *** POINT 3 *** Do not specify launchMode -->
         <activity
             android:name=".PrivateActivity"
             android:label="@string/app_name"
@@ -594,7 +594,7 @@ Example of sending an intent
 ``` java
         Intent intent = new Intent();
 
-        // *** POINT 6 *** Do not set the FLAG\_ACTIVITY\_NEW\_TASK flag for the intent to start an activity.
+        // *** POINT 4 *** Do not set the FLAG_ACTIVITY_NEW_TASK flag for the intent to start an activity.
 
         intent.setClass(this, PrivateActivity.class);
         intent.putExtra("PARAM", "Sensitive Info");
@@ -658,7 +658,7 @@ Example of returning data.
 ``` java
     public void onReturnResultClick(View view) {
 
-        // *** POINT 6 *** Information that is granted to be disclosed to a partner application can be returned.
+        // *** POINT 7 *** When Returning a Result, Pay Attention to the Possibility of Information Leakage of that Result from the Destination Application
         Intent intent = new Intent();
         intent.putExtra("RESULT", "Information that is granted to disclose to partner applications");
         setResult(RESULT_OK, intent);
