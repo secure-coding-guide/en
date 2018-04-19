@@ -1553,9 +1553,11 @@ The sample code for sending Broadcasts to private Broadcast Receiver is shown be
 
 Points (Sending Broadcasts):
 
+```eval_rst
 4. Use the explicit Intent with class specified to call a receiver within the same application.
 5. Sensitive information can be sent since the destination Receiver is within the same application.
 6. Handle the received result data carefully and securely, even though the data came from the Receiver within the same application.
+```
 
 PrivateSenderActivity.java
 ```eval_rst
@@ -1612,8 +1614,10 @@ Next, the sample code for sending Broadcasts to public Broadcast Receiver is sho
 
 Points (Sending Broadcasts):
 
+```eval_rst
 4. Do not send sensitive information.
 5. When receiving a result, handle the result data carefully and securely.
+```
 
 PublicSenderActivity.java
 ```eval_rst
@@ -1700,6 +1704,7 @@ Next, the sample code for sending Broadcasts to in-house Broadcast Receiver is s
 
 Points (Sending Broadcasts):
 
+```eval_rst
 10. Define an in-house signature permission to receive results.
 11. Declare to use the in-house signature permission to receive Broadcasts.
 12. Verify that the in-house signature permission is defined by an in-house application.
@@ -1707,6 +1712,7 @@ Points (Sending Broadcasts):
 14. Require the in-house signature permission of Receivers.
 15. Handle the received result data carefully and securely.
 16. When exporting an APK, sign the APK with the same developer key as the destination application.
+```
 
 AndroidManifest.xml
 ```eval_rst
