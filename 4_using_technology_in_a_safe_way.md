@@ -435,7 +435,7 @@ AndroidManifest.xml
 
 ``` xml
         <!-- Private activity -->
-        <!-- *** POINT 1 *** Activities that are Used Only Internally to the Application Must be Set Private -->
+        <!-- *** POINT 3 *** Explicitly set the exported attribute to false. -->
         <activity
             android:name=".PrivateActivity"
             android:label="@string/app_name"
@@ -455,7 +455,7 @@ AndroidManifest.xml(Not recommended)
 
 ``` xml
         <!-- Private activity -->
-        <!-- *** POINT 1 *** Activities that are Used Only Internally to the Application Must be Set Private -->
+        <!-- *** POINT 3 *** Explicitly set the exported attribute to false. -->
         <activity
             android:name=".PictureActivity"
             android:label="@string/picture_name"
@@ -494,12 +494,12 @@ Private Activities.
 AndroidManifest.xml
 
 ``` xml
-    <!-- *** POINT 2 *** Do not specify taskAffinity -->
+    <!-- *** POINT 1 *** Do not specify taskAffinity -->
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
 
-        <!-- *** POINT 2 *** Do not specify taskAffinity -->
+        <!-- *** POINT 1 *** Do not specify taskAffinity -->
         <activity
             android:name=".PrivateUserActivity"
             android:label="@string/app_name" >
@@ -510,7 +510,7 @@ AndroidManifest.xml
         </activity>
 
         <!-- Private activity -->
-        <!-- *** POINT 2 *** Do not specify taskAffinity -->
+        <!-- *** POINT 1 *** Do not specify taskAffinity -->
         <activity
             android:name=".PrivateActivity"
             android:label="@string/app_name"
@@ -550,7 +550,7 @@ Activity declaration and the value should be kept as the default
 AndroidManifest.xml
 
 ``` xml
-        <!-- *** POINT 3 *** Do not specify launchMode -->
+        <!-- *** POINT 2 *** Do not specify launchMode -->
         <activity
             android:name=".PrivateUserActivity"
             android:label="@string/app_name" >
@@ -561,7 +561,7 @@ AndroidManifest.xml
         </activity>
 
         <!-- Private activity -->
-        <!-- *** POINT 3 *** Do not specify launchMode -->
+        <!-- *** POINT 2 *** Do not specify launchMode -->
         <activity
             android:name=".PrivateActivity"
             android:label="@string/app_name"
@@ -594,7 +594,7 @@ Example of sending an intent
 ``` java
         Intent intent = new Intent();
 
-        // *** POINT 4 *** Do not set the FLAG_ACTIVITY_NEW_TASK flag for the intent to start an activity.
+        // *** POINT 6 *** Do not set the FLAG_ACTIVITY_NEW_TASK flag for the intent to start an activity.
 
         intent.setClass(this, PrivateActivity.class);
         intent.putExtra("PARAM", "Sensitive Info");
@@ -658,7 +658,7 @@ Example of returning data.
 ``` java
     public void onReturnResultClick(View view) {
 
-        // *** POINT 7 *** When Returning a Result, Pay Attention to the Possibility of Information Leakage of that Result from the Destination Application
+        // *** POINT 6 *** Information that is granted to be disclosed to a partner application can be returned.
         Intent intent = new Intent();
         intent.putExtra("RESULT", "Information that is granted to disclose to partner applications");
         setResult(RESULT_OK, intent);
@@ -2247,11 +2247,13 @@ Next is an example of Activity which uses Private Content Provider.
 
 Points (Using a Content Provider):
 
+```eval_rst
 4. Sensitive information can be sent since the destination provider is
    in the same application.
 
 5. Handle received result data carefully and securely, even though the
    data comes from the same application.
+```
 
 PrivateUserActivity.java
 ```eval_rst
@@ -2302,9 +2304,11 @@ Next is an example of Activity which uses Public Content Provider.
 
 Points (Using a Content Provider):
 
+```eval_rst
 4. Do not send sensitive information.
 
 5. When receiving a result, handle the result data carefully and securely.
+```
 
 PublicUserActivity.java
 ```eval_rst
@@ -2351,6 +2355,7 @@ Next is an example of Activity which use partner only Content Provider.
 
 Points (Using a Content Provider):
 
+```eval_rst
 5. Verify if the certificate of the target application has been
    registered in the own white list.
 
@@ -2359,6 +2364,7 @@ Points (Using a Content Provider):
 
 7. Handle the received result data carefully and securely, even though
    the data comes from a partner application.
+```
 
 PartnerUserActivity.java
 ```eval_rst
@@ -2554,8 +2560,10 @@ Next is the example of temporary permit Content Provider.
 
 Points (Using a Content Provider):
 
+```eval_rst
 9. Do not send sensitive information.
 10. When receiving a result, handle the result data carefully and securely.
+```
 
 TemporaryUserActivity.java
 ```eval_rst
@@ -2568,6 +2576,7 @@ TemporaryUserActivity.java
 
 Be sure to follow the rules below when Implementing or using a content provider.
 
+```eval_rst
 1.  Content Provider that Is Used Only in an Application Must Be Set as Private (Required)
 2.  Handle the Received Request Parameter Carefully and Securely (Required)
 3.  Use an In-house Defined Signature Permission after Verifying that it
@@ -2580,6 +2589,7 @@ Be sure to follow the rules below when Implementing or using a content provider.
 And user side should follow the below rules, too.
 
 6.  Handle the Returned Result Data from the Content Provider Carefully and Securely (Required)
+```
 
 #### Content Provider that Is Used Only in an Application Must Be Set as Private (Required)
 
