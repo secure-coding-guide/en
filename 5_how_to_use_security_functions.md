@@ -5199,6 +5199,8 @@ Notify users the fingerprint registration will be required.
 
 ### Advanced Topics<!-- 2f9aa719 -->
 
+#### Preconditions for the use of fingerprint authentication features by Android apps
+
 The following two conditions must be satisfied in order for an app to
 use fingerprint authentication.
 
