@@ -195,9 +195,9 @@ appreciated.
 <td>Revised the creation script to include the SubjectAltName in the private certificate.</td>
 </tr>
 <tr>
-<td> (該当なし)</td>
-<td>5.4.3.8 （コラム）　セキュア接続のTLS1.2への移行について</td>
-<td>HTTPS(SSL/TLS)通信のTLS 1.2への移行を推奨する記事を追加しました。</td>
+<td>(not applicable)</td>
+<td>(Column): Transitioning to TLS1.2 for secure connections</td>
+<td>Added an article to recommend migration of HTTPS (SSL / TLS) communication to TLS 1.2.</td>
 </tr>
 <tr>
 <td>(not applicable)</td>
