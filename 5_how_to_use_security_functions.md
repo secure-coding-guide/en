@@ -511,9 +511,9 @@ appears
 .. [27] In Android 6.0 (API Level 23) and later, the granting or refusal
     of user permissions does not occur when an app is installed, but
     instead at runtime when then app requests permissions. For more
-    details, see Section　"5.2.1.4　Methods for using Dangerous
-    Permissions in Android 6.0 and later"　and Section
-    "5.2.3.6　Modifications to the Permission model specifications in
+    details, see Section "5.2.1.4 Methods for using Dangerous
+    Permissions in Android 6.0 and later" and Section
+    "5.2.3.6 Modifications to the Permission model specifications in
     Android versions 6.0 and later".
 ```
 
@@ -948,7 +948,7 @@ Protection Level is signature must be written in AndroidManifest.xml
 of the provider-side application that has the Component, but the
 user-side application must not define the signature permission.
 
-This rule is applied to signatureOrSystem　Permission　as well.
+This rule is applied to signatureOrSystem Permission as well.
 
 The reason for this is as follows.
 
@@ -1047,7 +1047,7 @@ in-house-defined signature permission has been defined by an In house
 application\", please refer to \"5.2.1.2 How to Communicate Between
 In-house Applications with In-house-defined Signature Permission\".
 
-This rule is applied to signatureOrSystem　Permission　as well.
+This rule is applied to signatureOrSystem Permission as well.
 
 #### Your Own Normal Permission Should Not Be Used (Recommended)
 
@@ -1660,7 +1660,7 @@ running Android 6.0 (API Level 23) or later(Table 5.2‑1).
 +-----------------------------+----------------------+----------------------------------------------+------------------------------------+
 ```
 However, it should be noted that the effect of maxSdkVersion is
-limited.　When the value of maxSdkVersion is set 22 or earlier,
+limited. When the value of maxSdkVersion is set 22 or earlier,
 Android 6.0 (API Level 23) and later of the devices are no longer
 listed as an installable device of the target application in Google
 Play. On the other hand, because the value of maxSdkVersion is not
@@ -3532,7 +3532,7 @@ More specifically, you may use the following flowchart to determine
 which sample code to use.
 
 ![](media/image76.png)
-Figure 5.5‑2　Flow Figure to select sample code of handling privacy data
+Figure 5.5‑2 Flow Figure to select sample code of handling privacy data
 
 Here the phrase "broad consent" refers to a broad permission, granted
 by the user to the application upon the first launch of the
@@ -3700,13 +3700,13 @@ MainActivity.java
    :encoding: shift-jis
 ```
 
-Sample description on the marketplace　is below.
+Sample description on the marketplace is below.
 
 ```eval_rst
 .. image:: media/image77.png
    :width: 50%
 ```
-Figure 5.5‑3　Description on the marketplace
+Figure 5.5‑3 Description on the marketplace
 
 ### Rule Book<!-- 68dc21c7 -->
 
@@ -3798,7 +3798,7 @@ protected void onStart() {
 .. image:: media/image78.png
    :width: 50%
 ```
-Figure 5.5‑4　Example of broad consent
+Figure 5.5‑4 Example of broad consent
 
 #### Obtain specific consent before transmitting user data that requires particularly delicate handling (Required)
 
@@ -3863,7 +3863,7 @@ MainActivity.java
 .. image:: media/image80.png
    :width: 50%
 ```
-Figure 5.5‑6　Context menu to show privacy policy
+Figure 5.5‑6 Context menu to show privacy policy
 
 #### Place a summary version of the application privacy policy in the assets folder (Recommended)
 
@@ -4690,7 +4690,7 @@ offer examples to demonstrate the use of SecureRandom.
 
 Note that SecureRandom may exhibit a number of weaknesses depending on
 the Android version, requiring preventative measures to be put in
-place in implementations. Please refer to "5.6.3.3　Measures to
+place in implementations. Please refer to "5.6.3.3 Measures to
 Protect against Vulnerabilities in Random-Number Generators".
 
 Using SecureRandom (using the default implementation)
