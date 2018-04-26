@@ -1149,7 +1149,7 @@ MainActivity.java
 However, there are cases where other applications can read the Extras
 data of intent using ActivityManager\#getRecentTasks(). Please refer
 to "4.1.2.2 Do Not Specify taskAffinity (Required)", "4.1.2.3 Do Not
-Specify launchMode (Required)" and "4.1.2.4　Do Not Set the
+Specify launchMode (Required)" and "4.1.2.4 Do Not Set the
 FLAG\_ACTIVITY\_NEW\_TASK Flag for Intents that Start an Activity
 (Required)".
 
@@ -1160,8 +1160,8 @@ problem known as *Fragment Injection* [5]_ may arise. To prevent this
 problem from arising, it is necessary to override
 PreferenceActivity.IsValidFragment() and check the validity of its
 arguments to ensure that the Activity does not handle any Fragments
-without intention. (For more on the safety of input data,　 see
-Section　\"3.2 Handling Input Data Carefully and Securely\".)
+without intention. (For more on the safety of input data, see
+Section \"3.2 Handling Input Data Carefully and Securely\".)
 
 .. [5] For more information on Fragment Injection, consult this URL: https://securityintelligence.com/new-vulnerability-android-framework-fragment-injection/
 ```
@@ -1585,7 +1585,7 @@ PublicReceiver.java
    :encoding: shift-jis
 ```
 
-Static Broadcast Receive is defined in AndroidManifest.xml. Note with caution that---depending on the terminal version---reception of implicit Broadcast Intents may be restricted, as in 「Table 4.2‑1」.
+Static Broadcast Receive is defined in AndroidManifest.xml. Note with caution that---depending on the terminal version---reception of implicit Broadcast Intents may be restricted, as in Table 4.2‑2.
 
 AndroidManifest.xml
 ```eval_rst
@@ -1651,7 +1651,7 @@ InhouseReceiver.java
    :encoding: shift-jis
 ```
 
-Static Broadcast Receiver is to be defined in AndroidManifest.xml.Note with caution that---depending on the terminal version---reception of implicit Broadcast Intents may be restricted, as in 「Table 4.2‑1」.
+Static Broadcast Receiver is to be defined in AndroidManifest.xml.Note with caution that---depending on the terminal version---reception of implicit Broadcast Intents may be restricted, as in Table 4.2‑2.
 
 AndroidManifest.xml
 ```eval_rst
@@ -5611,7 +5611,7 @@ appear on the screen, inside which you may display icons and messages.
 .. height="6.603472222222222in"}
 ```
 
-Figure 4.10‑1　An example of a Notification
+Figure 4.10‑1 An example of a Notification
 
 The communication functionality of Notifications is enhanced in
 Android 5.0 (API Level 21) to allow messages to be displayed via
