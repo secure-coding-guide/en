@@ -1005,7 +1005,7 @@ The following are the steps for using in-house-defined signature
 permission securely and correctly.
 
 First, write as the followings in AndroidManifest.xml:
-```eval_rst
+
 1.  Define an in-house signature permission in the AndroidManifest.xml
     of the provider-side application. (definition of permission)<br/>
     Example: \<permission android:name=\"xxx\"
@@ -1023,6 +1023,7 @@ First, write as the followings in AndroidManifest.xml:
     of using permission)<br/>
     Example: \<uses-permission android:name=\"xxx\" /\>
 
+```eval_rst
 Next, implement the followings in the source code.
 
 4.  Before processing a request to the Component, first verify that the
