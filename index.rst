@@ -106,7 +106,7 @@ Revision history
     Added new articles below
         - 4.1.3.7 The Autofill framework
         - 5.3.3.3 Cases in which Authenticator accounts with non-matching signatures may be read in Android 8.0 (API Level 26) or later
-        - 5.4.3.8 （コラム）　セキュア接続のTLS1.2への移行について
+        - 5.4.3.8 (Column): Transitioning to TLS1.2 for secure connections
         - 5.5.3.3 Version-dependent differences in handling of Android IDs
     Revised articles below
         - 4.2 Receiving/Sending Broadcast

@@ -196,7 +196,7 @@ appreciated.
 </tr>
 <tr>
 <td>(not applicable)</td>
-<td>(Column): Transitioning to TLS1.2 for secure connections</td>
+<td>5.4.3.8 (Column): Transitioning to TLS1.2 for secure connections</td>
 <td>Added an article to recommend migration of HTTPS (SSL / TLS) communication to TLS 1.2.</td>
 </tr>
 <tr>
